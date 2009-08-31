@@ -18,6 +18,7 @@ public class Node {
   private ListPattern _contents;
   private ListPattern _image;
   private List<Link> _children;
+  private Node _followedBy;
 
   /**
    * Empty constructor is only called to construct a new root node for the 
@@ -40,6 +41,7 @@ public class Node {
    _contents = contents;
     _image = image;
     _children = new ArrayList<Link> ();
+    _followedBy = null;
   }
 
   /**
@@ -68,6 +70,20 @@ public class Node {
    */
   public List<Link> getChildren () {
     return _children;
+  }
+
+  /**
+   * Accessor to node that follows this node.
+   */
+  public Node getFollowedBy () {
+    return _followedBy;
+  }
+
+  /**
+   * Modify node that follows this node.
+   */
+  public void setFollowedBy (Node node) {
+    _followedBy = node;
   }
 
   /** 

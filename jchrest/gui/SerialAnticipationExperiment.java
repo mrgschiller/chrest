@@ -2,6 +2,7 @@ package jchrest.gui;
 
 import jchrest.architecture.Chrest;
 import jchrest.lib.ListPattern;
+import jchrest.lib.Pattern;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -83,36 +84,78 @@ class SerialAnticipationExperiment extends JPanel {
       return panel;        
     }
 
-    private List<List<ListPattern>> _responses;
-
-    class RunTrialAction extends AbstractAction implements ActionListener {
-
-      RunTrialAction () {
-        super ("Run Trial");
-      }
-
-      private List<StimulusResponsePair> preparePatterns () {
-        // TODO allow for randomising
-        return _patterns;
+    class RestartAction extends AbstractAction implements ActionListener {
+      RestartAction () {
+        super ("Restart");
       }
 
       public void actionPerformed (ActionEvent e) {
-        // TODO add in timing
-        List<ListPattern> responses = new ArrayList<ListPattern> ();
-        for (StimulusResponsePair pair : preparePatterns ()) {
-          responses.add (_model.recallPattern (pair.getStimulus ())); // TODO: Make this find 'linked object'
-          _model.learnAndLinkPatterns (pair.getStimulus (), pair.getResponse ());
-        }
-        _responses.add (responses);
-        ((AbstractTableModel)_protocol.getModel()).fireTableStructureChanged ();
+        _model.clear ();
+        _responses.clear ();
+        _exptClock = 0;
+
+        updateControls ();
       }
     }
 
+    private List<List<ListPattern>> _responses;
+
+    class RunTrialAction extends AbstractAction implements ActionListener {
+      RunTrialAction () {
+        super ("Run Trial");
+
+        _exptClock = 0;
+      }
+
+      private List<StimulusResponsePair> preparePatterns () {
+        List<StimulusResponsePair> patterns = new ArrayList<StimulusResponsePair> ();
+        java.util.Random gen = new java.util.Random ();
+        for (StimulusResponsePair pattern : _patterns) {
+          if (_randomOrder.isSelected ()) {
+            patterns.add (gen.nextInt (patterns.size () + 1), pattern);
+          } else {
+            patterns.add (pattern);
+          }
+        }
+
+        return patterns;
+      }
+
+      private void collectResponses () {
+        List<ListPattern> responses = new ArrayList<ListPattern> ();
+        for (StimulusResponsePair pair : _patterns) {
+          ListPattern response = _model.followPattern (pair.getStimulus ());
+          if (response != null) {
+            responses.add (response);
+          } else {
+            responses.add (Pattern.makeList (new String[]{"NONE"}));
+          }
+        }
+        _responses.add (responses);
+      }
+
+      public void actionPerformed (ActionEvent e) {
+        collectResponses ();
+        for (StimulusResponsePair pair : preparePatterns ()) {
+          _model.learnAndLinkPatterns (pair.getStimulus (), pair.getResponse (), _exptClock);
+          _exptClock += ((SpinnerNumberModel)_interItemTime.getModel()).getNumber().intValue ();
+        }
+        _exptClock += ((SpinnerNumberModel)_endTrialTime.getModel()).getNumber().intValue ();
+        updateControls ();
+      }
+    }
+
+    private int _exptClock;
     private JLabel _experimentTimeLabel;
     private JSpinner _endTrialTime;
     private JSpinner _interItemTime;
     private JCheckBox _randomOrder;
     private JTable _protocol;
+
+    private void updateControls () {
+      ((AbstractTableModel)_protocol.getModel()).fireTableStructureChanged ();
+      _experimentTimeLabel.setText ("" + _exptClock);
+    }
 
     private JPanel createControls () {
       _experimentTimeLabel = new JLabel ("0");
@@ -120,11 +163,13 @@ class SerialAnticipationExperiment extends JPanel {
       _interItemTime = new JSpinner (new SpinnerNumberModel (2000, 1, 50000, 1));
       _randomOrder = new JCheckBox ("Random order");
       _randomOrder.setToolTipText ("Set this to pass pairs to model in a random order");
+      JButton restart = new JButton (new RestartAction ());
+      restart.setToolTipText ("Reset the experiment and clear the model");
       JButton runTrial = new JButton (new RunTrialAction ());
       runTrial.setToolTipText ("Pass each stimulus-response pair once against the model");
 
       JPanel controls = new JPanel ();
-      controls.setLayout (new GridLayout (4, 2, 10, 3));
+      controls.setLayout (new GridLayout (5, 2, 10, 3));
       controls.add (new JLabel ("Experiment time (ms)", SwingConstants.RIGHT));
       controls.add (_experimentTimeLabel);
       controls.add (new JLabel ("End trial time (ms)", SwingConstants.RIGHT));
@@ -132,6 +177,8 @@ class SerialAnticipationExperiment extends JPanel {
       controls.add (new JLabel ("Inter item time (ms)", SwingConstants.RIGHT));
       controls.add (_interItemTime);
       controls.add (_randomOrder);
+      controls.add (restart);
+      controls.add (new JLabel (""));
       controls.add (runTrial);
 
       return controls;

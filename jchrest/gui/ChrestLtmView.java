@@ -139,8 +139,14 @@ class NodeDisplay implements LtmGrapherNode {
     } else if ( size.isSmall () ) {
       width = size.getSmallSize ();
     } else {
-      width += Math.max (getNodeNumberWidth (g, size), 
+      int fixedItemsWidth = Math.max (getNodeNumberWidth (g, size), 
           size.getWidth (_node.getImage().toString (), g));
+      if (_node.getFollowedBy () == null) {
+      width += fixedItemsWidth;
+      } else {
+        width += Math.max (fixedItemsWidth, 
+            size.getWidth (_node.getFollowedBy().getReference() + "", g));
+      }
     }
 
     return width;
@@ -157,6 +163,10 @@ class NodeDisplay implements LtmGrapherNode {
       height += getNodeNumberHeight (g, size);
       height += size.getMargin (); // gap between the two
       height += size.getHeight (_node.getImage ().toString (), g);
+      if (_node.getFollowedBy() != null) {
+        height += size.getMargin ();
+        height += size.getHeight (_node.getFollowedBy().getReference() + "", g);
+      }
     }
     return height;
   }
@@ -199,6 +209,11 @@ class NodeDisplay implements LtmGrapherNode {
 
     int textHeight = size.getHeight (getNodeNumberString (), g);
     size.drawText (g, x, y + textHeight + size.getMargin (), _node.getImage().toString ());
+    if (_node.getFollowedBy () != null) {
+      textHeight += size.getMargin () + size.getHeight ((_node.getFollowedBy().getReference() + ""), g);
+      g.setColor (Color.BLUE);
+      size.drawText (g, x, y + textHeight + size.getMargin (), _node.getFollowedBy().getReference() + "");
+    }
   }
 
   private String getNodeNumberString () { 

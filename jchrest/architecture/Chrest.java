@@ -23,21 +23,19 @@ public class Chrest extends Observable {
   // long-term-memory holds information within the model permanently
   private Node _ltm;
   // short-term-memory holds information within the model temporarily, usually within one experiment
-  private int _visualStmSize;
-  private int _verbalStmSize;
-  private Stm _stm;
+  private Stm _visualStm;
+  private Stm _verbalStm;
 
   public Chrest () {
     _addLinkTime = 10000;
     _discriminationTime = 10000;
     _familiarisationTime = 2000;
     _rho = 1.0f;
-    _visualStmSize = 4;
-    _verbalStmSize = 2;
 
     _clock = 0;
     _ltm = new Node ();
-    _stm = new Stm ();
+    _visualStm = new Stm (4);
+    _verbalStm = new Stm (2);
   }
 
   /**
@@ -100,30 +98,32 @@ public class Chrest extends Observable {
    * Accessor to retrieve the size of visual short-term memory.
    */
   public int getVisualStmSize () {
-    return _visualStmSize;
+    return _visualStm.getSize ();
   }
 
   /**
    * Modify size of visual short-term memory.
-   * TODO: Update STM itself.
    */
   public void setVisualStmSize (int size) {
-    _visualStmSize = size;
+    _visualStm.setSize (size);
+    setChanged ();
+    notifyObservers ();
   }
 
   /**
    * Accessor to retrieve the size of verbal short-term memory.
    */
   public int getVerbalStmSize () {
-    return _verbalStmSize;
+    return _verbalStm.getSize ();
   }
 
   /**
    * Modify size of verbal short-term memory.
-   * TODO: Update STM itself.
    */
   public void setVerbalStmSize (int size) {
-    _verbalStmSize = size;
+    _verbalStm.setSize (size);
+    setChanged ();
+    notifyObservers ();
   }
 
   /**
@@ -138,6 +138,7 @@ public class Chrest extends Observable {
    */
   public void advanceClock (int time) {
     _clock += time;
+    setChanged ();
   }
 
   /**
@@ -182,6 +183,9 @@ public class Chrest extends Observable {
       }
     }
 
+    _visualStm.add (currentNode); // TODO: Choose STM based on modality
+    setChanged ();
+
     return currentNode;
   }
 
@@ -192,17 +196,26 @@ public class Chrest extends Observable {
    * used to extend the network.  Otherwise, new information will be added 
    * to the image using the pattern.
    */
-  public Node recogniseAndLearn (ListPattern pattern) {
+  public Node recogniseAndLearn (ListPattern pattern, int time) {
     Node currentNode = recognise (pattern);
-    if (currentNode == _ltm || !currentNode.getImage().matches (pattern)) {
-      currentNode = currentNode.discriminate (this, pattern);
-      setChanged ();
-    } else if (!currentNode.getImage().equals (pattern)) {
-      currentNode = currentNode.familiarise (this, pattern);
-      setChanged ();
+    if (_clock <= time) { // only try to learn if model clock is 'behind' the time of the call
+      if (Math.random () < _rho) { // depending on _rho, may refuse to learn some random times
+        _clock = time; // bring clock up to date
+        if (currentNode == _ltm || !currentNode.getImage().matches (pattern)) { // || currentNode.getImage().isFinished ()) {
+          currentNode = currentNode.discriminate (this, pattern);
+          setChanged ();
+        } else if (!currentNode.getImage().equals (pattern)) {
+          currentNode = currentNode.familiarise (this, pattern);
+          setChanged ();
+        }
+        notifyObservers ();
+      }
     }
-    notifyObservers ();
     return currentNode;
+  }
+
+  public Node recogniseAndLearn (ListPattern pattern) {
+    return recogniseAndLearn (pattern, _clock);
   }
 
   /**
@@ -213,14 +226,31 @@ public class Chrest extends Observable {
     return recognise(pattern).getImage ();
   }
 
+  /** 
+   * Asks Chrest to return the image of the node which follows the node 
+   * obtained by sorting given pattern through the network.
+   */
+  public ListPattern followPattern (ListPattern pattern) {
+    Node retrievedNode = recognise (pattern);
+    if (retrievedNode.getFollowedBy () != null) {
+      return retrievedNode.getFollowedBy().getImage ();
+    } else {
+      return null;
+    }
+  }
+
   /**
    * Presents Chrest with a pair of patterns, which it should learn and 
    * then attempt to learn a link.
    */
   public void learnAndLinkPatterns (ListPattern pattern1, ListPattern pattern2, int time) {
-    recogniseAndLearn (pattern1);
-    recogniseAndLearn (pattern2);
-    // TODO learn links
+    recogniseAndLearn (pattern1, time);
+    recogniseAndLearn (pattern2, time);
+    if (_clock <= time) {
+      _visualStm.learnLateralLinks (this);
+      setChanged ();
+      notifyObservers ();
+    }
   }
 
   /**

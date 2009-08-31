@@ -11,6 +11,7 @@ import javax.swing.*;
 public class ChrestView extends JFrame implements Observer {
   private Chrest _model;
   private ChrestLtmView _ltmView;
+  private ChrestStmView _stmView;
   private ChrestTimeView _timeView;
 
   public ChrestView (Chrest model) {
@@ -19,6 +20,7 @@ public class ChrestView extends JFrame implements Observer {
     _model.addObserver (this);
     _timeView = new ChrestTimeView (_model);
     _ltmView = new ChrestLtmView (_model);
+    _stmView = new ChrestStmView (_model);
 
     // catch close-window event
     addWindowListener(new WindowAdapter() {
@@ -31,7 +33,8 @@ public class ChrestView extends JFrame implements Observer {
     setLayout (new BorderLayout ());
     add (_timeView, BorderLayout.NORTH);
     add (_ltmView, BorderLayout.CENTER);
-    setSize (400, 300);
+    add (_stmView, BorderLayout.WEST);
+    setSize (500, 400);
     setVisible (true);
 
     _ltmView.setStandardDisplay ();
