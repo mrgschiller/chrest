@@ -3,7 +3,10 @@ package jchrest.gui;
 import jchrest.architecture.Chrest;
 import jchrest.lib.ListPattern;
 import jchrest.lib.Pattern;
+
+import java.awt.GridLayout;
 import java.awt.event.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -29,7 +32,7 @@ public class Shell extends JFrame {
     setContentPane( new JLabel ("Open some data to use shell") );
 
     setSize(600, 400);
-    setLocationRelativeTo(null);
+    setLocationRelativeTo (null);
     setTheme ("Nimbus");
     setVisible (true);
   }
@@ -116,14 +119,39 @@ public class Shell extends JFrame {
 
     public void actionPerformed (ActionEvent e) {
       if (_parent.fileChooser().showOpenDialog (_parent) == JFileChooser.APPROVE_OPTION) {
-        // -- following code for testing only
-        List<ListPattern> items = new ArrayList<ListPattern> ();
-        items.add (Pattern.makeList (new String[]{"A", "B", "C"}));
-        items.add (Pattern.makeList (new String[]{"A", "D", "C"}));
-        items.add (Pattern.makeList (new String[]{"C", "B", "D"}));
-
-        _parent.setContentPane(new RecogniseAndLearnDemo (_model, items));
-        _parent.validate ();
+        if (_parent.fileChooser().getSelectedFile().exists ()) {
+          try {
+            String task = "";
+            List<ListPattern> items = new ArrayList<ListPattern> ();
+            BufferedReader input = new BufferedReader (new FileReader (_parent.fileChooser().getSelectedFile ()));
+            String line = input.readLine ();
+            if (line != null) {
+              task = line;
+              line = input.readLine ();
+            }              
+            while (line != null) {
+              items.add (Pattern.makeList (line.split("[, ]")));
+              line = input.readLine ();
+            }
+            if (task.equals ("recognise-and-learn")) {
+              _parent.setContentPane (new RecogniseAndLearnDemo (_model, items));
+              _parent.validate ();
+            } else if (task.equals ("serial-anticipation")) {
+              _parent.setContentPane (new SerialAnticipationExperiment (_model, items));
+              _parent.validate ();
+            } else {
+              JOptionPane.showMessageDialog (_parent,
+                  "Invalid task on first line of file",
+                  "File error",
+                  JOptionPane.ERROR_MESSAGE);
+            }
+          } catch (IOException ioe) {
+            JOptionPane.showMessageDialog (_parent, 
+                "There was an error in processing your file", 
+                "File error",
+                JOptionPane.ERROR_MESSAGE);
+          }
+        }
       }
     }
   }
@@ -132,14 +160,12 @@ public class Shell extends JFrame {
    * Action to clear data held in the model.
    */
   class ClearModelAction extends AbstractAction implements ActionListener {
-    private Chrest _model;
     private Shell _parent;
 
-    ClearModelAction (Shell parent, Chrest model) {
+    ClearModelAction (Shell parent) {
       super ("Clear");
 
       _parent = parent;
-      _model = model;
     }
 
     public void actionPerformed (ActionEvent e) {
@@ -158,15 +184,62 @@ public class Shell extends JFrame {
    * Action to show a dialog to change properties of model.
    */
   class ModelPropertiesAction extends AbstractAction implements ActionListener {
-    private Chrest _model;
+    private Shell _parent;
 
-    ModelPropertiesAction (Chrest model) {
+    ModelPropertiesAction (Shell parent) {
       super ("Properties");
 
-      _model = model;
+      _parent = parent;
     }
 
     public void actionPerformed (ActionEvent e) {
+      if (JOptionPane.OK_OPTION == JOptionPane.showOptionDialog (_parent, 
+            properties(), 
+            "Chrest: Model properties", 
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE,
+            null, null, 0)) {
+        _model.setAddLinkTime (((SpinnerNumberModel)_addLinkTime.getModel()).getNumber().intValue ());
+        _model.setDiscriminationTime (((SpinnerNumberModel)_discriminationTime.getModel()).getNumber().intValue ());
+        _model.setFamiliarisationTime (((SpinnerNumberModel)_familiarisationTime.getModel()).getNumber().intValue ());
+        _model.setRho (((SpinnerNumberModel)_rhoEntry.getModel()).getNumber().floatValue ());
+        _model.setVisualStmSize (((SpinnerNumberModel)_visualStmSize.getModel()).getNumber().intValue ());
+        _model.setVerbalStmSize (((SpinnerNumberModel)_verbalStmSize.getModel()).getNumber().intValue ());
+      }
+    }
+
+    private JSpinner _addLinkTime;
+    private JSpinner _discriminationTime;
+    private JSpinner _familiarisationTime;
+    private JSpinner _rhoEntry;
+    private JSpinner _visualStmSize;
+    private JSpinner _verbalStmSize;
+
+    private JPanel properties () {
+      // -- create entry widgets
+      _addLinkTime = new JSpinner (new SpinnerNumberModel (_model.getAddLinkTime (), 1, 100000, 1));
+      _discriminationTime = new JSpinner (new SpinnerNumberModel (_model.getDiscriminationTime (), 1, 100000, 1));
+      _familiarisationTime = new JSpinner (new SpinnerNumberModel (_model.getFamiliarisationTime (), 1, 100000, 1));
+      _rhoEntry = new JSpinner (new SpinnerNumberModel (_model.getRho (), 0.0, 1.0, 0.1));
+      _visualStmSize = new JSpinner (new SpinnerNumberModel (_model.getVisualStmSize (), 1, 10, 1));
+      _verbalStmSize = new JSpinner (new SpinnerNumberModel (_model.getVerbalStmSize (), 1, 10, 1));
+
+      JPanel panel = new JPanel ();
+      panel.setLayout (new GridLayout (6, 2));
+      panel.add (new JLabel ("Add link time (ms)", SwingConstants.RIGHT));
+      panel.add (_addLinkTime);
+      panel.add (new JLabel ("Discrimination time (ms)", SwingConstants.RIGHT));
+      panel.add (_discriminationTime);
+      panel.add (new JLabel ("Familiarisation time (ms)", SwingConstants.RIGHT));
+      panel.add (_familiarisationTime);
+      panel.add (new JLabel ("Rho", SwingConstants.RIGHT));
+      panel.add (_rhoEntry);
+      panel.add (new JLabel ("Visual STM size", SwingConstants.RIGHT));
+      panel.add (_visualStmSize);
+      panel.add (new JLabel ("Verbal STM size", SwingConstants.RIGHT));
+      panel.add (_verbalStmSize);
+
+      return panel;
     }
   }
 
@@ -174,15 +247,21 @@ public class Shell extends JFrame {
    * Action to display information about the current model.
    */
   class ModelInformationAction extends AbstractAction implements ActionListener {
-    private Chrest _model;
+    private Shell _parent;
 
-    ModelInformationAction (Chrest model) {
+    ModelInformationAction (Shell parent) {
       super ("Information");
 
-      _model = model;
+      _parent = parent;
     }
 
     public void actionPerformed (ActionEvent e) {
+      JOptionPane.showMessageDialog (_parent,
+          "<html><p>" + 
+          "Nodes in LTM: " + _model.ltmSize () +
+          "</p></html>",
+          "Chrest: Model information",
+          JOptionPane.INFORMATION_MESSAGE);
     }
   }
 
@@ -192,14 +271,12 @@ public class Shell extends JFrame {
    * design pattern to keep updated as the model changes.
    */
   class ViewModelAction extends AbstractAction implements ActionListener {
-    private Chrest _model;
     private Shell _parent;
 
-    ViewModelAction (Shell parent, Chrest model) {
+    ViewModelAction (Shell parent) {
       super ("View");
 
       _parent = parent;
-      _model = model;
     }
 
     public void actionPerformed (ActionEvent e) {
@@ -233,11 +310,11 @@ public class Shell extends JFrame {
 
   private JMenu createModelMenu () {
     JMenu menu = new JMenu ("Model");
-    menu.add (new ClearModelAction (this, _model));
-    menu.add (new ModelPropertiesAction (_model));
+    menu.add (new ClearModelAction (this));
+    menu.add (new ModelPropertiesAction (this));
     menu.add (new JSeparator ());
-    menu.add (new ModelInformationAction (_model));
-    menu.add (new ViewModelAction (this, _model));
+    menu.add (new ModelInformationAction (this));
+    menu.add (new ViewModelAction (this));
 
     return menu;
   }

@@ -70,6 +70,18 @@ public class Node {
     return _children;
   }
 
+  /** 
+   * Compute the size of the network below the current node.
+   */
+  public int size () {
+    int count = 1; // for self
+    for (Link link : _children) {
+      count += link.getChildNode().size ();
+    }
+
+    return count;
+  }
+
   /**
    * LearnPrimitive is used to construct a test link and node containing 
    * precisely the given pattern.  It is assumed the given pattern contains 
@@ -79,6 +91,7 @@ public class Node {
     assert (pattern.isFinished () && pattern.size () == 1);
     Node child = new Node (pattern, pattern);
     _children.add (new Link (pattern, child));
+    model.advanceClock (model.getDiscriminationTime ());
 
     return child;
   }
@@ -105,6 +118,7 @@ public class Node {
       // else, create a new test link using the provided chunk as a test
       Node newChild = new Node (_contents.append (retrievedChunk.getImage ()), new ListPattern ());
       _children.add (new Link (retrievedChunk.getImage (), newChild));
+      model.advanceClock (model.getDiscriminationTime ());
       return newChild;
     } else { // look for or learn a new primitive chunk
       ListPattern primitive = newInformation.getFirstItem ();
@@ -114,6 +128,7 @@ public class Node {
       } else {
         Node newChild = new Node (_contents.append (primitive), new ListPattern ());
         _children.add (new Link (primitive, newChild));
+        model.advanceClock (model.getDiscriminationTime ());
         return newChild;
       }
     }
@@ -144,9 +159,11 @@ public class Node {
           return model.getLtm().learnPrimitive (model, primitive);
         } else {
           _image = _image.append (primitive);
+          model.advanceClock (model.getFamiliarisationTime ());
         }
       } else if (retrievedChunk.getImage().matches (newInformation)) {
         _image = _image.append (retrievedChunk.getImage ());
+        model.advanceClock (model.getFamiliarisationTime ());
       } else { // could not retrieve a chunk, so look for, or learn a primitive
         ListPattern primitive = newInformation.getFirstItem ();
         retrievedChunk = model.recognise (primitive);
@@ -154,6 +171,7 @@ public class Node {
           return model.getLtm().learnPrimitive (model, primitive);
         } else {
           _image = _image.append (primitive);
+          model.advanceClock (model.getFamiliarisationTime ());
         }
       }
     }

@@ -105,13 +105,13 @@ public class ChrestLtmView extends JPanel {
   private LtmGrapherNode constructTree (Node baseNode) {
     LtmGrapherNode baseGrapherNode = new NodeDisplay (baseNode);
     for (Link link : baseNode.getChildren ()) {
-      // TODO display links too
-      baseGrapherNode.add (constructTree (link.getChildNode ()));
+      LtmGrapherNode linkNode = new LinkDisplay (link);
+      linkNode.add (constructTree (link.getChildNode ()));
+      baseGrapherNode.add (linkNode);
     }
 
     return baseGrapherNode;
   }
-
 }
 
 enum Orientation { HORIZONTAL, VERTICAL }
@@ -211,6 +211,76 @@ class NodeDisplay implements LtmGrapherNode {
 
   private int getNodeNumberHeight (Graphics2D g, Size size) {
     return (int)(size.getTextBounds(getNodeNumberString (), g).getHeight ());
+  }
+}
+
+/**
+ * Display a link within the LTM view.  Note that a link can 
+ * never be a root node.
+ */
+class LinkDisplay implements LtmGrapherNode {
+  private Link _link;
+  private List<LtmGrapherNode> _children;
+
+  public LinkDisplay (Link link) {
+    _link = link;
+    _children = new ArrayList<LtmGrapherNode> ();
+  }
+
+  public List<LtmGrapherNode> getChildren () {
+    return _children;
+  }
+
+  public int getWidth (Graphics2D g, Size size) {
+    int width =  2 * size.getMargin ();
+
+    if ( size.isSmall () ) {
+      width = size.getSmallSize ();
+    } else {
+      width += size.getWidth (_link.getTest().toString (), g);
+    }
+
+    return width;
+  }
+
+  public int getHeight (Graphics2D g, Size size) {
+    int height = 2 * size.getMargin ();
+
+    if ( size.isSmall () ) {
+      height = size.getSmallSize ();
+    } else {
+      height += size.getHeight (_link.getTest().toString (), g);
+    }
+    return height;
+  }
+
+  public void draw (Graphics2D g, int x, int y, int w, int h, Size size) {
+    if ( size.isSmall () ) {
+      drawSmallNode (g, x, y, w, h);
+    } else {
+      drawRegularNode (g, x, y, w, h, size);
+    }
+  }
+
+  public boolean isRoot () {
+    return false;
+  }
+
+  public void add (LtmGrapherNode node) {
+    _children.add (node);
+  }
+
+  private void drawSmallNode (Graphics2D g, int x, int y, int w, int h) {
+    g.setColor (Color.GRAY);
+    g.fillRect (x, y, w, h);
+  }
+
+  private void drawRegularNode (Graphics2D g, int x, int y, int w, int h, Size size) {
+    g.setBackground (Color.GRAY);
+    g.clearRect (x+1, y+1, w-1, h-1);
+    g.setColor (Color.BLACK);
+
+    size.drawText (g, x, y, _link.getTest().toString ());
   }
 }
 

@@ -11,11 +11,13 @@ import javax.swing.*;
 public class ChrestView extends JFrame implements Observer {
   private Chrest _model;
   private ChrestLtmView _ltmView;
+  private ChrestTimeView _timeView;
 
   public ChrestView (Chrest model) {
     super ("Chrest Model View");
     _model = model;
     _model.addObserver (this);
+    _timeView = new ChrestTimeView (_model);
     _ltmView = new ChrestLtmView (_model);
 
     // catch close-window event
@@ -27,6 +29,7 @@ public class ChrestView extends JFrame implements Observer {
     createMenuBar ();
 
     setLayout (new BorderLayout ());
+    add (_timeView, BorderLayout.NORTH);
     add (_ltmView, BorderLayout.CENTER);
     setSize (400, 300);
     setVisible (true);
@@ -66,6 +69,7 @@ public class ChrestView extends JFrame implements Observer {
    */
   public void update(Observable o, Object arg) {
     _ltmView.update ();
+    _timeView.update ();
   }
 
   /**

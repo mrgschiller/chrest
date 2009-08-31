@@ -4,9 +4,12 @@ import jchrest.architecture.Chrest;
 import jchrest.lib.ListPattern;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.*;
 
 /**
  * This panel provides an interface for a simple demonstration of recognising 
@@ -29,9 +32,17 @@ class RecogniseAndLearnDemo extends JPanel {
   }
 
   private JList _patternList;
-  private JScrollPane constructPatternList () {
+  private JPanel constructPatternList () {
+    JPanel panel = new JPanel ();
+    panel.setBorder (new TitledBorder ("Patterns"));
+    panel.setLayout (new GridLayout (1, 1));
+
     _patternList = new JList (_patterns.toArray ());
-    return new JScrollPane (_patternList);
+    _patternList.setSelectedIndex (0);
+
+    panel.add (new JScrollPane (_patternList));
+
+    return panel;
   }
 
   abstract class PatternAction extends AbstractAction implements ActionListener {
@@ -97,10 +108,22 @@ class RecogniseAndLearnDemo extends JPanel {
 
   private Box constructButtons () {
     Box buttons = Box.createVerticalBox ();
+    JButton learnButton = new JButton (new LearnPatternAction ());
+    JButton learnAllButton = new JButton (new LearnAllPatternAction ());
+    JButton recogniseButton = new JButton (new RecognisePatternAction ());
+    
+    learnButton.setToolTipText ("Train model on currently selected pattern");
+    learnAllButton.setToolTipText ("Train model on all patterns");
+    recogniseButton.setToolTipText ("Recall currently selected pattern from model");
 
-    buttons.add (new JButton (new LearnPatternAction ()));
-    buttons.add (new JButton (new LearnAllPatternAction ()));
-    buttons.add (new JButton (new RecognisePatternAction ()));
+    learnButton.setMaximumSize (recogniseButton.getPreferredSize ());
+    learnAllButton.setMaximumSize (recogniseButton.getPreferredSize ());
+
+    buttons.add (Box.createGlue ());
+    buttons.add (learnButton);
+    buttons.add (learnAllButton);
+    buttons.add (recogniseButton);
+    buttons.add (Box.createGlue ());
 
     return buttons;
   }
@@ -109,6 +132,8 @@ class RecogniseAndLearnDemo extends JPanel {
 
   private JLabel constructFeedbackPanel () {
     _feedback = new JLabel ("FEEDBACK");
+    _feedback.setFont (new Font ("Arial", Font.PLAIN, 18));
+    _feedback.setBorder (new EmptyBorder (10, 50, 10, 50));
     return _feedback;
   }
 }

@@ -22,13 +22,122 @@ public class Chrest extends Observable {
   private float _rho;
   // long-term-memory holds information within the model permanently
   private Node _ltm;
-  private int _ltmSize;
   // short-term-memory holds information within the model temporarily, usually within one experiment
+  private int _visualStmSize;
+  private int _verbalStmSize;
   private Stm _stm;
 
   public Chrest () {
+    _addLinkTime = 10000;
+    _discriminationTime = 10000;
+    _familiarisationTime = 2000;
+    _rho = 1.0f;
+    _visualStmSize = 4;
+    _verbalStmSize = 2;
+
+    _clock = 0;
     _ltm = new Node ();
     _stm = new Stm ();
+  }
+
+  /**
+   * Accessor to retrieve time to add a new link.
+   */
+  public int getAddLinkTime () {
+    return _addLinkTime;
+  }
+
+  /**
+   * Modify time to add a new link.
+   */
+  public void setAddLinkTime (int time) {
+    _addLinkTime = time;
+  }
+
+  /**
+   * Accessor to retrieve time to discriminate a new node.
+   */
+  public int getDiscriminationTime () {
+    return _discriminationTime;
+  }
+
+  /**
+   * Modify time to discriminate a new node.
+   */
+  public void setDiscriminationTime (int time) {
+    _discriminationTime = time;
+  }
+
+  /**
+   * Accessor to retrieve time to familiarise image of a node.
+   */
+  public int getFamiliarisationTime () {
+    return _familiarisationTime;
+  }
+
+  /**
+   * Modify time to familiarise image of a node.
+   */
+  public void setFamiliarisationTime (int time) {
+    _familiarisationTime = time;
+  }
+
+  /**
+   * Accessor to retrieve value of rho, the probability of learning an item.
+   */
+  public float getRho () {
+    return _rho;
+  }
+
+  /**
+   * Modify value of rho, the probability of learning an item.
+   */
+  public void setRho (float rho) {
+    _rho = rho;
+  }
+
+  /**
+   * Accessor to retrieve the size of visual short-term memory.
+   */
+  public int getVisualStmSize () {
+    return _visualStmSize;
+  }
+
+  /**
+   * Modify size of visual short-term memory.
+   * TODO: Update STM itself.
+   */
+  public void setVisualStmSize (int size) {
+    _visualStmSize = size;
+  }
+
+  /**
+   * Accessor to retrieve the size of verbal short-term memory.
+   */
+  public int getVerbalStmSize () {
+    return _verbalStmSize;
+  }
+
+  /**
+   * Modify size of verbal short-term memory.
+   * TODO: Update STM itself.
+   */
+  public void setVerbalStmSize (int size) {
+    _verbalStmSize = size;
+  }
+
+  /**
+   * Accessor to retrieve current time of model.
+   */
+  public int getClock () {
+    return _clock;
+  }
+
+  /**
+   * Advance the clock by given amount.
+   */
+  public void advanceClock (int time) {
+    _clock += time;
   }
 
   /**
@@ -36,6 +145,13 @@ public class Chrest extends Observable {
    */
   public Node getLtm () {
     return _ltm;
+  }
+
+  /** 
+   * Return a count of the number of nodes in long-term memory.
+   */
+  public int ltmSize () {
+    return _ltm.size ();
   }
 
   /** 
@@ -97,10 +213,29 @@ public class Chrest extends Observable {
     return recognise(pattern).getImage ();
   }
 
+  /**
+   * Presents Chrest with a pair of patterns, which it should learn and 
+   * then attempt to learn a link.
+   */
+  public void learnAndLinkPatterns (ListPattern pattern1, ListPattern pattern2, int time) {
+    recogniseAndLearn (pattern1);
+    recogniseAndLearn (pattern2);
+    // TODO learn links
+  }
+
+  /**
+   * Learns the two patterns assuming the time of presentation is the current 
+   * Chrest clock time.
+   */
+  public void learnAndLinkPatterns (ListPattern pattern1, ListPattern pattern2) {
+    learnAndLinkPatterns (pattern1, pattern2, _clock);
+  }
+
   /** 
    * Clear the STM and LTM of the model.
    */
   public void clear () {
+    _clock = 0;
     _ltm = new Node ();
     setChanged ();
     notifyObservers ();
