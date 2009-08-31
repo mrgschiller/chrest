@@ -101,6 +101,9 @@ public class Chrest extends Observable {
    * Clear the STM and LTM of the model.
    */
   public void clear () {
+    _ltm = new Node ();
+    setChanged ();
+    notifyObservers ();
   }
 }
 

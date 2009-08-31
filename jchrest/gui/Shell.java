@@ -61,9 +61,9 @@ public class Shell extends JFrame {
       JOptionPane.showMessageDialog (
           _parent, 
           "<HTML><P>This program is a graphical interface to the <BR>" +
-          "Chrest cognitive architecture.  You can load data, train <BR>" +
-          "models, and visualise results in a range of typical modelling <BR>" +
-          "problems for Chrest.</P>" +
+          "Chrest cognitive architecture.  You can load <BR>" +
+          "data, train models, and visualise results in a <BR>" +
+          "range of typical modelling problems for Chrest.</P>" +
           "<P><P>Copyright (c) 2009, Peter C. R. Lane.</P></P>"+
           "<P>Released under GNU General Public License</a>, version 3.</P></HTML>",
           "About Chrest Shell", 

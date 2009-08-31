@@ -6,21 +6,47 @@ import java.util.List;
 import jchrest.lib.ListPattern;
 import jchrest.lib.Pattern;
 
+/**
+ * Represents a node within the model's discrimination network.
+ * Methods support learning and also display.
+ *
+ * @author Peter C. R. Lane
+ */
 public class Node {
+  private static int _totalNodes = 0;
+  private int _reference;
   private ListPattern _contents;
   private ListPattern _image;
   private List<Link> _children;
 
+  /**
+   * Empty constructor is only called to construct a new root node for the 
+   * model.  
+   */
   public Node () {
-    _contents = Pattern.makeList (new String[]{});
-    _image = Pattern.makeList (new String[]{});
+    this (Pattern.makeList (new String[]{}), Pattern.makeList (new String[]{}));
+    _totalNodes = 1;
+    _reference = 0;
+  }
+ 
+  /**
+   * When constructing non-root nodes in the network, the new contents and image 
+   * must be defined.  Assume that the image always starts empty.
+   */
+  public Node (ListPattern contents, ListPattern image) {
+     _reference = _totalNodes;
+    _totalNodes += 1;
+
+   _contents = contents;
+    _image = image;
     _children = new ArrayList<Link> ();
   }
 
-  public Node (ListPattern contents, ListPattern image) {
-    _contents = contents;
-    _image = image;
-    _children = new ArrayList<Link> ();
+  /**
+   * Accessor to reference number of node.
+   */
+  public int getReference () {
+    return _reference;
   }
 
   /**
@@ -66,7 +92,7 @@ public class Node {
 
     // nothing to learn from, so stop
     if (newInformation.isEmpty ()) return this;
-    
+
     Node retrievedChunk = model.recognise (pattern);
     if (retrievedChunk == model.getLtm ()) {
       // if root node is retrieved, then the primitive must be learnt
