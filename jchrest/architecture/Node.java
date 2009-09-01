@@ -122,7 +122,7 @@ public class Node {
   Node discriminate (Chrest model, ListPattern pattern) {
     ListPattern newInformation = pattern.remove (_contents);
 
-    // nothing to learn from, so stop
+    // special case if no new items - look for test for 'finished'
     if (newInformation.isEmpty ()) {
       if (newInformation.isFinished ()) { // add test for < $ >
         ListPattern newContents = _contents.clone ();

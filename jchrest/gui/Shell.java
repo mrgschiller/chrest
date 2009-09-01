@@ -117,29 +117,39 @@ public class Shell extends JFrame {
       _parent = parent;
     }
 
+    private List<ListPattern> readItems (BufferedReader input) throws IOException {
+      List<ListPattern> items = new ArrayList<ListPattern> ();
+      String line = input.readLine ();
+
+      while (line != null) {
+        ListPattern pattern = Pattern.makeList (line.split("[, ]"));
+        pattern.setFinished ();
+        items.add (pattern);
+        line = input.readLine ();
+      } 
+
+      return items;
+    }
+
     public void actionPerformed (ActionEvent e) {
       if (_parent.fileChooser().showOpenDialog (_parent) == JFileChooser.APPROVE_OPTION) {
         if (_parent.fileChooser().getSelectedFile().exists ()) {
           try {
             String task = "";
-            List<ListPattern> items = new ArrayList<ListPattern> ();
             BufferedReader input = new BufferedReader (new FileReader (_parent.fileChooser().getSelectedFile ()));
             String line = input.readLine ();
             if (line != null) {
               task = line;
-              line = input.readLine ();
             }              
-            while (line != null) {
-              ListPattern pattern = Pattern.makeList (line.split("[, ]"));
-              pattern.setFinished ();
-              items.add (pattern);
-              line = input.readLine ();
-            }
+
             if (task.equals ("recognise-and-learn")) {
-              _parent.setContentPane (new RecogniseAndLearnDemo (_model, items));
+              _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input)));
               _parent.validate ();
             } else if (task.equals ("serial-anticipation")) {
-              _parent.setContentPane (new SerialAnticipationExperiment (_model, items));
+              _parent.setContentPane (new SerialAnticipationExperiment (_model, readItems (input)));
+              _parent.validate ();
+            } else if (task.equals ("visual-search")) {
+              _parent.setContentPane (new VisualSearchPane (_model)); // readScenes (input)
               _parent.validate ();
             } else {
               JOptionPane.showMessageDialog (_parent,
