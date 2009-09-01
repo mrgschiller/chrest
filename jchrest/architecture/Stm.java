@@ -12,6 +12,10 @@ public class Stm {
     _items = new ArrayList<Node> ();
   }
 
+  public List<Node> getContents () {
+    return _items;
+  }
+
   public int getSize () {
     return _size;
   }
@@ -22,10 +26,15 @@ public class Stm {
   }
 
   public void add (Node node) {
+    _items.remove (node);
     _items.add (0, node);
     while (_items.size () > _size) {
       _items.remove (_items.size () - 1);
     }
+  }
+
+  public void clear () {
+    _items.clear ();
   }
 
   public void learnLateralLinks (Chrest model) {

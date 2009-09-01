@@ -2,7 +2,7 @@ package jchrest.gui;
 
 import jchrest.architecture.Chrest;
 
-import java.awt.BorderLayout;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.Observable;
 import java.util.Observer;
@@ -30,13 +30,21 @@ public class ChrestView extends JFrame implements Observer {
     });
     createMenuBar ();
 
-    setLayout (new BorderLayout ());
-    add (_timeView, BorderLayout.NORTH);
-    add (_ltmView, BorderLayout.CENTER);
-    add (_stmView, BorderLayout.WEST);
-    setSize (500, 400);
-    setVisible (true);
+    // layout the components
+    JPanel leftSide = new JPanel ();
+    leftSide.setLayout (new BorderLayout ());
+    leftSide.add (_timeView, BorderLayout.NORTH);
+    leftSide.add (_stmView, BorderLayout.CENTER);
+    JSplitPane jsp = new JSplitPane (JSplitPane.HORIZONTAL_SPLIT, leftSide, _ltmView);
+    jsp.setOneTouchExpandable (true);
 
+    setLayout (new GridLayout (1, 1));
+    add (jsp);
+
+    // finalise display settings
+    setSize (550, 400);
+    setVisible (true);
+    // prompt the long-term memory to draw itself
     _ltmView.setStandardDisplay ();
   }
 
@@ -72,6 +80,7 @@ public class ChrestView extends JFrame implements Observer {
    */
   public void update(Observable o, Object arg) {
     _ltmView.update ();
+    _stmView.update ();
     _timeView.update ();
   }
 

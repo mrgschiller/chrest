@@ -142,6 +142,13 @@ public class Chrest extends Observable {
   }
 
   /**
+   * Accessor to retrieve visual short-term memory of model.
+   */
+  public Stm getVisualStm () {
+    return _visualStm;
+  }
+
+  /**
    * Accessor to retrieve long-term memory of model.
    */
   public Node getLtm () {
@@ -267,6 +274,8 @@ public class Chrest extends Observable {
   public void clear () {
     _clock = 0;
     _ltm = new Node ();
+    _visualStm.clear ();
+    _verbalStm.clear ();
     setChanged ();
     notifyObservers ();
   }
