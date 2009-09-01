@@ -35,10 +35,11 @@ public class Node {
    * must be defined.  Assume that the image always starts empty.
    */
   public Node (ListPattern contents, ListPattern image) {
-     _reference = _totalNodes;
+    _reference = _totalNodes;
     _totalNodes += 1;
 
-   _contents = contents;
+    _contents = contents.clone ();
+    _contents.setNotFinished (); // do not allow contents to be finished
     _image = image;
     _children = new ArrayList<Link> ();
     _followedBy = null;
@@ -105,8 +106,10 @@ public class Node {
    */
   public Node learnPrimitive (Chrest model, ListPattern pattern) {
     assert (pattern.isFinished () && pattern.size () == 1);
-    Node child = new Node (pattern, pattern);
-    _children.add (new Link (pattern, child));
+    ListPattern contents = pattern.clone ();
+    contents.setNotFinished ();
+    Node child = new Node (contents, pattern);
+    _children.add (0, new Link (contents, child));
     model.advanceClock (model.getDiscriminationTime ());
 
     return child;
@@ -117,10 +120,22 @@ public class Node {
    * nodes.
    */
   Node discriminate (Chrest model, ListPattern pattern) {
-    ListPattern newInformation = pattern.remove (_image);
+    ListPattern newInformation = pattern.remove (_contents);
 
     // nothing to learn from, so stop
-    if (newInformation.isEmpty ()) return this;
+    if (newInformation.isEmpty ()) {
+      if (newInformation.isFinished ()) { // add test for < $ >
+        ListPattern newContents = _contents.clone ();
+        newContents.setFinished ();
+        Node newChild = new Node (newContents, new ListPattern ());
+        ListPattern finishTest = new ListPattern ();
+        finishTest.setFinished ();
+        _children.add (0, new Link (finishTest, newChild));
+        model.advanceClock (model.getDiscriminationTime ());
+        return newChild;
+      }
+      return this;
+    }
 
     Node retrievedChunk = model.recognise (pattern);
     if (retrievedChunk == model.getLtm ()) {
@@ -133,7 +148,9 @@ public class Node {
     } else if (retrievedChunk.getImage().matches (newInformation)) {
       // else, create a new test link using the provided chunk as a test
       Node newChild = new Node (_contents.append (retrievedChunk.getImage ()), new ListPattern ());
-      _children.add (new Link (retrievedChunk.getImage (), newChild));
+      ListPattern contents = retrievedChunk.getImage ().clone ();
+      contents.setNotFinished ();
+      _children.add (0, new Link (contents, newChild));
       model.advanceClock (model.getDiscriminationTime ());
       return newChild;
     } else { // look for or learn a new primitive chunk
@@ -143,7 +160,9 @@ public class Node {
         return model.getLtm().learnPrimitive (model, primitive);
       } else {
         Node newChild = new Node (_contents.append (primitive), new ListPattern ());
-        _children.add (new Link (primitive, newChild));
+        ListPattern contents = primitive.clone ();
+        contents.setNotFinished ();
+        _children.add (0, new Link (contents, newChild));
         model.advanceClock (model.getDiscriminationTime ());
         return newChild;
       }
@@ -174,11 +193,15 @@ public class Node {
         if (retrievedChunk == model.getLtm ()) {
           return model.getLtm().learnPrimitive (model, primitive);
         } else {
-          _image = _image.append (primitive);
+          ListPattern toadd = primitive.clone ();
+          toadd.setNotFinished ();
+          _image = _image.append (toadd);
           model.advanceClock (model.getFamiliarisationTime ());
         }
       } else if (retrievedChunk.getImage().matches (newInformation)) {
-        _image = _image.append (retrievedChunk.getImage ());
+        ListPattern toadd = retrievedChunk.getImage().clone ();
+        toadd.setNotFinished ();
+        _image = _image.append (toadd);
         model.advanceClock (model.getFamiliarisationTime ());
       } else { // could not retrieve a chunk, so look for, or learn a primitive
         ListPattern primitive = newInformation.getFirstItem ();
@@ -186,7 +209,9 @@ public class Node {
         if (retrievedChunk == model.getLtm ()) {
           return model.getLtm().learnPrimitive (model, primitive);
         } else {
-          _image = _image.append (primitive);
+          ListPattern toadd = primitive.clone ();
+          toadd.setNotFinished ();
+          _image = _image.append (toadd);
           model.advanceClock (model.getFamiliarisationTime ());
         }
       }

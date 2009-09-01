@@ -67,15 +67,29 @@ public class TestPatterns {
     assertTrue (_list1.equals (list1Copy));
   }
 
-  @Test public void testListPatternMatches () {
+  @Test public void testListPatternMatches1 () {
     assertTrue ((new ListPattern ()).matches (_list1));
     assertTrue (_list1.matches (_list1));
     assertFalse (_list1.matches (_list2));
     assertTrue (_list3.matches(_list1));
     assertFalse (_list1.matches(_list3));
+  }
+
+  @Test public void testListPatternMatches2 () {
     ListPattern prim1 = Pattern.makeList (new int[]{1});
-    prim1.setFinished ();
     assertTrue (prim1.matches (_list1));
+    ListPattern prim1Clone = prim1.clone ();
+    prim1Clone.setFinished ();
+    assertTrue (prim1.matches (prim1Clone));
+    assertFalse (prim1Clone.matches (prim1));
+  }
+  
+  @Test public void testListPatternMatches3 () {
+    ListPattern empty = new ListPattern ();
+    assertTrue (empty.matches (_list1));
+    empty.setFinished ();
+    assertFalse (empty.matches (_list1));
+    assertTrue (empty.matches (empty));
   }
 
   @Test public void testListPatternAppend () {
@@ -86,6 +100,10 @@ public class TestPatterns {
   @Test public void testListPatternRemove () {
     assertTrue ((Pattern.makeList(new int[]{4})).equals(_list1.remove(_list3)));
     assertTrue ((Pattern.makeList(new int[]{4})).equals(_list1.remove(Pattern.makeList(new int[]{1,2,3,5,6}))));
+    ListPattern pattern = _list3.clone ();
+    pattern.setFinished ();
+    assertTrue (pattern.remove(_list3).isEmpty ());
+    assertTrue (pattern.remove(_list3).isFinished ());
   }
 }
 

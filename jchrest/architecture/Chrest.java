@@ -192,6 +192,7 @@ public class Chrest extends Observable {
 
     _visualStm.add (currentNode); // TODO: Choose STM based on modality
     setChanged ();
+    notifyObservers ();
 
     return currentNode;
   }
@@ -208,14 +209,17 @@ public class Chrest extends Observable {
     if (_clock <= time) { // only try to learn if model clock is 'behind' the time of the call
       if (Math.random () < _rho) { // depending on _rho, may refuse to learn some random times
         _clock = time; // bring clock up to date
-        if (currentNode == _ltm || !currentNode.getImage().matches (pattern)) { // || currentNode.getImage().isFinished ()) {
-          currentNode = currentNode.discriminate (this, pattern);
-          setChanged ();
-        } else if (!currentNode.getImage().equals (pattern)) {
-          currentNode = currentNode.familiarise (this, pattern);
-          setChanged ();
+        if (!currentNode.getImage().equals (pattern)) { // only try any learning if image differs from pattern
+          if (currentNode == _ltm || !currentNode.getImage().matches (pattern) || currentNode.getImage().isFinished ()) {
+            currentNode = currentNode.discriminate (this, pattern);
+            setChanged ();
+          } else if (!currentNode.getImage().equals (pattern)) {
+            currentNode = currentNode.familiarise (this, pattern);
+            setChanged ();
+          }
+          _visualStm.add (currentNode); // TODO: change based on modality
+          notifyObservers ();
         }
-        notifyObservers ();
       }
     }
     return currentNode;

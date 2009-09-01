@@ -130,7 +130,9 @@ public class Shell extends JFrame {
               line = input.readLine ();
             }              
             while (line != null) {
-              items.add (Pattern.makeList (line.split("[, ]")));
+              ListPattern pattern = Pattern.makeList (line.split("[, ]"));
+              pattern.setFinished ();
+              items.add (pattern);
               line = input.readLine ();
             }
             if (task.equals ("recognise-and-learn")) {

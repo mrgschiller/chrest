@@ -34,6 +34,21 @@ public class ListPattern extends Pattern {
     }
   }
 
+  /**
+   * Construct a copy of this pattern, so that it can be modified 
+   * without affecting the original.
+   */
+  public ListPattern clone () {
+    ListPattern result = new ListPattern ();
+    for (Pattern pattern : _list) {
+      result.add (pattern);
+    }
+    if (isFinished ()) {
+      result.setFinished ();
+    }
+    return result;
+  }
+
   public int size () {
     return _list.size ();
   }
@@ -94,15 +109,23 @@ public class ListPattern extends Pattern {
     if (!(givenPattern instanceof ListPattern)) return false;
     ListPattern pattern = (ListPattern)givenPattern;
 
-    // this pattern cannot be larger than given pattern to match it.
-    if (size () > pattern.size ()) return false;
+    // check relative sizes of patterns
+    if (isFinished ()) {
+      if (size () != pattern.size ()) return false;
+      if (!pattern.isFinished ()) return false;
 
+    } else {
+      // this pattern cannot be larger than given pattern to match it.
+      if (size () > pattern.size ()) return false;
+    }
+    // now just check that the items in this pattern match up with the given pattern
     for (int i = 0, n = size (); i < n; ++i) {
       if (!pattern.getItem(i).equals(getItem (i))) {
         return false; // false if any item not the same
       }
     }
     return true;
+
   }
 
   /**
@@ -125,8 +148,8 @@ public class ListPattern extends Pattern {
       }
       i += 1;
     }
-    if (isFinished ()) {
-      result.isFinished ();
+    if (isFinished () && !pattern.isFinished ()) {
+      result.setFinished ();
     }
 
     return result;

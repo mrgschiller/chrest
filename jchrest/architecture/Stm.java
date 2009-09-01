@@ -25,6 +25,14 @@ public class Stm {
     _items.clear ();
   }
 
+  public int getCount () {
+    return _items.size ();
+  }
+
+  public Node getItem (int index) {
+    return _items.get (index);
+  }
+
   public void add (Node node) {
     _items.remove (node);
     _items.add (0, node);
