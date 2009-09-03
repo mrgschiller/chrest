@@ -1,5 +1,8 @@
 package jchrest.lib;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The NumberPattern is a type of PrimitivePattern used to hold 
  * numbers.  The number is treated as a single object.
@@ -8,11 +11,20 @@ package jchrest.lib;
  */
 public class NumberPattern extends PrimitivePattern {
   private int _number;
+  private static final Map<Integer, NumberPattern> _cache = new HashMap<Integer, NumberPattern> ();
+
+  public static NumberPattern create (int num) {
+    Integer number = new Integer (num);
+    if (!_cache.containsKey (number)) {
+      _cache.put (number, new NumberPattern (num));
+    }
+    return _cache.get (number);
+  }
 
   /** 
    * Constructor takes an int to define the contents of this pattern.
    */
-  public NumberPattern (int number) {
+  private NumberPattern (int number) {
     _number = number;
   }
 

@@ -1,5 +1,8 @@
 package jchrest.lib;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The StringPattern is a type of PrimitivePattern used to hold 
  * Strings.  The String is treated as a single object, and 
@@ -9,12 +12,20 @@ package jchrest.lib;
  */
 public class StringPattern extends PrimitivePattern {
   private String _name;
+  private static final Map<String, StringPattern> _cache = new HashMap<String, StringPattern> ();
+
+  public static StringPattern create (String name) {
+    if (!_cache.containsKey (name)) {
+      _cache.put (name, new StringPattern (name));
+    }
+    return _cache.get (name);
+  }
 
   /**
    * Constructor takes a String name which is used to 
    * denote this pattern.
    */
-  public StringPattern (String name) {
+   private StringPattern (String name) {
     _name = name;
   }
 

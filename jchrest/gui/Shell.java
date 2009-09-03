@@ -3,6 +3,7 @@ package jchrest.gui;
 import jchrest.architecture.Chrest;
 import jchrest.lib.ListPattern;
 import jchrest.lib.Pattern;
+import jchrest.lib.Scenes;
 
 import java.awt.GridLayout;
 import java.awt.event.*;
@@ -149,7 +150,8 @@ public class Shell extends JFrame {
               _parent.setContentPane (new SerialAnticipationExperiment (_model, readItems (input)));
               _parent.validate ();
             } else if (task.equals ("visual-search")) {
-              _parent.setContentPane (new VisualSearchPane (_model)); // readScenes (input)
+              Scenes scenes = Scenes.read (input); // throws IOException if any problem
+              _parent.setContentPane (new VisualSearchPane (_model, scenes));
               _parent.validate ();
             } else {
               JOptionPane.showMessageDialog (_parent,
@@ -292,7 +294,7 @@ public class Shell extends JFrame {
     }
 
     public void actionPerformed (ActionEvent e) {
-      new ChrestView (_model);
+      new ChrestView (_parent, _model);
     }
   }
 

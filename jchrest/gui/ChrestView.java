@@ -4,18 +4,21 @@ import jchrest.architecture.Chrest;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.*;
 
 public class ChrestView extends JFrame implements Observer {
+  private Shell _shell;
   private Chrest _model;
   private ChrestLtmView _ltmView;
   private ChrestStmView _stmView;
   private ChrestTimeView _timeView;
 
-  public ChrestView (Chrest model) {
+  public ChrestView (Shell shell, Chrest model) {
     super ("Chrest Model View");
+    _shell = shell;
     _model = model;
     _model.addObserver (this);
     _timeView = new ChrestTimeView (_model);
@@ -54,7 +57,27 @@ public class ChrestView extends JFrame implements Observer {
     setJMenuBar (mb);
   }
 
-  class CloseAction extends AbstractAction {
+  public void saveLongTermMemory (File file) {
+    _ltmView.saveLongTermMemory (file);
+  }
+
+  class SaveLtmAction extends AbstractAction implements ActionListener {
+    private ChrestView _parent;
+
+    public SaveLtmAction (ChrestView parent) {
+      super ("Save LTM");
+
+      _parent = parent;
+    }
+
+    public void actionPerformed (ActionEvent e) {
+      if (_shell.fileChooser().showSaveDialog (_ltmView) == JFileChooser.APPROVE_OPTION) {
+        _parent.saveLongTermMemory (_shell.fileChooser().getSelectedFile ());
+      }
+    }
+  }
+
+  class CloseAction extends AbstractAction implements ActionListener {
     private ChrestView _view;
 
     public CloseAction (ChrestView view) {
@@ -69,6 +92,7 @@ public class ChrestView extends JFrame implements Observer {
 
   private JMenu createViewMenu () {
     JMenu menu = new JMenu ("View");
+    menu.add (new SaveLtmAction (this));
     menu.add (new CloseAction (this));
 
     return menu;

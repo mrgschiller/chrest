@@ -28,16 +28,16 @@ public class TestPatterns {
   }
 
   @Test public void testNumberMatches () {
-    assertTrue (_number1.equals (new NumberPattern (1)));
+    assertTrue (_number1.equals (NumberPattern.create (1)));
     assertFalse (_number1.equals (_number2));
-    assertTrue (_number1.matches (new NumberPattern (1)));
+    assertTrue (_number1.matches (NumberPattern.create (1)));
     assertFalse (_number1.matches (_number2));
   }
 
   @Test public void testStringMatches () {
-    assertTrue (_string1.equals (new StringPattern ("abc")));
+    assertTrue (_string1.equals (StringPattern.create ("abc")));
     assertFalse (_string1.equals (_string2));
-    assertTrue (_string1.matches (new StringPattern ("abc")));
+    assertTrue (_string1.matches (StringPattern.create ("abc")));
     assertFalse (_string1.matches (_string2));
   }
 

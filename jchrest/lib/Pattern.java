@@ -11,14 +11,14 @@ public abstract class Pattern {
    * Factory method to make a NumberPattern.
    */
   public static NumberPattern makeNumber (int number) {
-    return new NumberPattern (number);
+    return NumberPattern.create (number);
   }
 
   /**
    * Factory method to make a StringPattern.
    */
   public static StringPattern makeString (String str) {
-    return new StringPattern (str);
+    return StringPattern.create (str);
   }
 
   /** Factory method to make a ListPattern given an array of numbers.
@@ -29,7 +29,7 @@ public abstract class Pattern {
     ListPattern list = new ListPattern ();
     for (int i = 0; i < numbers.length; ++i)
     {
-      list.add (new NumberPattern (numbers[i]));
+      list.add (NumberPattern.create (numbers[i]));
     }
     return list;
   }
@@ -42,7 +42,7 @@ public abstract class Pattern {
     ListPattern list = new ListPattern ();
     for (int i = 0; i < strings.length; ++i)
     {
-      list.add (new StringPattern (strings[i]));
+      list.add (StringPattern.create (strings[i]));
     }
     return list;
   }

@@ -7,8 +7,11 @@ import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.awt.font.TextLayout;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -29,10 +32,7 @@ public class ChrestLtmView extends JPanel {
 
     // -- the grapher pane
     _ltmView = new GrapherPane (new GrapherNode (constructTree (_model.getLtm ())));
-    JScrollPane jsp = new JScrollPane (_ltmView);
-    _ltmView.setScrollingContainer (jsp);
-
-    add (jsp);
+    add (new JScrollPane (_ltmView));
     add (createToolBar (), BorderLayout.SOUTH);
   }
 
@@ -42,7 +42,7 @@ public class ChrestLtmView extends JPanel {
 
   private JComboBox createOrientationBox () {
     JComboBox box = new JComboBox (new String[] { "Horizontal", "Vertical" });
-    box.setSelectedIndex (1); // Display begins in vertical orientation
+    box.setSelectedIndex (0); // Display begins in horizontal orientation
     box.addActionListener (new ActionListener () {
       public void actionPerformed (ActionEvent e) {
         JComboBox box = (JComboBox)(e.getSource ());
@@ -83,18 +83,45 @@ public class ChrestLtmView extends JPanel {
 	}
 
 	public void setStandardDisplay () {
-		updateOrientation (Orientation.VERTICAL);
+		updateOrientation (Orientation.HORIZONTAL);
 		updateSize (Size.getValues().get (1));
 	}
 
+  /**
+   * Relayout and draw the grapher nodes.
+   */
 	public void drawGrapher () {
 		_ltmView.relayout();
 	}
 
+  /**
+   * Save the network as an image file.  Currently, only .png format is supported.
+   */
+  public void saveLongTermMemory (File file) {
+    BufferedImage img = new BufferedImage(_ltmView.getExtentWidth (), _ltmView.getExtentHeight (), BufferedImage.TYPE_INT_RGB);  
+    img.createGraphics();  
+    _ltmView.paint (img.getGraphics());
+    try {
+      String format = "png"; // TODO Extend range  
+      ImageIO.write(img, format, file);
+    } catch (IOException e) {  
+      JOptionPane.showMessageDialog (this, 
+          "Failed to write image",
+          "Failed to write image",
+          JOptionPane.ERROR_MESSAGE);
+    }  
+  }
+
+  /**
+   * Change the orientation of the displayed network.
+   */
 	public void updateOrientation (Orientation newOrientation) {
 		_ltmView.setOrientation (newOrientation);
 	}
 	
+  /**
+   * Change the displayed size of the network.
+   */
 	public void updateSize (Size newSize) {
 		_ltmView.setSize (newSize);
 	}
@@ -173,12 +200,12 @@ class LinkDisplay implements LtmGrapherNode {
   }
 
   private void drawSmallNode (Graphics2D g, int x, int y, int w, int h) {
-    g.setColor (Color.GRAY);
+    g.setColor (Color.LIGHT_GRAY);
     g.fillRect (x, y, w, h);
   }
 
   private void drawRegularNode (Graphics2D g, int x, int y, int w, int h, Size size) {
-    g.setBackground (Color.GRAY);
+    g.setBackground (Color.LIGHT_GRAY);
     g.clearRect (x+1, y+1, w-1, h-1);
     g.setColor (Color.BLACK);
 
@@ -195,7 +222,6 @@ class GrapherPane extends JPanel {
 	private GrapherNode _rootnode;
 	private Orientation _orientation;
 	private Size _size;
-	private JScrollPane  _scrollingContainer;
 
 	public GrapherPane (GrapherNode rootNode) {
 		super();
@@ -210,10 +236,6 @@ class GrapherPane extends JPanel {
 		_maxX = 100;
 		_maxY = 100;
 		setPreferredSize (new Dimension (_maxX, _maxY));
-	}
-
-	public void setScrollingContainer (JScrollPane jsp) {
-		_scrollingContainer = jsp;
 	}
 
 	public void setOrientation (Orientation newOrientation) {
@@ -246,9 +268,17 @@ class GrapherPane extends JPanel {
 		Graphics2D g2 = (Graphics2D)g;
 
 		g2.setBackground (Color.WHITE);
-		g2.clearRect (0, 0, this.getWidth (), this.getHeight ());
+		g2.clearRect (0, 0, this.getExtentWidth (), this.getExtentHeight ());
 		_rootnode.drawNode (g, _size, _orientation);
 	}
+
+  int getExtentWidth () {
+    return 20 + _rootnode.getExtentWidth (getGraphics (), _orientation, _size);
+  }
+
+  int getExtentHeight () {
+    return 20 + _rootnode.getExtentHeight (getGraphics (), _orientation, _size);
+  }
 }
 
 /** The GrapherNode is a wrapper around a Node, 
