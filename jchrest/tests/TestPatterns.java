@@ -22,9 +22,9 @@ public class TestPatterns {
     _number2 = Pattern.makeNumber (2);
     _string1 = Pattern.makeString ("abc");
     _string2 = Pattern.makeString ("def");
-    _list1 = Pattern.makeList (new int[]{1,2,3,4});
-    _list2 = Pattern.makeList (new String[]{"a", "b", "c", "d", "e"});
-    _list3 = Pattern.makeList(new int[]{1,2,3});
+    _list1 = Pattern.makeVisualList (new int[]{1,2,3,4});
+    _list2 = Pattern.makeVisualList (new String[]{"a", "b", "c", "d", "e"});
+    _list3 = Pattern.makeVisualList(new int[]{1,2,3});
   }
 
   @Test public void testNumberMatches () {
@@ -55,12 +55,13 @@ public class TestPatterns {
   }
 
   @Test public void testListPatternEquality () {
-    assertTrue (_list1.equals (Pattern.makeList(new int[]{1,2,3,4})));
-    assertFalse (_list1.equals (Pattern.makeList(new int[]{1,2,3})));
-    assertFalse (_list1.equals (Pattern.makeList(new int[]{1,2,3,4,5})));
-    assertFalse (_list1.equals (Pattern.makeList(new int[]{1,2,4,5})));
+    assertFalse (Pattern.makeVisualList(new int[]{}).equals (Pattern.makeVerbalList(new int[]{})));
+    assertTrue (_list1.equals (Pattern.makeVisualList(new int[]{1,2,3,4})));
+    assertFalse (_list1.equals (Pattern.makeVisualList(new int[]{1,2,3})));
+    assertFalse (_list1.equals (Pattern.makeVisualList(new int[]{1,2,3,4,5})));
+    assertFalse (_list1.equals (Pattern.makeVisualList(new int[]{1,2,4,5})));
     assertFalse (_list1.equals (_list2));
-    ListPattern list1Copy = Pattern.makeList(new int[]{1,2,3,4});
+    ListPattern list1Copy = Pattern.makeVisualList(new int[]{1,2,3,4});
     list1Copy.setFinished ();
     assertFalse (_list1.equals (list1Copy));
     _list1.setFinished ();
@@ -68,6 +69,7 @@ public class TestPatterns {
   }
 
   @Test public void testListPatternMatches1 () {
+    assertFalse (Pattern.makeVisualList(new int[]{}).matches (Pattern.makeVerbalList(new int[]{})));
     assertTrue ((new ListPattern ()).matches (_list1));
     assertTrue (_list1.matches (_list1));
     assertFalse (_list1.matches (_list2));
@@ -76,7 +78,7 @@ public class TestPatterns {
   }
 
   @Test public void testListPatternMatches2 () {
-    ListPattern prim1 = Pattern.makeList (new int[]{1});
+    ListPattern prim1 = Pattern.makeVisualList (new int[]{1});
     assertTrue (prim1.matches (_list1));
     ListPattern prim1Clone = prim1.clone ();
     prim1Clone.setFinished ();
@@ -93,13 +95,13 @@ public class TestPatterns {
   }
 
   @Test public void testListPatternAppend () {
-    assertTrue (_list1.equals(_list3.append(Pattern.makeList(new int[] {4}))));
+    assertTrue (_list1.equals(_list3.append(Pattern.makeVisualList(new int[] {4}))));
     assertTrue (_list1.equals(_list3.append(Pattern.makeNumber(4))));
   }
 
   @Test public void testListPatternRemove () {
-    assertTrue ((Pattern.makeList(new int[]{4})).equals(_list1.remove(_list3)));
-    assertTrue ((Pattern.makeList(new int[]{4})).equals(_list1.remove(Pattern.makeList(new int[]{1,2,3,5,6}))));
+    assertTrue ((Pattern.makeVisualList(new int[]{4})).equals(_list1.remove(_list3)));
+    assertTrue ((Pattern.makeVisualList(new int[]{4})).equals(_list1.remove(Pattern.makeVisualList(new int[]{1,2,3,5,6}))));
     ListPattern pattern = _list3.clone ();
     pattern.setFinished ();
     assertTrue (pattern.remove(_list3).isEmpty ());

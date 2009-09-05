@@ -17,10 +17,16 @@ import java.util.List;
  */
 public class ListPattern extends Pattern {
   private List<Pattern> _list;  // items within the pattern
+  private Modality _modality;   // record type of ListPattern
   private boolean _finished;    // marker to indicate if pattern complete
 
   public ListPattern () {
+    this (Modality.VISUAL);
+  }
+
+  public ListPattern (Modality modality) {
     _list = new ArrayList<Pattern> ();
+    _modality = modality;
     _finished = false;
   }
 
@@ -39,7 +45,7 @@ public class ListPattern extends Pattern {
    * without affecting the original.
    */
   public ListPattern clone () {
-    ListPattern result = new ListPattern ();
+    ListPattern result = new ListPattern (_modality);
     for (Pattern pattern : _list) {
       result.add (pattern);
     }
@@ -68,6 +74,41 @@ public class ListPattern extends Pattern {
     return _finished;
   }
 
+  static public boolean isSameModality (ListPattern pattern1, ListPattern pattern2) {
+    return pattern1._modality == pattern2._modality;
+  }
+
+  /**
+   * Accessor method to check visual modality.
+   */
+  public boolean isVisual () {
+    return _modality == Modality.VISUAL;
+  }
+
+  /**
+   * Accessor method to check verbal modality.
+   */
+  public boolean isVerbal () {
+    return _modality == Modality.VERBAL;
+  }
+
+  /**
+   * Accessor method to check action modality.
+   */
+  public boolean isAction () {
+    return _modality == Modality.ACTION;
+  }
+
+  public String getModalityString () {
+    if (isVisual ()) {
+      return "Visual";
+    } else if (isVerbal ()) {
+      return "Verbal";
+    } else { // if (isAction ())
+      return "Action";
+    }
+  }
+
   /**
    * Set the _finished property to true.
    */
@@ -89,6 +130,8 @@ public class ListPattern extends Pattern {
     if (!(givenPattern instanceof ListPattern)) return false;
     ListPattern pattern = (ListPattern)givenPattern;
 
+    if (_modality != pattern._modality) return false;
+
     // patterns must be equal size to be equal
     if (size () != pattern.size ()) return false;
 
@@ -108,6 +151,8 @@ public class ListPattern extends Pattern {
   public boolean matches (Pattern givenPattern) {
     if (!(givenPattern instanceof ListPattern)) return false;
     ListPattern pattern = (ListPattern)givenPattern;
+
+    if (_modality != pattern._modality) return false;
 
     // check relative sizes of patterns
     if (isFinished ()) {
@@ -133,7 +178,7 @@ public class ListPattern extends Pattern {
    * the matching elements of the given pattern. 
    */
   public ListPattern remove (ListPattern pattern) {
-    ListPattern result = new ListPattern ();
+    ListPattern result = new ListPattern (_modality);
 
     int i = 0;
     boolean takingItems = false;
@@ -160,7 +205,7 @@ public class ListPattern extends Pattern {
    * contents of the given pattern appended to it.
    */
   public ListPattern append (ListPattern pattern) {
-    ListPattern result = new ListPattern ();
+    ListPattern result = new ListPattern (_modality);
 
     for (Pattern item : _list) {
       result.add (item);
@@ -181,7 +226,7 @@ public class ListPattern extends Pattern {
    * the given PrimitivePattern appended to it.
    */
   public ListPattern append (PrimitivePattern pattern) {
-    ListPattern result = new ListPattern ();
+    ListPattern result = new ListPattern (_modality);
 
     for (Pattern item : _list) {
       result.add (item);
@@ -195,7 +240,7 @@ public class ListPattern extends Pattern {
    * Construct a new pattern containing just the first item in this one.
    */
   public ListPattern getFirstItem () {
-    ListPattern pattern = new ListPattern ();
+    ListPattern pattern = new ListPattern (_modality);
     if (size () > 0) {
       pattern.add (getItem (0));
     }
@@ -218,3 +263,4 @@ public class ListPattern extends Pattern {
   }
 }
 
+enum Modality { VISUAL, VERBAL, ACTION }

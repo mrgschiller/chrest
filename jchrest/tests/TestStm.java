@@ -19,10 +19,10 @@ public class TestStm {
 
   @Before public void setup () {
     _model = new Chrest ();
-    _patternA = Pattern.makeList (new String[]{"A", "E", "F"});
-    _patternB = Pattern.makeList (new String[]{"B", "E", "F"});
-    _patternC = Pattern.makeList (new String[]{"C", "E", "F"});
-    _patternD = Pattern.makeList (new String[]{"D", "E", "F"});
+    _patternA = Pattern.makeVisualList (new String[]{"A", "E", "F"});
+    _patternB = Pattern.makeVisualList (new String[]{"B", "E", "F"});
+    _patternC = Pattern.makeVisualList (new String[]{"C", "E", "F"});
+    _patternD = Pattern.makeVisualList (new String[]{"D", "E", "F"});
   }
 
   /**
@@ -33,7 +33,7 @@ public class TestStm {
     assertEquals (0, _model.getVisualStm().getCount ());
     _model.recognise (_patternA);
     assertEquals (1, _model.getVisualStm().getCount ());
-    assertTrue (_model.getLtm () == _model.getVisualStm().getItem (0));
+    assertTrue (_model.getLtmByModality (_patternA) == _model.getVisualStm().getItem (0));
   }
 
   /**
@@ -43,7 +43,7 @@ public class TestStm {
   @Test public void test2 () {
     _model.recogniseAndLearn (_patternA);
     assertEquals (2, _model.getVisualStm().getCount ());
-    assertTrue (_model.getLtm () == _model.getVisualStm().getItem (1));
+    assertTrue (_model.getLtmByModality (_patternA) == _model.getVisualStm().getItem (1));
     assertEquals (1, _model.getVisualStm().getItem(0).getReference ());
   }
 

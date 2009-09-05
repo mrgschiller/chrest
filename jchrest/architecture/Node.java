@@ -19,13 +19,14 @@ public class Node {
   private ListPattern _image;
   private List<Link> _children;
   private Node _followedBy;
+  private Node _namedBy;
 
   /**
    * Empty constructor is only called to construct a new root node for the 
    * model.  
    */
-  public Node () {
-    this (Pattern.makeList (new String[]{}), Pattern.makeList (new String[]{}));
+  public Node (ListPattern type) {
+    this (type, type);
     _totalNodes = 1;
     _reference = 0;
   }
@@ -43,6 +44,7 @@ public class Node {
     _image = image;
     _children = new ArrayList<Link> ();
     _followedBy = null;
+    _namedBy = null;
   }
 
   /**
@@ -85,6 +87,20 @@ public class Node {
    */
   public void setFollowedBy (Node node) {
     _followedBy = node;
+  }
+
+  /**
+   * Accessor to node that names this node.
+   */
+  public Node getNamedBy () {
+    return _namedBy;
+  }
+
+  /**
+   * Modify node that names this node.
+   */
+  public void setNamedBy (Node node) {
+    _namedBy = node;
   }
 
   /** 
@@ -138,9 +154,9 @@ public class Node {
     }
 
     Node retrievedChunk = model.recognise (pattern);
-    if (retrievedChunk == model.getLtm ()) {
+    if (retrievedChunk == model.getLtmByModality (pattern)) {
       // if root node is retrieved, then the primitive must be learnt
-      return model.getLtm().learnPrimitive (model, pattern.getFirstItem ());
+      return model.getLtmByModality(pattern).learnPrimitive (model, pattern.getFirstItem ());
     } else if (retrievedChunk.getImage().isEmpty ()) {
       // if the retrieved chunk has an empty image, then familiarisation must occur
       // to extend that image.
@@ -156,8 +172,8 @@ public class Node {
     } else { // look for or learn a new primitive chunk
       ListPattern primitive = newInformation.getFirstItem ();
       retrievedChunk = model.recognise (primitive);
-      if (retrievedChunk == model.getLtm ()) {
-        return model.getLtm().learnPrimitive (model, primitive);
+      if (retrievedChunk == model.getLtmByModality (pattern)) {
+        return model.getLtmByModality(pattern).learnPrimitive (model, primitive);
       } else {
         Node newChild = new Node (_contents.append (primitive), new ListPattern ());
         ListPattern contents = primitive.clone ();
@@ -184,14 +200,14 @@ public class Node {
       }
     } else {
       Node retrievedChunk = model.recognise (newInformation);
-      if (retrievedChunk == model.getLtm ()) {
-        return model.getLtm().learnPrimitive (model, newInformation.getFirstItem ());
+      if (retrievedChunk == model.getLtmByModality (pattern)) {
+        return model.getLtmByModality(pattern).learnPrimitive (model, newInformation.getFirstItem ());
       } else if (retrievedChunk.getImage().isEmpty ()) {
         // could not retrieve useful chunk, so look for, or learn, a primitive
         ListPattern primitive = newInformation.getFirstItem ();
         retrievedChunk = model.recognise (primitive);
-        if (retrievedChunk == model.getLtm ()) {
-          return model.getLtm().learnPrimitive (model, primitive);
+        if (retrievedChunk == model.getLtmByModality (pattern)) {
+          return model.getLtmByModality(pattern).learnPrimitive (model, primitive);
         } else {
           ListPattern toadd = primitive.clone ();
           toadd.setNotFinished ();
@@ -206,8 +222,8 @@ public class Node {
       } else { // could not retrieve a chunk, so look for, or learn a primitive
         ListPattern primitive = newInformation.getFirstItem ();
         retrievedChunk = model.recognise (primitive);
-        if (retrievedChunk == model.getLtm ()) {
-          return model.getLtm().learnPrimitive (model, primitive);
+        if (retrievedChunk == model.getLtmByModality (pattern)) {
+          return model.getLtmByModality(pattern).learnPrimitive (model, primitive);
         } else {
           ListPattern toadd = primitive.clone ();
           toadd.setNotFinished ();

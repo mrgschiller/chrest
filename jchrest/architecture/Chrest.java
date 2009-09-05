@@ -1,9 +1,10 @@
 package jchrest.architecture;
 
+import jchrest.lib.ListPattern;
+import jchrest.lib.Pattern;
+
 import java.util.List;
 import java.util.Observable;
-
-import jchrest.lib.ListPattern;
 
 /**
  * The parent class for an instance of a Chrest model.
@@ -21,10 +22,13 @@ public class Chrest extends Observable {
   // rho is the probability that a given learning operation will occur
   private float _rho;
   // long-term-memory holds information within the model permanently
-  private Node _ltm;
+  private Node _visualLtm;
+  private Node _verbalLtm;
+  private Node _actionLtm;
   // short-term-memory holds information within the model temporarily, usually within one experiment
   private Stm _visualStm;
   private Stm _verbalStm;
+  private Stm _actionStm; // TODO: Incorporate into displays
 
   public Chrest () {
     _addLinkTime = 10000;
@@ -33,9 +37,12 @@ public class Chrest extends Observable {
     _rho = 1.0f;
 
     _clock = 0;
-    _ltm = new Node ();
+    _visualLtm = new Node (Pattern.makeVisualList (new String[]{"Root"}));
+    _verbalLtm = new Node (Pattern.makeVerbalList (new String[]{"Root"}));
+    _actionLtm = new Node (Pattern.makeActionList (new String[]{"Root"}));
     _visualStm = new Stm (4);
     _verbalStm = new Stm (2);
+    _actionStm = new Stm (4);
   }
 
   /**
@@ -149,17 +156,48 @@ public class Chrest extends Observable {
   }
 
   /**
+   * Accessor to retrieve verbal short-term memory of model.
+   */
+  public Stm getVerbalStm () {
+    return _verbalStm;
+  }
+
+  /**
    * Accessor to retrieve long-term memory of model.
    */
   public Node getLtm () {
-    return _ltm;
+    return _visualLtm;
   }
 
   /** 
    * Return a count of the number of nodes in long-term memory.
    */
   public int ltmSize () {
-    return _ltm.size ();
+    return _visualLtm.size () + _verbalLtm.size () + _actionLtm.size ();
+  }
+
+  public Node getLtmByModality (ListPattern pattern) {
+    if (pattern.isVisual ()) {
+      return _visualLtm;
+    } else if (pattern.isVerbal ()) {
+      return _verbalLtm;
+    } else { // if (pattern.isAction ()) 
+      return _actionLtm;
+    }
+  }
+
+  private Stm getStmByModality (ListPattern pattern) {
+    if (pattern.isVisual ()) {
+      return _visualStm;
+    } else if (pattern.isVerbal ()) {
+      return _verbalStm;
+    } else { // if (pattern.isAction ()) 
+      return _actionStm;
+    }
+  }
+
+  private void addToStm (Node node) {
+    getStmByModality(node.getImage()).add (node);
   }
 
   /** 
@@ -170,7 +208,7 @@ public class Chrest extends Observable {
    * children of the new node.
    */
   public Node recognise (ListPattern pattern) {
-    Node currentNode = _ltm;
+    Node currentNode = getLtmByModality (pattern);
     List<Link> children = currentNode.getChildren ();
     ListPattern sortedPattern = pattern;
     int nextLink = 0;
@@ -190,7 +228,8 @@ public class Chrest extends Observable {
       }
     }
 
-    _visualStm.add (currentNode); // TODO: Choose STM based on modality
+    addToStm (currentNode);
+    
     setChanged ();
     notifyObservers ();
 
@@ -210,14 +249,14 @@ public class Chrest extends Observable {
       if (Math.random () < _rho) { // depending on _rho, may refuse to learn some random times
         _clock = time; // bring clock up to date
         if (!currentNode.getImage().equals (pattern)) { // only try any learning if image differs from pattern
-          if (currentNode == _ltm || !currentNode.getImage().matches (pattern) || currentNode.getImage().isFinished ()) {
+          if (currentNode == getLtmByModality (pattern) || !currentNode.getImage().matches (pattern) || currentNode.getImage().isFinished ()) {
             currentNode = currentNode.discriminate (this, pattern);
             setChanged ();
           } else if (!currentNode.getImage().equals (pattern)) {
             currentNode = currentNode.familiarise (this, pattern);
             setChanged ();
           }
-          _visualStm.add (currentNode); // TODO: change based on modality
+          addToStm (currentNode);
           notifyObservers ();
         }
       }
@@ -251,6 +290,19 @@ public class Chrest extends Observable {
   }
 
   /**
+   * Asks Chrest to return the image of the node which names the node 
+   * obtained by sorting given pattern through the network.
+   */
+  public ListPattern namePattern (ListPattern pattern) {
+    Node retrievedNode = recognise (pattern);
+    if (retrievedNode.getNamedBy () != null) {
+      return retrievedNode.getNamedBy().getImage ();
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * Presents Chrest with a pair of patterns, which it should learn and 
    * then attempt to learn a link.
    */
@@ -258,7 +310,13 @@ public class Chrest extends Observable {
     recogniseAndLearn (pattern1, time);
     recogniseAndLearn (pattern2, time);
     if (_clock <= time) {
-      _visualStm.learnLateralLinks (this);
+      if (pattern1.isVisual ()) {
+        _visualStm.learnLateralLinks (this);
+      } else if (pattern1.isVerbal ()) {
+        _verbalStm.learnLateralLinks (this);
+      } else { // if (pattern1.isAction ())
+        _actionStm.learnLateralLinks (this);
+      }
       setChanged ();
       notifyObservers ();
     }
@@ -272,12 +330,34 @@ public class Chrest extends Observable {
     learnAndLinkPatterns (pattern1, pattern2, _clock);
   }
 
+  /**
+   * Learn and link a visual and verbal pattern with a naming link.
+   */
+  public void learnAndNamePatterns (ListPattern pattern1, ListPattern pattern2, int time) {
+    recogniseAndLearn (pattern1, time);
+    recogniseAndLearn (pattern2, time);
+    if (_clock <= time) {
+      if (pattern1.isVisual () && pattern2.isVerbal () && _visualStm.getCount () > 0 && _verbalStm.getCount () > 0) {
+        _visualStm.getItem(0).setNamedBy (_verbalStm.getItem (0));
+        advanceClock (getAddLinkTime ());
+      }
+      setChanged ();
+      notifyObservers ();
+    }
+  }
+
+  public void learnAndNamePatterns (ListPattern pattern1, ListPattern pattern2) {
+    learnAndNamePatterns (pattern1, pattern2, _clock);
+  }
+
   /** 
    * Clear the STM and LTM of the model.
    */
   public void clear () {
     _clock = 0;
-    _ltm = new Node ();
+    _visualLtm = new Node (Pattern.makeVisualList (new String[]{"Root"}));
+    _verbalLtm = new Node (Pattern.makeVerbalList (new String[]{"Root"}));
+    _actionLtm = new Node (Pattern.makeActionList (new String[]{"Root"}));
     _visualStm.clear ();
     _verbalStm.clear ();
     setChanged ();

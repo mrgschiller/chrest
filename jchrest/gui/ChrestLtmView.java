@@ -1,6 +1,7 @@
 package jchrest.gui;
 
 import jchrest.architecture.*;
+import jchrest.lib.Pattern;
 
 import java.awt.*;
 import java.awt.BorderLayout;
@@ -31,13 +32,13 @@ public class ChrestLtmView extends JPanel {
     setLayout (new BorderLayout ());
 
     // -- the grapher pane
-    _ltmView = new GrapherPane (new GrapherNode (constructTree (_model.getLtm ())));
+    _ltmView = new GrapherPane (new GrapherNode (constructTree ()));
     add (new JScrollPane (_ltmView));
     add (createToolBar (), BorderLayout.SOUTH);
   }
 
   public void update () {
-    _ltmView.changeRoot (new GrapherNode (constructTree (_model.getLtm ())));
+    _ltmView.changeRoot (new GrapherNode (constructTree ()));
   }
 
   private JComboBox createOrientationBox () {
@@ -125,6 +126,18 @@ public class ChrestLtmView extends JPanel {
 	public void updateSize (Size newSize) {
 		_ltmView.setSize (newSize);
 	}
+
+  /**
+   * Wrap the model's LTM as a set of LtmGrapherNode objects,
+   * joining the three types of LTM into a single tree.
+   */
+  private LtmGrapherNode constructTree () {
+    LtmGrapherNode baseGrapherNode = new NodeDisplay (null);
+    baseGrapherNode.add (constructTree (_model.getLtmByModality(Pattern.makeVisualList (new String[]{}))));
+    baseGrapherNode.add (constructTree (_model.getLtmByModality(Pattern.makeVerbalList (new String[]{}))));
+    baseGrapherNode.add (constructTree (_model.getLtmByModality(Pattern.makeActionList (new String[]{}))));
+    return baseGrapherNode;
+  }
 
   /** 
    * Wrap the model's LTM as a set of LtmGrapherNode objects.

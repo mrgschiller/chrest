@@ -23,8 +23,8 @@ public class TestChrestTimings {
     _model.setRho (1.0f);
     _model.setFamiliarisationTime (2000);
     _model.setDiscriminationTime (10000);
-    _patternA = Pattern.makeList (new String[]{"B", "I", "F"});
-    _patternB = Pattern.makeList (new String[]{"X", "A", "Q"});
+    _patternA = Pattern.makeVisualList (new String[]{"B", "I", "F"});
+    _patternB = Pattern.makeVisualList (new String[]{"X", "A", "Q"});
   }
 
   @Test public void testTimings () {

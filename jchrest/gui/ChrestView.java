@@ -71,8 +71,14 @@ public class ChrestView extends JFrame implements Observer {
     }
 
     public void actionPerformed (ActionEvent e) {
-      if (_shell.fileChooser().showSaveDialog (_ltmView) == JFileChooser.APPROVE_OPTION) {
-        _parent.saveLongTermMemory (_shell.fileChooser().getSelectedFile ());
+      JFileChooser fc;
+      if (_shell == null) { // in scripts, this view may not have a parent Shell
+        fc = new JFileChooser ();
+      } else {
+        fc = _shell.fileChooser();
+      }
+      if (fc.showSaveDialog (_ltmView) == JFileChooser.APPROVE_OPTION) {
+        _parent.saveLongTermMemory (fc.getSelectedFile ());
       }
     }
   }

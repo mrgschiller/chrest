@@ -123,7 +123,7 @@ public class Shell extends JFrame {
       String line = input.readLine ();
 
       while (line != null) {
-        ListPattern pattern = Pattern.makeList (line.split("[, ]"));
+        ListPattern pattern = Pattern.makeVisualList (line.split("[, ]"));
         pattern.setFinished ();
         items.add (pattern);
         line = input.readLine ();

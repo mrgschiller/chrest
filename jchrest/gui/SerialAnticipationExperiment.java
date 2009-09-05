@@ -128,7 +128,7 @@ class SerialAnticipationExperiment extends JPanel {
           if (response != null) {
             responses.add (response);
           } else {
-            responses.add (Pattern.makeList (new String[]{"NONE"}));
+            responses.add (Pattern.makeVisualList (new String[]{"NONE"}));
           }
         }
         _responses.add (responses);

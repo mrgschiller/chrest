@@ -1,5 +1,6 @@
 package jchrest.lib;
 
+// TODO: Clarify order of row/column in methods calls/displays.
 public class Scene {
   private String _name;
   private int _height;

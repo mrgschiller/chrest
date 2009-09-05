@@ -141,6 +141,7 @@ class SceneDisplay extends JPanel {
       repaint ();
     }
 
+    // TODO: Add display of field of view
     public void paint (Graphics g) {
       super.paint (g); // make sure the background of the JPanel is drawn
       Graphics2D g2 = (Graphics2D)g;

@@ -23,33 +23,33 @@ public class TestChrest {
     _model1 = new Chrest ();
     _model2 = new Chrest ();
 
-    _list1 = Pattern.makeList (new int[]{1,2,3,4});
+    _list1 = Pattern.makeVisualList (new int[]{1,2,3,4});
     _list1.setFinished ();
-    _list2 = Pattern.makeList (new int[]{3,4});
+    _list2 = Pattern.makeVisualList (new int[]{3,4});
     _list2.setFinished ();
-    _list3 = Pattern.makeList (new int[]{1,2});
+    _list3 = Pattern.makeVisualList (new int[]{1,2});
     _list3.setFinished ();
     _list3Test = _list3.clone ();
     _list3Test.setNotFinished ();
-    _list4 = Pattern.makeList (new int[]{1});
-    _prim1 = Pattern.makeList (new int[]{1});
+    _list4 = Pattern.makeVisualList (new int[]{1});
+    _prim1 = Pattern.makeVisualList (new int[]{1});
     _prim1.setFinished ();
     _prim1Test = _prim1.clone ();
     _prim1Test.setNotFinished ();
-    _prim2 = Pattern.makeList (new int[]{2});
+    _prim2 = Pattern.makeVisualList (new int[]{2});
     _prim2.setFinished ();
 
-    _emptyList = Pattern.makeList (new int[]{});
+    _emptyList = Pattern.makeVisualList (new int[]{});
   }
 
   @Test public void baseCase () {
-    assertTrue (_emptyList.equals (_model1.recognise (_emptyList).getImage ()));
+    assertTrue (Pattern.makeVisualList(new String[]{"Root"}).equals (_model1.recognise (_emptyList).getImage ()));
   }
 
   @Test public void simpleLearning1 () {
     _model1.recogniseAndLearn (_list1);
-    assertEquals (1, _model1.getLtm().getChildren().size ());
-    Link firstChild = _model1.getLtm().getChildren().get(0);
+    assertEquals (1, _model1.getLtmByModality(_list1).getChildren().size ());
+    Link firstChild = _model1.getLtmByModality(_list1).getChildren().get(0);
     assertFalse (_emptyList.equals (firstChild.getChildNode().getContents ()));
     assertTrue (firstChild.getTest().equals (_prim1Test));
     assertTrue (firstChild.getChildNode().getContents().equals (_prim1Test));
@@ -68,12 +68,12 @@ public class TestChrest {
   @Test public void simpleLearning2 () {
     _model1.recogniseAndLearn (_list1);
     _model1.recogniseAndLearn (_list1);
-    assertEquals (2, _model1.getLtm().getChildren().size ());
+    assertEquals (2, _model1.getLtmByModality(_list1).getChildren().size ());
     // check most recent becomes the first child node
-    assertTrue (_prim2.equals (_model1.getLtm().getChildren().get(0).getChildNode().getImage ()));
-    assertTrue (_prim1.equals (_model1.getLtm().getChildren().get(1).getChildNode().getImage ()));
+    assertTrue (_prim2.equals (_model1.getLtmByModality(_list1).getChildren().get(0).getChildNode().getImage ()));
+    assertTrue (_prim1.equals (_model1.getLtmByModality(_list1).getChildren().get(1).getChildNode().getImage ()));
     // discriminate from node 1
-    Node node = _model1.getLtm().getChildren().get(1).getChildNode ();
+    Node node = _model1.getLtmByModality(_list1).getChildren().get(1).getChildNode ();
     assertEquals (0, node.getChildren().size ());
     _model1.recogniseAndLearn (_list1);
     assertEquals (1, node.getChildren().size ());
@@ -89,8 +89,8 @@ public class TestChrest {
    * Test that can learn a test link which is just 'pattern is finished', i.e. < $ >
    */
   @Test public void simpleLearning3 () {
-    ListPattern list5 = Pattern.makeList (new String[] {"A", "B", "C"});
-    ListPattern list6 = Pattern.makeList (new String[] {"A", "B"});
+    ListPattern list5 = Pattern.makeVisualList (new String[] {"A", "B", "C"});
+    ListPattern list6 = Pattern.makeVisualList (new String[] {"A", "B"});
     list5.setFinished ();
     list6.setFinished ();
     for (int i = 0; i < 8; ++i) {
