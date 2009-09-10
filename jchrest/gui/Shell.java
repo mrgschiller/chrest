@@ -2,6 +2,7 @@ package jchrest.gui;
 
 import jchrest.architecture.Chrest;
 import jchrest.lib.ListPattern;
+import jchrest.lib.PairedPattern;
 import jchrest.lib.Pattern;
 import jchrest.lib.Scenes;
 
@@ -123,11 +124,29 @@ public class Shell extends JFrame {
       String line = input.readLine ();
 
       while (line != null) {
-        ListPattern pattern = Pattern.makeVisualList (line.split("[, ]"));
+        ListPattern pattern = Pattern.makeVisualList (line.trim().split("[, ]"));
         pattern.setFinished ();
         items.add (pattern);
         line = input.readLine ();
       } 
+
+      return items;
+    }
+
+    private List<PairedPattern> readPairedItems (BufferedReader input) throws IOException {
+      List<PairedPattern> items = new ArrayList<PairedPattern> ();
+      String line = input.readLine ();
+      while (line != null) {
+        String[] pair = line.split (":");
+        if (pair.length != 2) throw new IOException (); // malformed pair
+        ListPattern pat1 = Pattern.makeVisualList (pair[0].trim().split("[, ]"));
+        pat1.setFinished ();
+        ListPattern pat2 = Pattern.makeVerbalList (pair[1].trim().split("[, ]"));
+        pat2.setFinished ();
+        items.add (new PairedPattern (pat1, pat2));
+
+        line = input.readLine ();
+      }
 
       return items;
     }
@@ -140,7 +159,7 @@ public class Shell extends JFrame {
             BufferedReader input = new BufferedReader (new FileReader (_parent.fileChooser().getSelectedFile ()));
             String line = input.readLine ();
             if (line != null) {
-              task = line;
+              task = line.trim ();
             }              
 
             if (task.equals ("recognise-and-learn")) {
@@ -148,6 +167,9 @@ public class Shell extends JFrame {
               _parent.validate ();
             } else if (task.equals ("serial-anticipation")) {
               _parent.setContentPane (new SerialAnticipationExperiment (_model, readItems (input)));
+              _parent.validate ();
+            } else if (task.equals ("categorisation")) {
+              _parent.setContentPane (new CategorisationExperiment (_model, readPairedItems (input)));
               _parent.validate ();
             } else if (task.equals ("visual-search")) {
               Scenes scenes = Scenes.read (input); // throws IOException if any problem

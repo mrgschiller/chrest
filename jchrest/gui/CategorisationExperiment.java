@@ -2,32 +2,34 @@ package jchrest.gui;
 
 import jchrest.architecture.Chrest;
 import jchrest.lib.ListPattern;
+import jchrest.lib.PairedPattern;
 import jchrest.lib.Pattern;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
 
 /**
- * This panel provides an interface for running serial anticipation 
- * experiments.
- * 
+ * This panel provides an interface for running categorisation experiments.
+ *
  * @author Peter C. R. Lane
  */
-class SerialAnticipationExperiment extends JPanel {
+public class CategorisationExperiment extends JPanel {
   private Chrest _model;
-  private List<StimulusResponsePair> _patterns;
+  private List<PairedPattern> _patterns;
 
-  public SerialAnticipationExperiment (Chrest model, List<ListPattern> patterns) {
+  public CategorisationExperiment (Chrest model, List<PairedPattern> patterns) {
     super ();
     
     _model = model;
-    _patterns = paired (patterns);
+    _patterns = patterns;
 
     setLayout (new GridLayout (1, 1));
     JSplitPane jsp = new JSplitPane (JSplitPane.HORIZONTAL_SPLIT, createRunExperimentView (), createProtocolView ());
@@ -36,55 +38,33 @@ class SerialAnticipationExperiment extends JPanel {
     add (jsp);
   }
 
-  class StimulusResponsePair {
-    private ListPattern _stimulus;
-    private ListPattern _response;
-
-    StimulusResponsePair (ListPattern stimulus, ListPattern response) {
-      _stimulus = stimulus;
-      _response = response;
-    }
-
-    public ListPattern getStimulus () {
-      return _stimulus;
-    }
-
-    public ListPattern getResponse () {
-      return _response;
-    }
-
-    public String toString () {
-      return _stimulus.toString() + " - " + _response.toString();
-    }
-  }
-
-  /**
-   * Convert a list of ListPatterns into a list of stimulus-response pairs.
-   */
-  private List<StimulusResponsePair> paired (List<ListPattern> patterns) {
-    List<StimulusResponsePair> pairs = new ArrayList<StimulusResponsePair> ();
-    for (int i = 1; i < patterns.size (); ++i) {
-      pairs.add (new StimulusResponsePair (patterns.get(i-1), patterns.get(i)));
-    }
-
-    return pairs;
-  }
+  private Map<PairedPattern, JCheckBox> _trainingSelection; 
 
   private JPanel createListView () {
+    _trainingSelection = new HashMap<PairedPattern, JCheckBox> ();
+
     JPanel panel = new JPanel ();
-    panel.setBorder (new TitledBorder ("Stimulus-response pairs"));
+    panel.setBorder (new TitledBorder ("Categorisation data"));
     panel.setLayout (new GridLayout (1, 1));
 
     JPanel pairsPanel = new JPanel ();
-    pairsPanel.setLayout (new GridLayout (_patterns.size(), 2));
-    for (StimulusResponsePair pair : _patterns) {
-      pairsPanel.add (new JLabel (pair.getStimulus().toString ()));
-      pairsPanel.add (new JLabel (pair.getResponse().toString ()));
+    pairsPanel.setLayout (new GridLayout (_patterns.size(), 3));
+    for (PairedPattern pair : _patterns) {
+      pairsPanel.add (new JLabel (pair.getFirst().toString ()));
+      pairsPanel.add (new JLabel (pair.getSecond().toString ()));
+      JCheckBox cb = new JCheckBox ("Training");
+      cb.setSelected (true);
+      pairsPanel.add (cb);
+      _trainingSelection.put (pair, cb);
     }
 
     panel.add (new JScrollPane (pairsPanel));
     return panel;        
-  }
+  } 
+
+  private JCheckBox _randomOrder;
+  private List<List<ListPattern>> _responses;
+  private JTable _protocol;
 
   class RestartAction extends AbstractAction implements ActionListener {
     RestartAction () {
@@ -94,29 +74,26 @@ class SerialAnticipationExperiment extends JPanel {
     public void actionPerformed (ActionEvent e) {
       _model.clear ();
       _responses.clear ();
-      _exptClock = 0;
 
       updateControls ();
     }
   }
 
-  private List<List<ListPattern>> _responses;
-
   class RunTrialAction extends AbstractAction implements ActionListener {
     RunTrialAction () {
       super ("Run Trial");
-
-      _exptClock = 0;
     }
 
-    private List<StimulusResponsePair> preparePatterns () {
-      List<StimulusResponsePair> patterns = new ArrayList<StimulusResponsePair> ();
+    private List<PairedPattern> preparePatterns () {
+      List<PairedPattern> patterns = new ArrayList<PairedPattern> ();
       java.util.Random gen = new java.util.Random ();
-      for (StimulusResponsePair pattern : _patterns) {
-        if (_randomOrder.isSelected ()) {
-          patterns.add (gen.nextInt (patterns.size () + 1), pattern);
-        } else {
-          patterns.add (pattern);
+      for (PairedPattern pattern : _patterns) {
+        if (_trainingSelection.get(pattern).isSelected ()) {
+          if (_randomOrder.isSelected ()) {
+            patterns.add (gen.nextInt (patterns.size () + 1), pattern);
+          } else {
+            patterns.add (pattern);
+          }
         }
       }
 
@@ -125,8 +102,8 @@ class SerialAnticipationExperiment extends JPanel {
 
     private void collectResponses () {
       List<ListPattern> responses = new ArrayList<ListPattern> ();
-      for (StimulusResponsePair pair : _patterns) {
-        ListPattern response = _model.followPattern (pair.getStimulus ());
+      for (PairedPattern pair : _patterns) {
+        ListPattern response = _model.namePattern (pair.getFirst ());
         if (response != null) {
           responses.add (response);
         } else {
@@ -138,46 +115,27 @@ class SerialAnticipationExperiment extends JPanel {
 
     public void actionPerformed (ActionEvent e) {
       collectResponses ();
-      for (StimulusResponsePair pair : preparePatterns ()) {
-        _model.learnAndLinkPatterns (pair.getStimulus (), pair.getResponse (), _exptClock);
-        _exptClock += ((SpinnerNumberModel)_interItemTime.getModel()).getNumber().intValue ();
+      for (PairedPattern pair : preparePatterns ()) {
+        _model.learnAndNamePatterns (pair.getFirst (), pair.getSecond ());
       }
-      _exptClock += ((SpinnerNumberModel)_endTrialTime.getModel()).getNumber().intValue ();
       updateControls ();
     }
   }
 
-  private int _exptClock;
-  private JLabel _experimentTimeLabel;
-  private JSpinner _endTrialTime;
-  private JSpinner _interItemTime;
-  private JCheckBox _randomOrder;
-  private JTable _protocol;
-
   private void updateControls () {
     ((AbstractTableModel)_protocol.getModel()).fireTableStructureChanged ();
-    _experimentTimeLabel.setText ("" + _exptClock);
   }
 
   private JPanel createControls () {
-    _experimentTimeLabel = new JLabel ("0");
-    _endTrialTime = new JSpinner (new SpinnerNumberModel (2000, 1, 50000, 1));
-    _interItemTime = new JSpinner (new SpinnerNumberModel (2000, 1, 50000, 1));
     _randomOrder = new JCheckBox ("Random order");
     _randomOrder.setToolTipText ("Set this to pass pairs to model in a random order");
-    JButton restart = new JButton (new RestartAction ());
+        JButton restart = new JButton (new RestartAction ());
     restart.setToolTipText ("Reset the experiment and clear the model");
     JButton runTrial = new JButton (new RunTrialAction ());
     runTrial.setToolTipText ("Pass each stimulus-response pair once against the model");
 
     JPanel controls = new JPanel ();
-    controls.setLayout (new GridLayout (5, 2, 10, 3));
-    controls.add (new JLabel ("Experiment time (ms)", SwingConstants.RIGHT));
-    controls.add (_experimentTimeLabel);
-    controls.add (new JLabel ("End trial time (ms)", SwingConstants.RIGHT));
-    controls.add (_endTrialTime);
-    controls.add (new JLabel ("Inter item time (ms)", SwingConstants.RIGHT));
-    controls.add (_interItemTime);
+    controls.setLayout (new GridLayout (2, 2, 10, 3));
     controls.add (_randomOrder);
     controls.add (restart);
     controls.add (new JLabel (""));
@@ -205,16 +163,16 @@ class SerialAnticipationExperiment extends JPanel {
       }
       public Object getValueAt (int row, int column) {
         if (column == 0) {
-          return _patterns.get(row).getStimulus ();
+          return _patterns.get(row).getFirst ();
         } else if (column == 1) {
-          return _patterns.get(row).getResponse ();
+          return _patterns.get(row).getSecond ();
         } else {
           return _responses.get(column-2).get(row).toString ();
         }
       }
       public String getColumnName (int column) {
         if (column == 0) {
-          return "Stimulus";
+          return "Source";
         } else if (column == 1) {
           return "Target";
         } else {
