@@ -2,6 +2,7 @@ package jchrest.gui;
 
 import jchrest.architecture.Chrest;
 import jchrest.lib.ListPattern;
+import jchrest.lib.PairedPattern;
 import jchrest.lib.Pattern;
 
 import java.awt.*;
@@ -21,7 +22,7 @@ import javax.swing.table.*;
  */
 class SerialAnticipationExperiment extends JPanel {
   private Chrest _model;
-  private List<StimulusResponsePair> _patterns;
+  private List<PairedPattern> _patterns;
 
   public SerialAnticipationExperiment (Chrest model, List<ListPattern> patterns) {
     super ();
@@ -36,35 +37,13 @@ class SerialAnticipationExperiment extends JPanel {
     add (jsp);
   }
 
-  class StimulusResponsePair {
-    private ListPattern _stimulus;
-    private ListPattern _response;
-
-    StimulusResponsePair (ListPattern stimulus, ListPattern response) {
-      _stimulus = stimulus;
-      _response = response;
-    }
-
-    public ListPattern getStimulus () {
-      return _stimulus;
-    }
-
-    public ListPattern getResponse () {
-      return _response;
-    }
-
-    public String toString () {
-      return _stimulus.toString() + " - " + _response.toString();
-    }
-  }
-
   /**
    * Convert a list of ListPatterns into a list of stimulus-response pairs.
    */
-  private List<StimulusResponsePair> paired (List<ListPattern> patterns) {
-    List<StimulusResponsePair> pairs = new ArrayList<StimulusResponsePair> ();
+  private List<PairedPattern> paired (List<ListPattern> patterns) {
+    List<PairedPattern> pairs = new ArrayList<PairedPattern> ();
     for (int i = 1; i < patterns.size (); ++i) {
-      pairs.add (new StimulusResponsePair (patterns.get(i-1), patterns.get(i)));
+      pairs.add (new PairedPattern (patterns.get(i-1), patterns.get(i)));
     }
 
     return pairs;
@@ -77,9 +56,9 @@ class SerialAnticipationExperiment extends JPanel {
 
     JPanel pairsPanel = new JPanel ();
     pairsPanel.setLayout (new GridLayout (_patterns.size(), 2));
-    for (StimulusResponsePair pair : _patterns) {
-      pairsPanel.add (new JLabel (pair.getStimulus().toString ()));
-      pairsPanel.add (new JLabel (pair.getResponse().toString ()));
+    for (PairedPattern pair : _patterns) {
+      pairsPanel.add (new JLabel (pair.getFirst().toString ()));
+      pairsPanel.add (new JLabel (pair.getSecond().toString ()));
     }
 
     panel.add (new JScrollPane (pairsPanel));
@@ -109,10 +88,10 @@ class SerialAnticipationExperiment extends JPanel {
       _exptClock = 0;
     }
 
-    private List<StimulusResponsePair> preparePatterns () {
-      List<StimulusResponsePair> patterns = new ArrayList<StimulusResponsePair> ();
+    private List<PairedPattern> preparePatterns () {
+      List<PairedPattern> patterns = new ArrayList<PairedPattern> ();
       java.util.Random gen = new java.util.Random ();
-      for (StimulusResponsePair pattern : _patterns) {
+      for (PairedPattern pattern : _patterns) {
         if (_randomOrder.isSelected ()) {
           patterns.add (gen.nextInt (patterns.size () + 1), pattern);
         } else {
@@ -125,8 +104,8 @@ class SerialAnticipationExperiment extends JPanel {
 
     private void collectResponses () {
       List<ListPattern> responses = new ArrayList<ListPattern> ();
-      for (StimulusResponsePair pair : _patterns) {
-        ListPattern response = _model.followPattern (pair.getStimulus ());
+      for (PairedPattern pair : _patterns) {
+        ListPattern response = _model.followPattern (pair.getFirst ());
         if (response != null) {
           responses.add (response);
         } else {
@@ -138,8 +117,8 @@ class SerialAnticipationExperiment extends JPanel {
 
     public void actionPerformed (ActionEvent e) {
       collectResponses ();
-      for (StimulusResponsePair pair : preparePatterns ()) {
-        _model.learnAndLinkPatterns (pair.getStimulus (), pair.getResponse (), _exptClock);
+      for (PairedPattern pair : preparePatterns ()) {
+        _model.learnAndLinkPatterns (pair.getFirst (), pair.getSecond (), _exptClock);
         _exptClock += ((SpinnerNumberModel)_interItemTime.getModel()).getNumber().intValue ();
       }
       _exptClock += ((SpinnerNumberModel)_endTrialTime.getModel()).getNumber().intValue ();
@@ -205,9 +184,9 @@ class SerialAnticipationExperiment extends JPanel {
       }
       public Object getValueAt (int row, int column) {
         if (column == 0) {
-          return _patterns.get(row).getStimulus ();
+          return _patterns.get(row).getFirst ();
         } else if (column == 1) {
-          return _patterns.get(row).getResponse ();
+          return _patterns.get(row).getSecond ();
         } else {
           return _responses.get(column-2).get(row).toString ();
         }
