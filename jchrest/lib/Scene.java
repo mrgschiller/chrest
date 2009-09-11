@@ -33,11 +33,19 @@ public class Scene {
   }
 
   public String getItem (int row, int column) {
-    return _scene[row][column];
+    if (row >= 0 && row < _height && column >= 0 && column < _width) {
+      return _scene[row][column];
+    } else {
+      return "";
+    }
   }
 
   public boolean isEmpty (int row, int column) {
-    return _scene[row][column].equals (".");
+    if (row >= 0 && row < _height && column >= 0 && column < _width) {
+      return _scene[row][column].equals (".");
+    } else {
+      return true; // no item off scene (!)
+    }
   }
   
   /**

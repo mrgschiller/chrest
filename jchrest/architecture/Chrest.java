@@ -1,8 +1,6 @@
 package jchrest.architecture;
 
-import jchrest.lib.ListPattern;
-import jchrest.lib.Pattern;
-import jchrest.lib.Scene;
+import jchrest.lib.*;
 
 import java.util.List;
 import java.util.Observable;
@@ -376,6 +374,8 @@ public class Chrest extends Observable {
     notifyObservers ();
   }
 
+    private final static java.util.Random _random = new java.util.Random ();
+
   /**
    * Perceiver is an inner class as it contains many specific methods to itself, but 
    * also needs access to details of the current _ltm and _stm.
@@ -418,21 +418,94 @@ public class Chrest extends Observable {
       _currentScene = scene;
     }
 
+    /** 
+     * Initial fixation point - the centre of the scene.
+     */
     public void start () {
-      _fixationX = 0;
-      _fixationY = 0;
+      _fixationX = _currentScene.getWidth () / 2;
+      _fixationY = _currentScene.getHeight () / 2;
     }
 
+    /**
+     * Try to move eye using LTM heuristic, return true if:
+     *   -- square suggested by first child yields a piece which 
+     *   -- allows model to follow a test link.
+     */
+    private boolean ltmHeuristic () {
+      if (_visualStm.getCount () >= 1) {
+        List<Link> hypothesisChildren = _visualStm.getItem(0).getChildren ();
+        if (hypothesisChildren.isEmpty ()) return false;
+        ListPattern test = hypothesisChildren.get(0).getTest ();
+        if (test.isEmpty ()) return false;
+        Pattern first = test.getItem (0);
+        if (first instanceof ItemSquarePattern) {
+          ItemSquarePattern ios = (ItemSquarePattern)first;
+          _fixationX = ios.getColumn ();
+          _fixationY = ios.getRow (); 
+
+          for (Link link : hypothesisChildren) {
+            if (_currentScene.getItem (_fixationY, _fixationX).equals (link.getTest ())) {
+              _visualStm.add (link.getChildNode ());
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    /**
+     * Try to move eye to random item in periphery.
+     */
+    private boolean randomItemHeuristic () {
+
+      for (int i = 0; i < 10; ++i) {
+        int xDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
+        int yDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
+        if (!_currentScene.isEmpty (_fixationY + yDisplacement, _fixationX + xDisplacement)) {
+          _fixationX += xDisplacement;
+          _fixationY += yDisplacement;
+
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /**
+     * Move eye to random position in periphery.
+     */
+    private void randomPlaceHeuristic () {
+      int xDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
+      int yDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
+
+      if ((xDisplacement == 0 && yDisplacement == 0) || 
+          (_fixationX + xDisplacement < 0) ||
+          (_fixationY + yDisplacement < 0) ||
+          (_fixationX + xDisplacement > _currentScene.getWidth ()) ||
+          (_fixationY + yDisplacement > _currentScene.getHeight ())) {
+        _fixationX += 1;
+        if (_fixationX == _currentScene.getWidth ()) {
+          _fixationY += 1;
+          _fixationX = 0;
+        }
+        if (_fixationY == _currentScene.getHeight ()) {
+          _fixationX = 0;
+          _fixationY = 0;
+        }
+      } else {
+        _fixationX += xDisplacement;
+        _fixationY += yDisplacement;
+      }
+    }
+
+    /**
+     * Find the next fixation point using one of the available 
+     * heuristics.
+     */
     public void moveEyeAndLearn () {
-      _fixationX += 1;
-      if (_fixationX == _currentScene.getWidth ()) {
-        _fixationY += 1;
-        _fixationX = 0;
-      }
-      if (_fixationY == _currentScene.getHeight ()) {
-        _fixationX = 0;
-        _fixationY = 0;
-      }
+      if (ltmHeuristic ()) return;
+      if (!randomItemHeuristic()) randomPlaceHeuristic ();
       recogniseAndLearn (_currentScene.getItems (_fixationX, _fixationY, 2));
     }
   }
