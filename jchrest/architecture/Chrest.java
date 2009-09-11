@@ -2,6 +2,7 @@ package jchrest.architecture;
 
 import jchrest.lib.ListPattern;
 import jchrest.lib.Pattern;
+import jchrest.lib.Scene;
 
 import java.util.List;
 import java.util.Observable;
@@ -29,6 +30,8 @@ public class Chrest extends Observable {
   private Stm _visualStm;
   private Stm _verbalStm;
   private Stm _actionStm; // TODO: Incorporate into displays
+  // Perception module
+  private Perceiver _perceiver;
 
   public Chrest () {
     _addLinkTime = 10000;
@@ -43,6 +46,8 @@ public class Chrest extends Observable {
     _visualStm = new Stm (4);
     _verbalStm = new Stm (2);
     _actionStm = new Stm (4);
+
+    _perceiver = new Perceiver ();
   }
 
   /**
@@ -200,6 +205,13 @@ public class Chrest extends Observable {
     getStmByModality(node.getImage()).add (node);
   }
 
+  /**
+   * Accessor to retrieve the model's perceiver object.
+   */
+  public Perceiver getPerceiver () {
+    return _perceiver;
+  }
+
   /** 
    * Retrieve a node in long-term memory using the given ListPattern.
    * The sorting process works through the children of the currentNode.
@@ -229,7 +241,7 @@ public class Chrest extends Observable {
     }
 
     addToStm (currentNode);
-    
+
     setChanged ();
     notifyObservers ();
 
@@ -362,6 +374,67 @@ public class Chrest extends Observable {
     _verbalStm.clear ();
     setChanged ();
     notifyObservers ();
+  }
+
+  /**
+   * Perceiver is an inner class as it contains many specific methods to itself, but 
+   * also needs access to details of the current _ltm and _stm.
+   */
+  public class Perceiver {
+    private int _fixationX, _fixationY, _fieldOfView;
+    private Scene _currentScene;
+
+    protected Perceiver () {
+      _fixationX = 0;
+      _fixationY = 0;
+      _fieldOfView = 2;
+    }
+
+    public int getFixationX () {
+      return _fixationX;
+    }
+
+    public void setFixationX (int x) {
+      _fixationX = x;
+    }
+
+    public int getFixationY () {
+      return _fixationY;
+    }
+
+    public void setFixationY (int y) {
+      _fixationY = y;
+    }
+
+    public int getFieldOfView () {
+      return _fieldOfView;
+    }
+
+    public void setFieldOfView (int fov) {
+      _fieldOfView = fov;
+    }
+
+    public void setScene (Scene scene) {
+      _currentScene = scene;
+    }
+
+    public void start () {
+      _fixationX = 0;
+      _fixationY = 0;
+    }
+
+    public void moveEyeAndLearn () {
+      _fixationX += 1;
+      if (_fixationX == _currentScene.getWidth ()) {
+        _fixationY += 1;
+        _fixationX = 0;
+      }
+      if (_fixationY == _currentScene.getHeight ()) {
+        _fixationX = 0;
+        _fixationY = 0;
+      }
+      recogniseAndLearn (_currentScene.getItems (_fixationX, _fixationY, 2));
+    }
   }
 }
 

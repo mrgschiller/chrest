@@ -241,6 +241,7 @@ public class Shell extends JFrame {
         _model.setRho (((SpinnerNumberModel)_rhoEntry.getModel()).getNumber().floatValue ());
         _model.setVisualStmSize (((SpinnerNumberModel)_visualStmSize.getModel()).getNumber().intValue ());
         _model.setVerbalStmSize (((SpinnerNumberModel)_verbalStmSize.getModel()).getNumber().intValue ());
+        _model.getPerceiver().setFieldOfView (((SpinnerNumberModel)_fieldOfView.getModel()).getNumber().intValue ());
       }
     }
 
@@ -250,6 +251,7 @@ public class Shell extends JFrame {
     private JSpinner _rhoEntry;
     private JSpinner _visualStmSize;
     private JSpinner _verbalStmSize;
+    private JSpinner _fieldOfView;
 
     private JPanel properties () {
       // -- create entry widgets
@@ -259,9 +261,10 @@ public class Shell extends JFrame {
       _rhoEntry = new JSpinner (new SpinnerNumberModel (_model.getRho (), 0.0, 1.0, 0.1));
       _visualStmSize = new JSpinner (new SpinnerNumberModel (_model.getVisualStmSize (), 1, 10, 1));
       _verbalStmSize = new JSpinner (new SpinnerNumberModel (_model.getVerbalStmSize (), 1, 10, 1));
+      _fieldOfView = new JSpinner (new SpinnerNumberModel (_model.getPerceiver().getFieldOfView (), 1, 100, 1));
 
       JPanel panel = new JPanel ();
-      panel.setLayout (new GridLayout (6, 2));
+      panel.setLayout (new GridLayout (7, 2));
       panel.add (new JLabel ("Add link time (ms)", SwingConstants.RIGHT));
       panel.add (_addLinkTime);
       panel.add (new JLabel ("Discrimination time (ms)", SwingConstants.RIGHT));
@@ -274,6 +277,8 @@ public class Shell extends JFrame {
       panel.add (_visualStmSize);
       panel.add (new JLabel ("Verbal STM size", SwingConstants.RIGHT));
       panel.add (_verbalStmSize);
+      panel.add (new JLabel ("Field of view", SwingConstants.RIGHT));
+      panel.add (_fieldOfView);
 
       return panel;
     }

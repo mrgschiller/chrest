@@ -24,6 +24,7 @@ public class VisualSearchPane extends JPanel {
 
     _model = model;
     _scenes = scenes;
+    _model.getPerceiver().setScene (_scenes.get (0));
     _sceneDisplay = new SceneDisplay (_scenes.get (0));
 
     setLayout (new BorderLayout ());
@@ -43,7 +44,9 @@ public class VisualSearchPane extends JPanel {
     _sceneSelector = new JComboBox (_scenes.getSceneNames ());
     _sceneSelector.addActionListener (new AbstractAction () {
       public void actionPerformed (ActionEvent e) {
-        _sceneDisplay.update (_scenes.get (_sceneSelector.getSelectedIndex ()));
+        Scene newScene = _scenes.get (_sceneSelector.getSelectedIndex ());
+        _model.getPerceiver().setScene (newScene);
+        _sceneDisplay.updateScene (newScene);
       }
     });
     panel.add (_sceneSelector);
@@ -51,16 +54,15 @@ public class VisualSearchPane extends JPanel {
     return panel;
   }
 
-  private int _fixationX;
-  private int _fixationY;
-
   class StartAction extends AbstractAction implements ActionListener {
     public StartAction () {
       super ("Start");
     }
     public void actionPerformed (ActionEvent e) {
-      _fixationX = 0;
-      _fixationY = 0;
+      _model.getPerceiver().start ();
+      _sceneDisplay.updateFixation (_model.getPerceiver().getFixationX (), 
+          _model.getPerceiver().getFixationY (), 
+          _model.getPerceiver().getFieldOfView ());
     }
   }
 
@@ -69,16 +71,10 @@ public class VisualSearchPane extends JPanel {
       super ("Step");
     }
     public void actionPerformed (ActionEvent e) {
-      _fixationX += 1;
-      if (_fixationX == _scenes.get (_sceneSelector.getSelectedIndex ()).getWidth ()) {
-        _fixationY += 1;
-        _fixationX = 0;
-      }
-      if (_fixationY == _scenes.get (_sceneSelector.getSelectedIndex ()).getHeight ()) {
-        _fixationY = 0;
-        _fixationX = 0;
-      }
-      _model.recogniseAndLearn (_scenes.get (_sceneSelector.getSelectedIndex()).getItems (_fixationX, _fixationY, 2));;
+      _model.getPerceiver().moveEyeAndLearn ();
+      _sceneDisplay.updateFixation (_model.getPerceiver().getFixationX (),
+         _model.getPerceiver().getFixationY (),
+         _model.getPerceiver().getFieldOfView ());
     }
   }
 
@@ -112,13 +108,18 @@ class SceneDisplay extends JPanel {
     add (new JScrollPane (_sceneView));
   }
 
-  public void update (Scene scene) {
+  public void updateScene (Scene scene) {
     _scene = scene;
     _sceneView.update ();
   }
 
+  public void updateFixation (int x, int y, int fov) {
+    _sceneView.setFixation (x, y, fov);
+  }
+
   class SceneView extends JPanel {
     private int _maxX, _maxY;
+    private int _fixationX, _fixationY, _fov;
 
     SceneView () {
       super ();
@@ -133,11 +134,20 @@ class SceneDisplay extends JPanel {
 
     public void update () {
 
+      _fixationX = _fixationY = -1; // set no fixation
+
       _maxX = scale * (_scene.getWidth () + 2); // + 2 for row heading and gaps
       _maxY = scale * (_scene.getHeight () + 2); // + 2 for column heading and gaps
 
       setPreferredSize (new Dimension (_maxX, _maxY));
       if (getParent () != null) ((JComponent)getParent ()).updateUI ();
+      repaint ();
+    }
+
+    public void setFixation (int x, int y, int fov) {
+      _fixationX = x;
+      _fixationY = y;
+      _fov = fov;
       repaint ();
     }
 
@@ -168,8 +178,21 @@ class SceneDisplay extends JPanel {
       // draw entries within grid
       for (int i = 0; i < _scene.getHeight (); ++i) {
         for (int j = 0; j < _scene.getWidth (); ++j) {
-          g2.drawString (_scene.getItem (i, j), offsetX + 5 + scale * j, offsetY + scale - 5 + scale * i);
+          if (!_scene.isEmpty (i, j)) {
+            g2.drawString (_scene.getItem (i, j), offsetX + 5 + scale * j, offsetY + scale - 5 + scale * i);
+          }
         }
+      }
+
+      // draw fixation
+      if (_fixationX >= 0 && _fixationY >= 0) {
+        g2.setColor (Color.BLUE);
+        g2.setStroke (new BasicStroke (2));
+        g2.drawRoundRect (offsetX + scale * _fixationX, offsetY + scale * _fixationY,
+            scale, scale, 5, 5);
+        g2.drawRoundRect (offsetX + scale * (_fixationX - _fov), offsetY + scale * (_fixationY - _fov), 
+            scale * (_fov * 2 + 1), scale * (_fov * 2 + 1),
+            5, 5);
       }
     }
   }

@@ -35,6 +35,10 @@ public class Scene {
   public String getItem (int row, int column) {
     return _scene[row][column];
   }
+
+  public boolean isEmpty (int row, int column) {
+    return _scene[row][column].equals (".");
+  }
   
   /**
    * Retrieve all items within given row +/- size, column +/- size
@@ -43,9 +47,9 @@ public class Scene {
   public ListPattern getItems (int row, int column, int size) {
     ListPattern items = new ListPattern ();
 
-    for (int i = column - size; i < column + size; ++i) {
+    for (int i = column - size; i <= column + size; ++i) {
       if (i >= 0 && i < _height) {
-        for (int j = row - size; j < row + size; ++j) {
+        for (int j = row - size; j <= row + size; ++j) {
           if (j >= 0 && j < _width) {
             if (!_scene[i][j].equals(".")) {
               items.add (new ItemSquarePattern (_scene[i][j], i, j));
