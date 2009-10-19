@@ -12,18 +12,18 @@ import javax.swing.*;
  *
  * @author Peter C. R. Lane
  */
-class NodeDisplay implements LtmGrapherNode {
+class NodeDisplay implements LtmTreeViewNode {
   private Node _node;
-  private List<LtmGrapherNode> _children;
+  private List<LtmTreeViewNode> _children;
 
   public NodeDisplay (Node node) {
     _node = node;
-    _children = new ArrayList<LtmGrapherNode> ();
+    _children = new ArrayList<LtmTreeViewNode> ();
   }
 
   private final int ROOTNODE_SIZE = 11;
 
-  public List<LtmGrapherNode> getChildren () {
+  public List<LtmTreeViewNode> getChildren () {
     return _children;
   }
 
@@ -96,7 +96,7 @@ class NodeDisplay implements LtmGrapherNode {
     return _node == null;
   }
 
-  public void add (LtmGrapherNode node) {
+  public void add (LtmTreeViewNode node) {
     _children.add (node);
   }
 

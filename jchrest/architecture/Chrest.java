@@ -429,7 +429,7 @@ public class Chrest extends Observable {
     /**
      * Try to move eye using LTM heuristic, return true if:
      *   -- square suggested by first child yields a piece which 
-     *   -- allows model to follow a test link.
+     *      allows model to follow a test link.
      */
     private boolean ltmHeuristic () {
       if (_visualStm.getCount () >= 1) {
@@ -445,7 +445,7 @@ public class Chrest extends Observable {
 
           for (Link link : hypothesisChildren) {
             if (_currentScene.getItem (_fixationY, _fixationX).equals (link.getTest ())) {
-              _visualStm.add (link.getChildNode ());
+              _visualStm.replaceHypothesis (link.getChildNode ());
               return true;
             }
           }
@@ -502,6 +502,8 @@ public class Chrest extends Observable {
     /**
      * Find the next fixation point using one of the available 
      * heuristics.
+     * TODO: Add in domain-specific heuristics
+     * Also, global strategies for moving to a 'new' part of the scene.
      */
     public void moveEyeAndLearn () {
       if (ltmHeuristic ()) return;

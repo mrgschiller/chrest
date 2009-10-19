@@ -22,7 +22,7 @@ import javax.swing.border.*;
  */
 public class ChrestLtmView extends JPanel {
   private Chrest _model;
-  private GrapherPane _ltmView;
+  private TreeViewPane _ltmView;
 
   public ChrestLtmView (Chrest model) {
     super ();
@@ -31,14 +31,14 @@ public class ChrestLtmView extends JPanel {
     setBorder (new TitledBorder ("LTM"));
     setLayout (new BorderLayout ());
 
-    // -- the grapher pane
-    _ltmView = new GrapherPane (new GrapherNode (constructTree ()));
+    // -- the treeview pane
+    _ltmView = new TreeViewPane (new TreeViewNode (constructTree ()));
     add (new JScrollPane (_ltmView));
     add (createToolBar (), BorderLayout.SOUTH);
   }
 
   public void update () {
-    _ltmView.changeRoot (new GrapherNode (constructTree ()));
+    _ltmView.changeRoot (new TreeViewNode (constructTree ()));
   }
 
   private JComboBox createOrientationBox () {
@@ -89,9 +89,9 @@ public class ChrestLtmView extends JPanel {
 	}
 
   /**
-   * Relayout and draw the grapher nodes.
+   * Relayout and draw the treeview nodes.
    */
-	public void drawGrapher () {
+	public void drawTreeView () {
 		_ltmView.relayout();
 	}
 
@@ -128,29 +128,29 @@ public class ChrestLtmView extends JPanel {
 	}
 
   /**
-   * Wrap the model's LTM as a set of LtmGrapherNode objects,
+   * Wrap the model's LTM as a set of LtmTreeVewNode objects,
    * joining the three types of LTM into a single tree.
    */
-  private LtmGrapherNode constructTree () {
-    LtmGrapherNode baseGrapherNode = new NodeDisplay (null);
-    baseGrapherNode.add (constructTree (_model.getLtmByModality(Pattern.makeVisualList (new String[]{}))));
-    baseGrapherNode.add (constructTree (_model.getLtmByModality(Pattern.makeVerbalList (new String[]{}))));
-    baseGrapherNode.add (constructTree (_model.getLtmByModality(Pattern.makeActionList (new String[]{}))));
-    return baseGrapherNode;
+  private LtmTreeViewNode constructTree () {
+    LtmTreeViewNode baseTreeViewNode = new NodeDisplay (null);
+    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeVisualList (new String[]{}))));
+    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeVerbalList (new String[]{}))));
+    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeActionList (new String[]{}))));
+    return baseTreeViewNode;
   }
 
   /** 
-   * Wrap the model's LTM as a set of LtmGrapherNode objects.
+   * Wrap the model's LTM as a set of LtmTreeViewNode objects.
    */
-  private LtmGrapherNode constructTree (Node baseNode) {
-    LtmGrapherNode baseGrapherNode = new NodeDisplay (baseNode);
+  private LtmTreeViewNode constructTree (Node baseNode) {
+    LtmTreeViewNode baseTreeViewNode = new NodeDisplay (baseNode);
     for (Link link : baseNode.getChildren ()) {
-      LtmGrapherNode linkNode = new LinkDisplay (link);
+      LtmTreeViewNode linkNode = new LinkDisplay (link);
       linkNode.add (constructTree (link.getChildNode ()));
-      baseGrapherNode.add (linkNode);
+      baseTreeViewNode.add (linkNode);
     }
 
-    return baseGrapherNode;
+    return baseTreeViewNode;
   }
 }
 
@@ -160,16 +160,16 @@ enum Orientation { HORIZONTAL, VERTICAL }
  * Display a link within the LTM view.  Note that a link can 
  * never be a root node.
  */
-class LinkDisplay implements LtmGrapherNode {
+class LinkDisplay implements LtmTreeViewNode {
   private Link _link;
-  private List<LtmGrapherNode> _children;
+  private List<LtmTreeViewNode> _children;
 
   public LinkDisplay (Link link) {
     _link = link;
-    _children = new ArrayList<LtmGrapherNode> ();
+    _children = new ArrayList<LtmTreeViewNode> ();
   }
 
-  public List<LtmGrapherNode> getChildren () {
+  public List<LtmTreeViewNode> getChildren () {
     return _children;
   }
 
@@ -208,7 +208,7 @@ class LinkDisplay implements LtmGrapherNode {
     return false;
   }
 
-  public void add (LtmGrapherNode node) {
+  public void add (LtmTreeViewNode node) {
     _children.add (node);
   }
 
@@ -226,17 +226,17 @@ class LinkDisplay implements LtmGrapherNode {
   }
 }
 
-/** Display a given GrapherNode with a JPanel.  */
-class GrapherPane extends JPanel {
+/** Display a given TreeViewNode with a JPanel.  */
+class TreeViewPane extends JPanel {
 	private final static long serialVersionUID = 2;
 	
 	private int _maxX;
 	private int _maxY;
-	private GrapherNode _rootnode;
+	private TreeViewNode _rootnode;
 	private Orientation _orientation;
 	private Size _size;
 
-	public GrapherPane (GrapherNode rootNode) {
+	public TreeViewPane (TreeViewNode rootNode) {
 		super();
 		
 		setBackground(Color.white);
@@ -261,7 +261,7 @@ class GrapherPane extends JPanel {
 		relayout();
 	}
 	
-	public void changeRoot (GrapherNode newRoot) {
+	public void changeRoot (TreeViewNode newRoot) {
 		_rootnode = newRoot;
 		relayout();
 	}
@@ -294,10 +294,10 @@ class GrapherPane extends JPanel {
   }
 }
 
-/** The GrapherNode is a wrapper around a Node, 
+/** The TreeViewNode is a wrapper around a Node, 
  * managing the layout and display of the node and its children.
  */
-class GrapherNode {
+class TreeViewNode {
 	int _x;  // x position on the canvas
 	int _y;  // y position 
 	int _w;  // the width
@@ -307,15 +307,15 @@ class GrapherNode {
 	int _extentWidth;
 	int _extentHeight;
 	// hold a pointer to the object being displayed
-	LtmGrapherNode _object;
-	ArrayList<GrapherNode> _children;
+	LtmTreeViewNode _object;
+	ArrayList<TreeViewNode> _children;
 	
-	public GrapherNode (LtmGrapherNode object) {
+	public TreeViewNode (LtmTreeViewNode object) {
 		_object = object;
-		_children = new ArrayList<GrapherNode> ();
-		// work through any children of node, turning them into GrapherNodes
-		for (LtmGrapherNode child : _object.getChildren ()) {
-			_children.add (new GrapherNode (child));
+		_children = new ArrayList<TreeViewNode> ();
+		// work through any children of node, turning them into TreeViewNodes
+		for (LtmTreeViewNode child : _object.getChildren ()) {
+			_children.add (new TreeViewNode (child));
 		}
 		
 		setDefaults();
@@ -339,7 +339,7 @@ class GrapherNode {
 		return new Rectangle(_x, _y, _w, _h);
 	}
 
-	/** Compute the extent in width of a GrapherNode.  Different routines compute width
+	/** Compute the extent in width of a TreeViewNode.  Different routines compute width
 	  * depending on direction of layout.
 	  */
 	public int getExtentWidth (Graphics g, Orientation orientation, Size size) {
@@ -354,7 +354,7 @@ class GrapherNode {
 		return _extentWidth;
 	}
 
-	/** Compute the extent in height of a GrapherNode.  Different routines compute height 
+	/** Compute the extent in height of a TreeViewNode.  Different routines compute height 
 	  * depending on direction of layout.
 	  */
 	public int getExtentHeight (Graphics g, Orientation orientation, Size size) {
@@ -375,7 +375,7 @@ class GrapherNode {
 		if (hasChildren ()) {
 			int maxChildWidth = 0;
 
-			for (GrapherNode child : _children) {
+			for (TreeViewNode child : _children) {
 				if (maxChildWidth < child.getExtentWidth (g, orientation, size)) {
 					maxChildWidth = child.getExtentWidth (g, orientation, size);
 				}
@@ -391,7 +391,7 @@ class GrapherNode {
 	private int getExtentWidthVerticalLayout (Graphics g, Orientation orientation, Size size) {
 		int totalChildWidth = 0;
 		if (hasChildren ()) {
-			for (GrapherNode child : _children) {
+			for (TreeViewNode child : _children) {
 				totalChildWidth += child.getExtentWidth (g, orientation, size);
 			}
 			// add n-1 gaps
@@ -405,7 +405,7 @@ class GrapherNode {
 	private int getExtentHeightHorizontalLayout (Graphics g, Orientation orientation, Size size) {
 		int totalChildHeight = 0;
 		if (hasChildren ()) {
-			for (GrapherNode child : _children) {
+			for (TreeViewNode child : _children) {
 				totalChildHeight += child.getExtentHeight (g, orientation, size);
 			}
 			// add n-1 gaps
@@ -421,7 +421,7 @@ class GrapherNode {
 		if (hasChildren ()) {
 			int maxChildHeight = 0;
 
-			for (GrapherNode child : _children) {
+			for (TreeViewNode child : _children) {
 				if (maxChildHeight < child.getExtentHeight (g, orientation, size)) {
 					maxChildHeight = child.getExtentHeight (g, orientation, size);
 				}
@@ -459,7 +459,7 @@ class GrapherNode {
 		// nextY is incremented by child's height + verticalSeparator
 		//       to get the vertical position of the next child
 		//       to get the vertical position of the next child
-		for (GrapherNode child : _children) {
+		for (TreeViewNode child : _children) {
 			child.layoutNode(g, thisX, nextY, orientation, size);
 			nextY += size.getVerticalSeparator (orientation);
 			nextY += child.getExtentHeight(g, orientation, size);
@@ -475,7 +475,7 @@ class GrapherNode {
 		int nextX = _x;
 		// nextX is incremented by child's width + horizontalSeparator
 		//       to get horizontal position of the next child
-		for (GrapherNode child : _children) {
+		for (TreeViewNode child : _children) {
 			child.layoutNode(g, nextX, thisY, orientation, size);
 			nextX += size.getHorizontalSeparator(orientation);
 			nextX += child.getExtentWidth(g, orientation, size);
@@ -491,7 +491,7 @@ class GrapherNode {
 	public int getMidY () { return _y + (Math.round (_h / 2)); }
 	public int getBottomY () { return _y + _h; }
 
-	/** A GrapherNode draws itself by requesting its object to draw 
+	/** A TreeViewNode draws itself by requesting its object to draw 
 	  * itself within the specified area, on the given context.
 	  */
 	public void drawNode (Graphics g, Size size, Orientation orientation) {
@@ -506,12 +506,12 @@ class GrapherNode {
 		if (_object.isRoot ()) return; // allow rootnode to be drawn differently
 		g2.clearRect (_x, _y, _w, _h);
 		g2.setColor (Color.BLACK);
-		g2.draw (new Rectangle2D.Double (_x, _y, _w, _h));
+    g2.drawRect (_x, _y, _w, _h);
 	}
 
 	private void drawChildren (Graphics g, Size size, Orientation orientation) {
 		if (hasChildren ()) {
-			for (GrapherNode child : _children) {
+			for (TreeViewNode child : _children) {
 				child.drawNode (g, size, orientation);
 			}
 		}
@@ -545,13 +545,13 @@ class GrapherNode {
 	}
 	
 	private void drawHorizontalLinks (Graphics2D g2, int from_x, int from_y) {
-		for (GrapherNode child : _children) {
+		for (TreeViewNode child : _children) {
 			g2.drawLine (from_x, from_y, child.getLeftX (), child.getMidY ());
 		}
 	}
 
 	private void drawVerticalLinks (Graphics2D g2, int from_x, int from_y) {
-		for (GrapherNode child : _children) {
+		for (TreeViewNode child : _children) {
 			g2.drawLine (from_x, from_y, child.getMidX (), child.getTopY ());
 		}
 	}

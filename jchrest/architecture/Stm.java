@@ -41,6 +41,14 @@ public class Stm {
     }
   }
 
+  /**
+   * Replace the topmost (hypothesis) node with the given one.
+   */
+  public void replaceHypothesis (Node node) {
+    _items.remove (0);
+    _items.add (0, node);
+  }
+
   public void clear () {
     _items.clear ();
   }
