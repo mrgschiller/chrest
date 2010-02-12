@@ -55,39 +55,50 @@ public class VisualSearchPane extends JPanel {
   }
 
   class StartAction extends AbstractAction implements ActionListener {
-    public StartAction () {
+    private JLabel _lastHeuristic;
+
+    public StartAction (JLabel lastHeuristic) {
       super ("Start");
+      _lastHeuristic = lastHeuristic;
     }
     public void actionPerformed (ActionEvent e) {
       _model.getPerceiver().start ();
       _sceneDisplay.updateFixation (_model.getPerceiver().getFixationX (), 
           _model.getPerceiver().getFixationY (), 
           _model.getPerceiver().getFieldOfView ());
+      _lastHeuristic.setText ("");
     }
   }
 
   class StepAction extends AbstractAction implements ActionListener {
-    public StepAction () {
+    private JLabel _lastHeuristic;
+
+    public StepAction (JLabel lastHeuristic) {
       super ("Step");
+      _lastHeuristic = lastHeuristic;
     }
     public void actionPerformed (ActionEvent e) {
       _model.getPerceiver().moveEyeAndLearn ();
       _sceneDisplay.updateFixation (_model.getPerceiver().getFixationX (),
          _model.getPerceiver().getFixationY (),
          _model.getPerceiver().getFieldOfView ());
+      _lastHeuristic.setText (_model.getHeuristicDescription ());
     }
   }
 
   private Box constructButtons () {
+    JLabel heuristicLabel = new JLabel ("");
+
     Box buttons = Box.createVerticalBox ();
-    JButton startButton = new JButton (new StartAction ());
-    JButton stepButton = new JButton (new StepAction ());
+    JButton startButton = new JButton (new StartAction (heuristicLabel));
+    JButton stepButton = new JButton (new StepAction (heuristicLabel));
 
     stepButton.setMaximumSize (stepButton.getPreferredSize ());
 
     buttons.add (Box.createGlue ());
     buttons.add (startButton);
     buttons.add (stepButton);
+    buttons.add (heuristicLabel);
     buttons.add (Box.createGlue ());
 
     return buttons;

@@ -49,7 +49,7 @@ public class ItemSquarePattern extends PrimitivePattern {
   public boolean equals (Pattern givenPattern) {
     if (givenPattern instanceof ItemSquarePattern) {
       ItemSquarePattern pattern = (ItemSquarePattern)givenPattern;
-      return (_item == pattern.getItem () &&
+      return (_item.equals (pattern.getItem ()) &&
           _column == pattern.getColumn () &&
           _row == pattern.getRow ());
     } else {

@@ -40,6 +40,10 @@ public class Scene {
     }
   }
 
+  public void setItem (int row, int column, String item) {
+    _scene[row][column] = item;
+  }
+
   public boolean isEmpty (int row, int column) {
     if (row >= 0 && row < _height && column >= 0 && column < _width) {
       return _scene[row][column].equals (".");

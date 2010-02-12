@@ -374,6 +374,10 @@ public class Chrest extends Observable {
     notifyObservers ();
   }
 
+  public String getHeuristicDescription () {
+    return _perceiver.getHeuristicDescription ();
+  }
+
     private final static java.util.Random _random = new java.util.Random ();
 
   /**
@@ -382,12 +386,14 @@ public class Chrest extends Observable {
    */
   public class Perceiver {
     private int _fixationX, _fixationY, _fieldOfView;
+    int _lastHeuristic;
     private Scene _currentScene;
 
     protected Perceiver () {
       _fixationX = 0;
       _fixationY = 0;
       _fieldOfView = 2;
+      _lastHeuristic = 0;
     }
 
     public int getFixationX () {
@@ -446,6 +452,7 @@ public class Chrest extends Observable {
           for (Link link : hypothesisChildren) {
             if (_currentScene.getItem (_fixationY, _fixationX).equals (link.getTest ())) {
               _visualStm.replaceHypothesis (link.getChildNode ());
+              _lastHeuristic = 1;
               return true;
             }
           }
@@ -465,6 +472,7 @@ public class Chrest extends Observable {
         if (!_currentScene.isEmpty (_fixationY + yDisplacement, _fixationX + xDisplacement)) {
           _fixationX += xDisplacement;
           _fixationY += yDisplacement;
+          _lastHeuristic = 2;
 
           return true;
         }
@@ -478,6 +486,8 @@ public class Chrest extends Observable {
     private void randomPlaceHeuristic () {
       int xDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
       int yDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
+
+      _lastHeuristic = 3;
 
       if ((xDisplacement == 0 && yDisplacement == 0) || 
           (_fixationX + xDisplacement < 0) ||
@@ -510,6 +520,24 @@ public class Chrest extends Observable {
       if (!randomItemHeuristic()) randomPlaceHeuristic ();
       recogniseAndLearn (_currentScene.getItems (_fixationX, _fixationY, 2));
     }
+
+    public void moveEye () {
+      if (ltmHeuristic ()) return;
+      if (!randomItemHeuristic ()) randomPlaceHeuristic ();
+      recognise (_currentScene.getItems (_fixationX, _fixationY, 2));
+    }
+
+    public String getHeuristicDescription () {
+      if (_lastHeuristic == 0)
+        return "No heuristic";
+      else if (_lastHeuristic == 1)
+        return "LTM heuristic";
+      else if (_lastHeuristic == 2)
+        return "Random item heuristic";
+      else // if (_lastHeuristic == 3)
+        return "Random piece heuristic";
+    }
+
   }
 }
 
