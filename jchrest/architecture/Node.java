@@ -196,6 +196,7 @@ public class Node {
       // if there is no more information, check if new pattern is 'complete'
       // and make this image complete, if so.
       if (newInformation.isFinished ()) {
+        _image = _image.clone ();
         _image.setFinished ();
       }
     } else {
