@@ -173,7 +173,7 @@ public class Shell extends JFrame {
               _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input)));
               _parent.validate ();
             } else if (task.equals ("serial-anticipation")) {
-              _parent.setContentPane (new SerialAnticipationExperiment (_model, readItems (input)));
+              _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(readItems (input))));
               _parent.validate ();
             } else if (task.equals ("paired-associate")) {
               _parent.setContentPane (new PairedAssociateExperiment (_model, readPairedItems (input, false)));
