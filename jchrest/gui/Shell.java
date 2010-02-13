@@ -9,6 +9,7 @@ import jchrest.lib.Scenes;
 import java.awt.GridLayout;
 import java.awt.event.*;
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -307,9 +308,13 @@ public class Shell extends JFrame {
     }
 
     public void actionPerformed (ActionEvent e) {
+      DecimalFormat twoPlaces = new DecimalFormat("0.00");
       JOptionPane.showMessageDialog (_parent,
           "<html><p>" + 
           "Nodes in LTM: " + _model.ltmSize () +
+          "<br>Visual nodes: " + _model.ltmVisualSize () + " Average depth: " + twoPlaces.format (_model.getVisualLtmAverageDepth ()) +
+          "<br>Verbal nodes: " + _model.ltmVerbalSize () + " Average depth: " + twoPlaces.format (_model.getVerbalLtmAverageDepth ()) +
+          "<br>Action nodes: " + _model.ltmActionSize () + " Average depth: " + twoPlaces.format (_model.getActionLtmAverageDepth ()) +
           "</p></html>",
           "Chrest: Model information",
           JOptionPane.INFORMATION_MESSAGE);

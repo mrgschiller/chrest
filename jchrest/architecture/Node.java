@@ -116,6 +116,42 @@ public class Node {
   }
 
   /**
+   * If this node is a child node, then add its depth to depths.  
+   * Otherwise, continue searching through children for the depth.
+   */
+  private void findDepth (int currentDepth, List<Integer> depths) {
+    if (_children.isEmpty ()) {
+      depths.add (currentDepth);
+    } else {
+      for (Link link : _children) {
+        link.getChildNode().findDepth (currentDepth + 1, depths);
+      }
+    }
+  }
+
+  /**
+   * Compute the average depth of nodes below this point.
+   */
+  public double averageDepth () {
+    List<Integer> depths = new ArrayList<Integer> ();
+    // -- find every depth
+    for (Link link : _children) {
+      link.getChildNode().findDepth(1, depths);
+    }
+
+    // -- compute the average of the depths
+    int sum = 0;
+    for (Integer depth : depths) {
+      sum += depth;
+    }
+    if (depths.isEmpty ()) {
+      return 0.0;
+    } else {
+      return (double)sum / (double)depths.size ();
+    }
+  }
+
+  /**
    * LearnPrimitive is used to construct a test link and node containing 
    * precisely the given pattern.  It is assumed the given pattern contains 
    * a single primitive item, and is finished.

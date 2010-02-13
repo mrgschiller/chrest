@@ -100,7 +100,7 @@ class RecogniseAndLearnDemo extends JPanel {
       if (isSelected ()) {
         _feedback.setText ("Recalled " + 
             _model.recallPattern (selectedPattern()).toString () +
-            "for " +
+            " for " +
             selectedPattern().toString ());
       }
     }

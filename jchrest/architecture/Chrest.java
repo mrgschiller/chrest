@@ -179,6 +179,48 @@ public class Chrest extends Observable {
     return _visualLtm.size () + _verbalLtm.size () + _actionLtm.size ();
   }
 
+  /** 
+   * Return a count of the number of nodes in visual long-term memory.
+   */
+  public int ltmVisualSize () {
+    return _visualLtm.size ();
+  }
+
+  /**
+   * Return the average depth of nodes in visual long-term memory.
+   */
+  public double getVisualLtmAverageDepth () {
+    return _visualLtm.averageDepth ();
+  }
+
+  /**
+   * Return a count of the number of nodes in verbal long-term memory.
+   */
+  public int ltmVerbalSize () {
+    return _verbalLtm.size ();
+  }
+
+  /**
+   * Return the average depth of nodes in verbal long-term memory.
+   */
+  public double getVerbalLtmAverageDepth () {
+    return _verbalLtm.averageDepth ();
+  }
+
+  /**
+   * Return a count of the number of nodes in action long-term memory.
+   */
+  public int ltmActionSize () {
+    return _actionLtm.size ();
+  }
+
+  /**
+   * Return the average depth of nodes in action long-term memory.
+   */
+  public double getActionLtmAverageDepth () {
+    return _actionLtm.averageDepth ();
+  }
+
   public Node getLtmByModality (ListPattern pattern) {
     if (pattern.isVisual ()) {
       return _visualLtm;
