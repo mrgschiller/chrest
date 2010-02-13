@@ -155,19 +155,44 @@ public class CategorisationExperiment extends JPanel {
 
   private void createProtocolTable () {
     TableModel tm = new AbstractTableModel () {
+      // include a row for the number of errors
       public int getRowCount () {
-        return _patterns.size ();
+        return 1 + _patterns.size ();
       }
+      // include two columns for the stimulus and target response
       public int getColumnCount () {
         return 2 + _responses.size (); 
       }
+      // compute the total number of errors in given column of responses
+      private int getErrors (int trial) {
+        int errors = 0;
+        for (int i = 0, n = _patterns.size (); i < n; ++i) {
+          if (_responses.get(trial).get(i).equals(_patterns.get(i).getSecond ())) {
+          } else {
+            errors += 1;
+          }
+        }
+        return errors;
+      }
       public Object getValueAt (int row, int column) {
         if (column == 0) {
-          return _patterns.get(row).getFirst ();
+          if (row == _patterns.size ()) {
+            return "";
+          } else {
+            return _patterns.get(row).getFirst ();
+          }
         } else if (column == 1) {
-          return _patterns.get(row).getSecond ();
+          if (row == _patterns.size ()) {
+            return "Errors:";
+          } else {
+            return _patterns.get(row).getSecond ();
+          }
         } else {
-          return _responses.get(column-2).get(row).toString ();
+          if (row == _patterns.size ()) {
+            return "" + getErrors (column-2);
+          } else {
+            return _responses.get(column-2).get(row).toString ();
+          }
         }
       }
       public String getColumnName (int column) {

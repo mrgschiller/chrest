@@ -176,7 +176,7 @@ public class PairedAssociateExperiment extends JPanel {
 
   private void createProtocolTable () {
     TableModel tm = new AbstractTableModel () {
-      // include a row for the number correct
+      // include a row for the number of errors
       public int getRowCount () {
         return 1 + _patterns.size ();
       }
