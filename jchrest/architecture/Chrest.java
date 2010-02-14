@@ -420,7 +420,7 @@ public class Chrest extends Observable {
     return _perceiver.getHeuristicDescription ();
   }
 
-    private final static java.util.Random _random = new java.util.Random ();
+  private final static java.util.Random _random = new java.util.Random ();
 
   /**
    * Perceiver is an inner class as it contains many specific methods to itself, but 
@@ -491,11 +491,21 @@ public class Chrest extends Observable {
           _fixationX = ios.getColumn ();
           _fixationY = ios.getRow (); 
 
+          // look at square given by first test link
+          // then look to see if a test link has the same square and observed piece
           for (Link link : hypothesisChildren) {
-            if (_currentScene.getItem (_fixationY, _fixationX).equals (link.getTest ())) {
-              _visualStm.replaceHypothesis (link.getChildNode ());
-              _lastHeuristic = 1;
-              return true;
+            if (link.getTest().size () == 1) {
+              if (link.getTest().getItem (0) instanceof ItemSquarePattern) {
+                ItemSquarePattern testIos = (ItemSquarePattern)link.getTest().getItem (0);
+                // check all details of test are correct
+                if (testIos.getColumn () == _fixationX && 
+                    testIos.getRow () == _fixationY &&
+                    testIos.getItem().equals (_currentScene.getItem (_fixationY, _fixationX))) {
+                  _visualStm.replaceHypothesis (link.getChildNode ());
+                  _lastHeuristic = 1;
+                  return true;
+                    }
+              }
             }
           }
         }

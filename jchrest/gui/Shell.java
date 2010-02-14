@@ -295,6 +295,50 @@ public class Shell extends JFrame {
     }
   }
 
+
+  /**
+   * Action to load data from a saved model.
+   */
+  class LoadModelAction extends AbstractAction implements ActionListener {
+    private Shell _parent;
+
+    LoadModelAction (Shell parent) {
+      super ("Load");
+
+      _parent = parent;
+    }
+
+    public void actionPerformed (ActionEvent e) {
+      JOptionPane.showMessageDialog (
+          _parent, 
+          "Load a model - to be implemented",
+          "Load model", 
+          JOptionPane.INFORMATION_MESSAGE);
+    }
+  }
+
+  /**
+   * Action to save data from current model.
+   */
+  class SaveModelAction extends AbstractAction implements ActionListener {
+    private Shell _parent;
+
+    SaveModelAction (Shell parent) {
+      super ("Save");
+
+      _parent = parent;
+    }
+
+    public void actionPerformed (ActionEvent e) {
+      JOptionPane.showMessageDialog (
+          _parent, 
+          "Save a model - to be implemented",
+          "Save model", 
+          JOptionPane.INFORMATION_MESSAGE);
+
+    }
+  }
+
   /**
    * Action to display information about the current model.
    */
@@ -311,10 +355,14 @@ public class Shell extends JFrame {
       DecimalFormat twoPlaces = new DecimalFormat("0.00");
       JOptionPane.showMessageDialog (_parent,
           "<html><p>" + 
-          "Nodes in LTM: " + _model.ltmSize () +
-          "<br>Visual nodes: " + _model.ltmVisualSize () + " Average depth: " + twoPlaces.format (_model.getVisualLtmAverageDepth ()) +
-          "<br>Verbal nodes: " + _model.ltmVerbalSize () + " Average depth: " + twoPlaces.format (_model.getVerbalLtmAverageDepth ()) +
-          "<br>Action nodes: " + _model.ltmActionSize () + " Average depth: " + twoPlaces.format (_model.getActionLtmAverageDepth ()) +
+          "Total nodes in LTM: " + _model.ltmSize () +
+          "<hr>" + 
+          "Visual nodes: " + _model.ltmVisualSize () + 
+          " Average depth: " + twoPlaces.format (_model.getVisualLtmAverageDepth ()) +
+          "<br>Verbal nodes: " + _model.ltmVerbalSize () + 
+          " Average depth: " + twoPlaces.format (_model.getVerbalLtmAverageDepth ()) +
+          "<br>Action nodes: " + _model.ltmActionSize () + 
+          " Average depth: " + twoPlaces.format (_model.getActionLtmAverageDepth ()) +
           "</p></html>",
           "Chrest: Model information",
           JOptionPane.INFORMATION_MESSAGE);
@@ -367,6 +415,8 @@ public class Shell extends JFrame {
   private JMenu createModelMenu () {
     JMenu menu = new JMenu ("Model");
     menu.add (new ClearModelAction (this));
+    menu.add (new LoadModelAction (this));
+    menu.add (new SaveModelAction (this));
     menu.add (new ModelPropertiesAction (this));
     menu.add (new JSeparator ());
     menu.add (new ModelInformationAction (this));
