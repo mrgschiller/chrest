@@ -56,15 +56,15 @@ public class Scene {
    * Retrieve all items within given row +/- size, column +/- size
    * TODO: Convert this to use a circular field of view.
    */
-  public ListPattern getItems (int row, int column, int size) {
+  public ListPattern getItems (int startRow, int startColumn, int size) {
     ListPattern items = new ListPattern ();
 
-    for (int i = column - size; i <= column + size; ++i) {
-      if (i >= 0 && i < _height) {
-        for (int j = row - size; j <= row + size; ++j) {
-          if (j >= 0 && j < _width) {
-            if (!_scene[i][j].equals(".")) {
-              items.add (new ItemSquarePattern (_scene[i][j], i, j));
+    for (int col = startColumn - size; col <= startColumn + size; ++col) {
+      if (col >= 0 && col < _width) {
+        for (int row = startRow - size; row <= startRow + size; ++row) {
+          if (row >= 0 && row < _height) {
+            if (!_scene[row][col].equals(".")) {
+              items.add (new ItemSquarePattern (_scene[row][col], col+1, row+1));
 
             }
           }
