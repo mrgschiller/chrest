@@ -1,6 +1,7 @@
 package jchrest.gui;
 
 import jchrest.architecture.Chrest;
+import jchrest.lib.FileUtilities;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -71,14 +72,9 @@ public class ChrestView extends JFrame implements Observer {
     }
 
     public void actionPerformed (ActionEvent e) {
-      JFileChooser fc;
-      if (_shell == null) { // in scripts, this view may not have a parent Shell
-        fc = new JFileChooser ();
-      } else {
-        fc = _shell.fileChooser();
-      }
-      if (fc.showSaveDialog (_ltmView) == JFileChooser.APPROVE_OPTION) {
-        _parent.saveLongTermMemory (fc.getSelectedFile ());
+      File file = FileUtilities.getSaveFilename (_shell);
+      if (file != null) {
+        _parent.saveLongTermMemory (file);
       }
     }
   }

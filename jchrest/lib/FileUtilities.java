@@ -54,7 +54,7 @@ public class FileUtilities {
       } else {
         JOptionPane.showMessageDialog(parent, 
             "File " + filename.getName() +
-            " does not exist.  You need to select an existing model.",
+            " does not exist.  You need to select an existing file.",
             "Error: No file exists",
             JOptionPane.ERROR_MESSAGE);
         return getLoadFilename (parent);
@@ -344,6 +344,13 @@ public class FileUtilities {
 		writeCloseTag (output, tagName);
 		writeNewLine (output);
 	}
+
+  public static void writeTaggedFloat (Writer output, String tagName, float data) throws IOException {
+    writeOpenTag (output, tagName);
+    output.write ("" + data);
+    writeCloseTag (output, tagName);
+    writeNewLine (output);
+  }
 
 	public static void writeTaggedString (Writer output, String tagName, String data) throws IOException {
 		writeOpenTag (output, tagName);

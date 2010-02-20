@@ -1,6 +1,7 @@
 package jchrest.gui;
 
 import jchrest.architecture.Chrest;
+import jchrest.lib.FileUtilities;
 import jchrest.lib.ListPattern;
 import jchrest.lib.PairedPattern;
 import jchrest.lib.Pattern;
@@ -20,13 +21,11 @@ import javax.swing.*;
  * @author Peter C. R. Lane
  */
 public class Shell extends JFrame {
-  private JFileChooser _fileChooser;
   private Chrest _model;
 
   private Shell () {
     super ("CHREST");
 
-    _fileChooser = new JFileChooser ();
     _model = new Chrest ();
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -38,10 +37,6 @@ public class Shell extends JFrame {
     setLocationRelativeTo (null);
     setTheme ("Nimbus");
     setVisible (true);
-  }
-
-  public JFileChooser fileChooser () {
-    return _fileChooser;
   }
 
   private void createMenuBar () {
@@ -160,44 +155,43 @@ public class Shell extends JFrame {
     }
 
     public void actionPerformed (ActionEvent e) {
-      if (_parent.fileChooser().showOpenDialog (_parent) == JFileChooser.APPROVE_OPTION) {
-        if (_parent.fileChooser().getSelectedFile().exists ()) {
-          try {
-            String task = "";
-            BufferedReader input = new BufferedReader (new FileReader (_parent.fileChooser().getSelectedFile ()));
-            String line = input.readLine ();
-            if (line != null) {
-              task = line.trim ();
-            }              
+      File file = FileUtilities.getLoadFilename (_parent);
+      if (file != null) {
+        try {
+          String task = "";
+          BufferedReader input = new BufferedReader (new FileReader (file));
+          String line = input.readLine ();
+          if (line != null) {
+            task = line.trim ();
+          }              
 
-            if (task.equals ("recognise-and-learn")) {
-              _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input)));
-              _parent.validate ();
-            } else if (task.equals ("serial-anticipation")) {
-              _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(readItems (input))));
-              _parent.validate ();
-            } else if (task.equals ("paired-associate")) {
-              _parent.setContentPane (new PairedAssociateExperiment (_model, readPairedItems (input, false)));
-              _parent.validate ();
-            } else if (task.equals ("categorisation")) {
-              _parent.setContentPane (new CategorisationExperiment (_model, readPairedItems (input, true)));
-              _parent.validate ();
-            } else if (task.equals ("visual-search")) {
-              Scenes scenes = Scenes.read (input); // throws IOException if any problem
-              _parent.setContentPane (new VisualSearchPane (_model, scenes));
-              _parent.validate ();
-            } else {
-              JOptionPane.showMessageDialog (_parent,
-                  "Invalid task on first line of file",
-                  "File error",
-                  JOptionPane.ERROR_MESSAGE);
-            }
-          } catch (IOException ioe) {
-            JOptionPane.showMessageDialog (_parent, 
-                "There was an error in processing your file", 
+          if (task.equals ("recognise-and-learn")) {
+            _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input)));
+            _parent.validate ();
+          } else if (task.equals ("serial-anticipation")) {
+            _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(readItems (input))));
+            _parent.validate ();
+          } else if (task.equals ("paired-associate")) {
+            _parent.setContentPane (new PairedAssociateExperiment (_model, readPairedItems (input, false)));
+            _parent.validate ();
+          } else if (task.equals ("categorisation")) {
+            _parent.setContentPane (new CategorisationExperiment (_model, readPairedItems (input, true)));
+            _parent.validate ();
+          } else if (task.equals ("visual-search")) {
+            Scenes scenes = Scenes.read (input); // throws IOException if any problem
+            _parent.setContentPane (new VisualSearchPane (_model, scenes));
+            _parent.validate ();
+          } else {
+            JOptionPane.showMessageDialog (_parent,
+                "Invalid task on first line of file",
                 "File error",
                 JOptionPane.ERROR_MESSAGE);
           }
+        } catch (IOException ioe) {
+          JOptionPane.showMessageDialog (_parent, 
+              "There was an error in processing your file", 
+              "File error",
+              JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -330,12 +324,19 @@ public class Shell extends JFrame {
     }
 
     public void actionPerformed (ActionEvent e) {
-      JOptionPane.showMessageDialog (
-          _parent, 
-          "Save a model - to be implemented",
-          "Save model", 
-          JOptionPane.INFORMATION_MESSAGE);
-
+      File file = FileUtilities.getSaveFilename (_parent);
+      if (file == null) return;
+      try {
+      FileWriter writer = new FileWriter (file);
+      _model.writeModel (writer);
+      writer.close ();
+      } catch (IOException ioe) {
+        JOptionPane.showMessageDialog (_parent,
+            "File " + file.getName () + 
+            " could not be saved due to an error.",
+            "Error: File save error",
+            JOptionPane.ERROR_MESSAGE);
+      }
     }
   }
 
@@ -443,7 +444,7 @@ public class Shell extends JFrame {
     }
     // make sure all components are updated
     SwingUtilities.updateComponentTreeUI(this);
-    SwingUtilities.updateComponentTreeUI(_fileChooser);
+    // SwingUtilities.updateComponentTreeUI(_fileChooser); TODO: update FileUtilities filechooser
   }
 
   /**

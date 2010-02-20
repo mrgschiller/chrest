@@ -2,6 +2,7 @@ package jchrest.architecture;
 
 import jchrest.lib.*;
 
+import java.io.*;
 import java.util.List;
 import java.util.Observable;
 
@@ -418,6 +419,24 @@ public class Chrest extends Observable {
 
   public String getHeuristicDescription () {
     return _perceiver.getHeuristicDescription ();
+  }
+
+  /**
+   * Write a description of the CHREST model to the given Writer object.
+   */
+  public void writeModel (Writer writer) throws IOException {
+    FileUtilities.writeOpenTag (writer, "chrest");
+    FileUtilities.writeTaggedInt (writer, "clock", _clock);
+    FileUtilities.writeTaggedInt (writer, "add-link-time", _addLinkTime);
+    FileUtilities.writeTaggedInt (writer, "discrimination-time", _discriminationTime);
+    FileUtilities.writeTaggedInt (writer, "familiarisation-time", _familiarisationTime);
+    FileUtilities.writeTaggedFloat (writer, "rho", _rho);
+    FileUtilities.writeTaggedInt (writer, "visual-stm-size", _visualStm.getSize ());
+    FileUtilities.writeTaggedInt (writer, "verbal-stm-size", _verbalStm.getSize ());
+    FileUtilities.writeTaggedInt (writer, "action-stm-size", _actionStm.getSize ());
+    // TODO: Write the long term memory structures
+
+    FileUtilities.writeCloseTag (writer, "chrest");
   }
 
   private final static java.util.Random _random = new java.util.Random ();
