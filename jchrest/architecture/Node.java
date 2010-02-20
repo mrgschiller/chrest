@@ -1,8 +1,10 @@
 package jchrest.architecture;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import jchrest.lib.FileUtilities;
 import jchrest.lib.ListPattern;
 import jchrest.lib.Pattern;
 
@@ -271,6 +273,43 @@ public class Node {
     }
 
     return this;
+  }
+
+  /**
+   * Write a description of the node to the given Writer object.
+   */
+  public void writeNode (Writer writer) throws IOException {
+    FileUtilities.writeOpenTag (writer, "node");
+    FileUtilities.writeTaggedInt (writer, "reference", _reference);
+
+    FileUtilities.writeOpenTag (writer, "contents");
+    _contents.writePattern (writer);
+    FileUtilities.writeCloseTag (writer, "contents");
+    FileUtilities.writeOpenTag (writer, "image");
+    _image.writePattern (writer);
+    FileUtilities.writeCloseTag (writer, "image");
+
+    if (_children.isEmpty ()) {
+      ; // write nothing if no children
+    } else {
+      FileUtilities.writeOpenTag (writer, "children");
+      for (Link link : _children) {
+        link.writeLink (writer);
+      }
+      FileUtilities.writeCloseTag (writer, "children");
+    }
+    if (_followedBy != null) {
+      FileUtilities.writeOpenTag (writer, "followed-by");
+      FileUtilities.writeTaggedInt (writer, "reference", _followedBy.getReference ());
+      FileUtilities.writeCloseTag (writer, "followed-by");
+    }
+    if (_namedBy != null) {
+      FileUtilities.writeOpenTag (writer, "named-by");
+      FileUtilities.writeTaggedInt (writer, "reference", _namedBy.getReference ());
+      FileUtilities.writeCloseTag (writer, "named-by");
+    }
+    FileUtilities.writeCloseTag (writer, "node");
+    FileUtilities.writeNewLine (writer);
   }
 }
 

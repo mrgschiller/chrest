@@ -1,7 +1,10 @@
 package jchrest.lib;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import jchrest.lib.FileUtilities;
 
 /**
  * The ListPattern is the primary datatype used to represent compound 
@@ -55,14 +58,24 @@ public class ListPattern extends Pattern {
     return result;
   }
 
+  /**
+   * Return the number of patterns held inside the list pattern.
+   */
   public int size () {
     return _list.size ();
   }
 
+  /**
+   * Check if the list pattern is empty, holding no patterns.
+   */
   public boolean isEmpty () {
     return _list.isEmpty ();
   }
 
+  /**
+   * Retrieve the indexed item from the list pattern.
+   * There is no check on the validity of the index.
+   */
   public Pattern getItem (int index) {
     return _list.get (index);
   }
@@ -74,6 +87,9 @@ public class ListPattern extends Pattern {
     return _finished;
   }
 
+  /**
+   * Class level method to check if two patterns have the same modality.
+   */
   static public boolean isSameModality (ListPattern pattern1, ListPattern pattern2) {
     return pattern1._modality == pattern2._modality;
   }
@@ -99,6 +115,9 @@ public class ListPattern extends Pattern {
     return _modality == Modality.ACTION;
   }
 
+  /**
+   * Convert the modality into a string.
+   */
   public String getModalityString () {
     if (isVisual ()) {
       return "Visual";
@@ -260,6 +279,22 @@ public class ListPattern extends Pattern {
     if (_finished) result += "$ ";
 
     return result + ">";
+  }
+
+  /**
+   * Write a description of the list pattern to the given Writer object.
+   */
+  public void writePattern (Writer writer) throws IOException {
+    FileUtilities.writeOpenTag (writer, "list-pattern");
+    FileUtilities.writeOpenTag (writer, "items");
+    for (Pattern pattern : _list) {
+      pattern.writePattern (writer);
+    }
+    FileUtilities.writeCloseTag (writer, "items");
+
+    FileUtilities.writeTaggedString (writer, "modality", _modality.toString ());
+    FileUtilities.writeTaggedBoolean (writer, "finished", _finished);
+    FileUtilities.writeCloseTag (writer, "list-pattern");
   }
 }
 

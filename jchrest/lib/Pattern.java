@@ -1,5 +1,7 @@
 package jchrest.lib;
 
+import java.io.*;
+
 /** 
  * Parent class of all patterns.
  *
@@ -70,5 +72,6 @@ public abstract class Pattern {
   public abstract boolean equals (Pattern pattern);
   public abstract boolean matches (Pattern pattern);
   public abstract String toString ();
+  public abstract void writePattern (Writer writer) throws IOException;
 }
 

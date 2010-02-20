@@ -1,5 +1,7 @@
 package jchrest.lib;
 
+import java.io.*;
+
 /**
  * The ItemSquarePattern is a type of PrimitivePattern used to hold 
  * objects places on a square array.  The item-on-square is treated 
@@ -66,6 +68,14 @@ public class ItemSquarePattern extends PrimitivePattern {
 
   public String toString () {
     return "[" + _item + " " + _column + " " + _row + "]";
+  }
+
+  public void writePattern (Writer writer) throws IOException {
+    FileUtilities.writeOpenTag (writer, "item-on-square-pattern");
+    FileUtilities.writeTaggedString (writer, "item", _item);
+    FileUtilities.writeTaggedInt (writer, "column", _column);
+    FileUtilities.writeTaggedInt (writer, "row", _row);
+    FileUtilities.writeCloseTag (writer, "item-on-square-pattern");
   }
 }
 

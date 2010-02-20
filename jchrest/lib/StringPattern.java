@@ -1,5 +1,6 @@
 package jchrest.lib;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +62,10 @@ public class StringPattern extends PrimitivePattern {
 
   public String toString () {
     return _name;
+  }
+
+  public void writePattern (Writer writer) throws IOException {
+    FileUtilities.writeTaggedString (writer, "string-pattern", _name);
   }
 }
 

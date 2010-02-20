@@ -1,5 +1,8 @@
 package jchrest.architecture;
 
+import java.io.*;
+
+import jchrest.lib.FileUtilities;
 import jchrest.lib.ListPattern;
 
 public class Link {
@@ -21,6 +24,22 @@ public class Link {
 
   public boolean passes (ListPattern pattern) {
     return _test.matches (pattern);
+  }
+
+  /**
+   * Write a description of the link to the given Writer object.
+   */
+  public void writeLink (Writer writer) throws IOException {
+    FileUtilities.writeOpenTag (writer, "link");
+    FileUtilities.writeOpenTag (writer, "test");
+    _test.writePattern (writer);
+    FileUtilities.writeCloseTag (writer, "test");
+
+    FileUtilities.writeOpenTag (writer, "child");
+    _child.writeNode (writer);
+    FileUtilities.writeCloseTag (writer, "child");
+
+    FileUtilities.writeCloseTag (writer, "link");
   }
 }
 

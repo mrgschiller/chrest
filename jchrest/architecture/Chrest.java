@@ -434,7 +434,19 @@ public class Chrest extends Observable {
     FileUtilities.writeTaggedInt (writer, "visual-stm-size", _visualStm.getSize ());
     FileUtilities.writeTaggedInt (writer, "verbal-stm-size", _verbalStm.getSize ());
     FileUtilities.writeTaggedInt (writer, "action-stm-size", _actionStm.getSize ());
-    // TODO: Write the long term memory structures
+    // write each ltm in turn
+    FileUtilities.writeOpenTag (writer, "visual-ltm");
+    _visualLtm.writeNode (writer);
+    FileUtilities.writeCloseTag (writer, "visual-ltm");
+    FileUtilities.writeNewLine (writer);
+    FileUtilities.writeOpenTag (writer, "verbal-ltm");
+    _verbalLtm.writeNode (writer);
+    FileUtilities.writeCloseTag (writer, "verbal-ltm");
+    FileUtilities.writeNewLine (writer);
+    FileUtilities.writeOpenTag (writer, "action-ltm");
+    _actionLtm.writeNode (writer);
+    FileUtilities.writeCloseTag (writer, "action-ltm");
+    FileUtilities.writeNewLine (writer);
 
     FileUtilities.writeCloseTag (writer, "chrest");
   }
