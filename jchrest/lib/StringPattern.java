@@ -67,5 +67,10 @@ public class StringPattern extends PrimitivePattern {
   public void writePattern (Writer writer) throws IOException {
     FileUtilities.writeTaggedString (writer, "string-pattern", _name);
   }
+
+  public static StringPattern readPattern (BufferedReader reader) throws ParsingErrorException {
+    String name = FileUtilities.readStringInTag (reader, "string-pattern");
+    return StringPattern.create (name);
+  }
 }
 

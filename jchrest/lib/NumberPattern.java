@@ -65,5 +65,10 @@ public class NumberPattern extends PrimitivePattern {
   public void writePattern (Writer writer) throws IOException {
     FileUtilities.writeTaggedInt (writer, "number-pattern", _number);
   }
+
+  public static NumberPattern readPattern (BufferedReader reader) throws ParsingErrorException {
+    int number = FileUtilities.readIntInTag (reader, "number-pattern");
+    return NumberPattern.create (number);
+  }
 }
 

@@ -2,7 +2,10 @@ package jchrest.architecture;
 
 import jchrest.lib.*;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
@@ -431,6 +434,7 @@ public class Chrest extends Observable {
     FileUtilities.writeTaggedInt (writer, "discrimination-time", _discriminationTime);
     FileUtilities.writeTaggedInt (writer, "familiarisation-time", _familiarisationTime);
     FileUtilities.writeTaggedFloat (writer, "rho", _rho);
+    FileUtilities.writeTaggedInt (writer, "field-of-view", _perceiver.getFieldOfView ());
     FileUtilities.writeTaggedInt (writer, "visual-stm-size", _visualStm.getSize ());
     FileUtilities.writeTaggedInt (writer, "verbal-stm-size", _verbalStm.getSize ());
     FileUtilities.writeTaggedInt (writer, "action-stm-size", _actionStm.getSize ());
@@ -449,6 +453,108 @@ public class Chrest extends Observable {
     FileUtilities.writeNewLine (writer);
 
     FileUtilities.writeCloseTag (writer, "chrest");
+  }
+
+  /**
+   * Read a description of a Chrest model from the given buffered-reader, and construct 
+   * a new instance of Chrest.
+   */
+  public static Chrest readFromFile (BufferedReader reader) throws ParsingErrorException {
+    int clock, addLinkTime, familiarisationTime, discriminationTime, 
+        visualStmSize, verbalStmSize, actionStmSize, fieldOfView;
+    float rho;
+    Node visualLtm, verbalLtm, actionLtm;
+
+    FileUtilities.acceptOpenTag (reader, "chrest");
+    while (!FileUtilities.checkCloseTag (reader, "chrest")) {
+      if (FileUtilities.checkOpenTag (reader, "clock")) {
+        clock = FileUtilities.readIntInTag (reader, "clock");
+      } else if (FileUtilities.checkOpenTag (reader, "add-link-time")) {
+        addLinkTime = FileUtilities.readIntInTag (reader, "add-link-time");
+      } else if (FileUtilities.checkOpenTag (reader, "discrimination-time")) {
+        discriminationTime = FileUtilities.readIntInTag (reader, "discrimination-time");
+      } else if (FileUtilities.checkOpenTag (reader, "familiarisation-time")) {
+        familiarisationTime = FileUtilities.readIntInTag (reader, "familiarisation-time");
+      } else if (FileUtilities.checkOpenTag (reader, "rho")) {
+        rho = FileUtilities.readFloatInTag (reader, "rho");
+      } else if (FileUtilities.checkOpenTag (reader, "field-of-view")) {
+        fieldOfView = FileUtilities.readIntInTag (reader, "field-of-view");
+      } else if (FileUtilities.checkOpenTag (reader, "visual-stm-size")) {
+        visualStmSize = FileUtilities.readIntInTag (reader, "visual-stm-size");
+      } else if (FileUtilities.checkOpenTag (reader, "verbal-stm-size")) {
+        verbalStmSize = FileUtilities.readIntInTag (reader, "verbal-stm-size");
+      } else if (FileUtilities.checkOpenTag (reader, "action-stm-size")) {
+        actionStmSize = FileUtilities.readIntInTag (reader, "action-stm-size");
+      } else if (FileUtilities.checkOpenTag (reader, "visual-ltm")) {
+        FileUtilities.acceptOpenTag (reader, "visual-ltm");
+        visualLtm = readNodeFromFile (reader, "visual-ltm");
+        FileUtilities.acceptCloseTag (reader, "visual-ltm");
+      } else if (FileUtilities.checkOpenTag (reader, "verbal-ltm")) {
+        FileUtilities.acceptOpenTag (reader, "verbal-ltm");
+        verbalLtm = readNodeFromFile (reader, "verbal-ltm");
+        FileUtilities.acceptCloseTag (reader, "verbal-ltm");
+      } else if (FileUtilities.checkOpenTag (reader, "verbal-ltm")) {
+        FileUtilities.acceptOpenTag (reader, "action-ltm");
+        actionLtm = readNodeFromFile (reader, "action-ltm");
+        FileUtilities.acceptCloseTag (reader, "action-ltm");
+      } else { // no valid tag
+        throw new ParsingErrorException ();
+      }
+    }
+    FileUtilities.acceptCloseTag (reader, "chrest");
+
+    return new Chrest ();
+  }
+
+  private static class ReadNode {
+
+    static ReadNode readNodeFromFile (BufferedReader reader) throws ParsingErrorException {
+      int reference, namedBy, followedBy;
+      ListPattern contents, image;
+
+      FileUtilities.acceptOpenTag (reader, "node");
+      while (!FileUtilities.checkCloseTag (reader, "node")) {
+        if (FileUtilities.checkOpenTag (reader, "reference")) {
+          reference = FileUtilities.readIntInTag (reader, "reference");
+        } else if (FileUtilities.checkOpenTag (reader, "contents")) {
+          contents = ListPattern.readPattern (reader);
+        } else if (FileUtilities.checkOpenTag (reader, "image")) {
+          image = ListPattern.readPattern (reader);
+        } else if (FileUtilities.checkOpenTag (reader, "children")) {
+
+        } else if (FileUtilities.checkOpenTag (reader, "named-by")) {
+          FileUtilities.acceptOpenTag (reader, "named-by");
+          namedBy = FileUtilities.readIntInTag (reader, "reference");
+          FileUtilities.acceptCloseTag (reader, "named-by");
+        } else if (FileUtilities.checkOpenTag (reader, "followed-by")) {
+          FileUtilities.acceptOpenTag (reader, "followed-by");
+          followedBy = FileUtilities.readIntInTag (reader, "reference");
+          FileUtilities.acceptCloseTag (reader, "followed-by");
+        } else {
+          throw new ParsingErrorException ();
+        }
+      }
+      FileUtilities.acceptCloseTag (reader, "node");
+
+      return new ReadNode ();
+    }
+  }
+
+  /** 
+   * Read all the nodes up to the close tag.  Construct a Chrest Node with correct object references.
+   */
+  private static Node readNodeFromFile (BufferedReader reader, String closeTag) throws ParsingErrorException {
+    // 1. Read in all the nodes
+    List<ReadNode> readNodes = new ArrayList<ReadNode> ();
+    while (!FileUtilities.checkCloseTag (reader, closeTag)) {
+      ReadNode newNode = ReadNode.readNodeFromFile (reader);
+    }
+    // 2. Convert into Chrest Nodes
+    
+    // 3. Add in link references
+    
+    // 4. Return the root node, which should have reference 0
+    return new Node (null);
   }
 
   private final static java.util.Random _random = new java.util.Random ();

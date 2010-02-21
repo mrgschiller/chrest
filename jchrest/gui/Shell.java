@@ -4,6 +4,7 @@ import jchrest.architecture.Chrest;
 import jchrest.lib.FileUtilities;
 import jchrest.lib.ListPattern;
 import jchrest.lib.PairedPattern;
+import jchrest.lib.ParsingErrorException;
 import jchrest.lib.Pattern;
 import jchrest.lib.Scenes;
 
@@ -303,11 +304,36 @@ public class Shell extends JFrame {
     }
 
     public void actionPerformed (ActionEvent e) {
-      JOptionPane.showMessageDialog (
-          _parent, 
-          "Load a model - to be implemented",
-          "Load model", 
-          JOptionPane.INFORMATION_MESSAGE);
+      File file = FileUtilities.getLoadFilename (_parent);
+      if (file == null) return;
+      try {
+        if (file.exists ()) {
+          BufferedReader reader = new BufferedReader (new FileReader (file));
+          _model = Chrest.readFromFile (reader);
+          reader.close ();
+        } else {
+          JOptionPane.showMessageDialog (
+              _parent, 
+              "File " + file.getName () + 
+              " could not be loaded because it does not exist.",
+              "Error: File load error", 
+              JOptionPane.ERROR_MESSAGE);
+        }
+      } catch (IOException ioe) {
+        JOptionPane.showMessageDialog (
+            _parent, 
+            "File " + file.getName () + 
+            " could not be loaded due to an error in accessing the file.",
+            "Error: File load error", 
+            JOptionPane.ERROR_MESSAGE);
+      } catch (ParsingErrorException err) {
+        JOptionPane.showMessageDialog (
+            _parent, 
+            "File " + file.getName () + 
+            " could not be loaded due to an error in processing the file.",
+            "Error: File load error", 
+            JOptionPane.ERROR_MESSAGE);
+      }
     }
   }
 
@@ -327,9 +353,9 @@ public class Shell extends JFrame {
       File file = FileUtilities.getSaveFilename (_parent);
       if (file == null) return;
       try {
-      FileWriter writer = new FileWriter (file);
-      _model.writeModel (writer);
-      writer.close ();
+        FileWriter writer = new FileWriter (file);
+        _model.writeModel (writer);
+        writer.close ();
       } catch (IOException ioe) {
         JOptionPane.showMessageDialog (_parent,
             "File " + file.getName () + 

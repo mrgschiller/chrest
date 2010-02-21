@@ -238,7 +238,20 @@ public class FileUtilities {
 
 		try {
 			String data = readUntilChar (inputFile, TAG_START_CHAR);
-			result = java.lang.Integer.parseInt(data);
+			result = java.lang.Integer.parseInt (data);
+		} catch (NumberFormatException e) {
+			throw new ParsingErrorException ();
+		}
+
+		return result;
+	}
+
+  public static float getFloat (BufferedReader inputFile) throws ParsingErrorException {
+		float result;
+
+		try {
+			String data = readUntilChar (inputFile, TAG_START_CHAR);
+			result = java.lang.Float.parseFloat (data);
 		} catch (NumberFormatException e) {
 			throw new ParsingErrorException ();
 		}
@@ -308,6 +321,15 @@ public class FileUtilities {
 		return i;
 	}
 
+	public static float readFloatInTag (BufferedReader inputFile, String tagName)
+		throws ParsingErrorException {
+
+		float f = 0.0f;
+		acceptOpenTag (inputFile, tagName);
+		f = getFloat (inputFile);
+		acceptCloseTag (inputFile, tagName);
+		return f;
+	}
 /**		
 	public static Point readPointInTag (BufferedReader inputFile, String tagName) 
 		throws ParsingErrorException {

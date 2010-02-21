@@ -35,9 +35,7 @@ public class Link {
     _test.writePattern (writer);
     FileUtilities.writeCloseTag (writer, "test");
 
-    FileUtilities.writeOpenTag (writer, "child");
-    _child.writeNode (writer);
-    FileUtilities.writeCloseTag (writer, "child");
+    FileUtilities.writeTaggedInt (writer, "child", _child.getReference ());
 
     FileUtilities.writeCloseTag (writer, "link");
   }

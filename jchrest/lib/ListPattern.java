@@ -296,6 +296,44 @@ public class ListPattern extends Pattern {
     FileUtilities.writeTaggedBoolean (writer, "finished", _finished);
     FileUtilities.writeCloseTag (writer, "list-pattern");
   }
+
+  /**
+   * Retrieve a description of list pattern from given Writer object, and create it.
+   */
+  public static ListPattern readPattern (BufferedReader reader) throws ParsingErrorException {
+    boolean finished = false;
+    String modality = "VISUAL";
+    List<Pattern> items = new ArrayList<Pattern> ();
+
+    FileUtilities.acceptOpenTag (reader, "list-pattern");
+
+    while (!FileUtilities.checkCloseTag (reader, "list-pattern")) {
+      if (FileUtilities.checkOpenTag (reader, "items")) {
+        FileUtilities.acceptOpenTag (reader, "items");
+        while (!FileUtilities.checkCloseTag (reader, "items")) {
+          if (FileUtilities.checkOpenTag (reader, "string-pattern")) {
+            items.add (StringPattern.readPattern (reader));
+          } else if (FileUtilities.checkOpenTag (reader, "number-pattern")) {
+            items.add (NumberPattern.readPattern (reader));
+          } else if (FileUtilities.checkOpenTag (reader, "item-on-square")) {
+            items.add (ItemSquarePattern.readPattern (reader));
+          } else {
+            throw new ParsingErrorException ();
+          }
+        }
+        FileUtilities.acceptCloseTag (reader, "items");
+      } else if (FileUtilities.checkOpenTag (reader, "modality")) {
+        modality = FileUtilities.readStringInTag (reader, "modality");
+      } else if (FileUtilities.checkOpenTag (reader, "finished")) {
+        finished = FileUtilities.readBooleanInTag (reader, "finished");
+      } else { // unknown tag
+        throw new ParsingErrorException ();
+      }
+    }
+
+    FileUtilities.acceptCloseTag (reader, "list-pattern");
+    return new ListPattern ();
+  }
 }
 
 enum Modality { VISUAL, VERBAL, ACTION }

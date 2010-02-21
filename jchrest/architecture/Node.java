@@ -6,6 +6,7 @@ import java.util.List;
 
 import jchrest.lib.FileUtilities;
 import jchrest.lib.ListPattern;
+import jchrest.lib.ParsingErrorException;
 import jchrest.lib.Pattern;
 
 /**
@@ -15,7 +16,7 @@ import jchrest.lib.Pattern;
  * @author Peter C. R. Lane
  */
 public class Node {
-  private static int _totalNodes = 0;
+  private static int _totalNodes = 0; //TODO: This count should be inside 'Chrest' to support multiple models
   private int _reference;
   private ListPattern _contents;
   private ListPattern _image;
@@ -310,6 +311,23 @@ public class Node {
     }
     FileUtilities.writeCloseTag (writer, "node");
     FileUtilities.writeNewLine (writer);
+
+    // recurse, by writing the node descriptions for any child nodes
+    for (Link link : _children) {
+      link.getChildNode().writeNode (writer);
+    }
+  }
+
+  /**
+   * Read a description of a Node from the given buffered-reader, and construct 
+   * a new instance of Node.
+   */
+  public static Node readFromFile (BufferedReader reader) throws ParsingErrorException {
+
+    FileUtilities.acceptOpenTag (reader, "node");
+
+    FileUtilities.acceptCloseTag (reader, "node");
+    return new Node (null);
   }
 }
 
