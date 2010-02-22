@@ -302,7 +302,7 @@ public class ListPattern extends Pattern {
    */
   public static ListPattern readPattern (BufferedReader reader) throws ParsingErrorException {
     boolean finished = false;
-    String modality = "VISUAL";
+    Modality modality = Modality.VISUAL;
     List<Pattern> items = new ArrayList<Pattern> ();
 
     FileUtilities.acceptOpenTag (reader, "list-pattern");
@@ -323,7 +323,14 @@ public class ListPattern extends Pattern {
         }
         FileUtilities.acceptCloseTag (reader, "items");
       } else if (FileUtilities.checkOpenTag (reader, "modality")) {
-        modality = FileUtilities.readStringInTag (reader, "modality");
+        String mode = FileUtilities.readStringInTag (reader, "modality");
+        if (mode.equals("VISUAL")) {
+          modality = Modality.VISUAL;
+        } else if (mode.equals("VERBAL")) {
+          modality = Modality.VERBAL;
+        } else { // if (mode.equals("ACTION")) 
+          modality = Modality.ACTION;
+        }
       } else if (FileUtilities.checkOpenTag (reader, "finished")) {
         finished = FileUtilities.readBooleanInTag (reader, "finished");
       } else { // unknown tag
@@ -332,7 +339,13 @@ public class ListPattern extends Pattern {
     }
 
     FileUtilities.acceptCloseTag (reader, "list-pattern");
-    return new ListPattern ();
+    ListPattern pattern = new ListPattern (modality);
+    for (Pattern pat : items) {
+      pattern.add (pat);
+    }
+    if (finished) pattern.setFinished ();
+
+    return pattern;
   }
 }
 

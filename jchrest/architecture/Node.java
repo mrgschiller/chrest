@@ -51,6 +51,21 @@ public class Node {
   }
 
   /**
+   * Constructor to build a new Chrest node with given reference, contents and image.
+   * Package access only, as should only be used by Chrest.java.
+   */
+  Node (int reference, ListPattern contents, ListPattern image) {
+    _reference = reference;
+    _totalNodes = Math.max (_totalNodes, reference); // make sure _totalNodes is largest sized node
+    _contents = contents.clone ();
+    _contents.setNotFinished (); // do not allow contents to be finished
+    _image = image;
+    _children = new ArrayList<Link> ();
+    _followedBy = null;
+    _namedBy = null;
+  }
+
+  /**
    * Accessor to reference number of node.
    */
   public int getReference () {
@@ -76,6 +91,10 @@ public class Node {
    */
   public List<Link> getChildren () {
     return _children;
+  }
+
+  void addTestLink (ListPattern test, Node child) {
+    _children.add (0, new Link (test, child));
   }
 
   /**
@@ -164,7 +183,7 @@ public class Node {
     ListPattern contents = pattern.clone ();
     contents.setNotFinished ();
     Node child = new Node (contents, pattern);
-    _children.add (0, new Link (contents, child));
+    addTestLink (contents, child);
     model.advanceClock (model.getDiscriminationTime ());
 
     return child;
@@ -185,7 +204,7 @@ public class Node {
         Node newChild = new Node (newContents, new ListPattern ());
         ListPattern finishTest = new ListPattern ();
         finishTest.setFinished ();
-        _children.add (0, new Link (finishTest, newChild));
+        addTestLink (finishTest, newChild);
         model.advanceClock (model.getDiscriminationTime ());
         return newChild;
       }
@@ -205,7 +224,7 @@ public class Node {
       Node newChild = new Node (_contents.append (retrievedChunk.getImage ()), new ListPattern ());
       ListPattern contents = retrievedChunk.getImage ().clone ();
       contents.setNotFinished ();
-      _children.add (0, new Link (contents, newChild));
+      addTestLink (contents, newChild);
       model.advanceClock (model.getDiscriminationTime ());
       return newChild;
     } else { // look for or learn a new primitive chunk
@@ -217,7 +236,7 @@ public class Node {
         Node newChild = new Node (_contents.append (primitive), new ListPattern ());
         ListPattern contents = primitive.clone ();
         contents.setNotFinished ();
-        _children.add (0, new Link (contents, newChild));
+        addTestLink (contents, newChild);
         model.advanceClock (model.getDiscriminationTime ());
         return newChild;
       }

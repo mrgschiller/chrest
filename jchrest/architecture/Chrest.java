@@ -6,7 +6,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 
 /**
@@ -506,11 +508,111 @@ public class Chrest extends Observable {
     return new Chrest ();
   }
 
+  /**
+   * Class to hold the information read in about a link.
+   */
+  private static class ReadLink {
+    private ListPattern _test;
+    private Integer _child;
+
+    ReadLink (ListPattern test, Integer child) {
+      _test = test;
+      _child = child;
+    }
+
+    ListPattern getTest () {
+      return _test;
+    }
+
+    Integer getChild () {
+      return _child;
+    }
+
+    public static ReadLink readLinkFromFile (BufferedReader reader) throws ParsingErrorException {
+      ListPattern test = null;
+      Integer child = null;
+      FileUtilities.acceptOpenTag (reader, "link");
+      while (!FileUtilities.checkCloseTag (reader, "link")) {
+        if (FileUtilities.checkOpenTag (reader, "test")) {
+          child = FileUtilities.readIntInTag (reader, "test");
+        } else if (FileUtilities.checkOpenTag (reader, "test")) {
+          test = ListPattern.readPattern (reader);
+        } else { // unknown tag
+          throw new ParsingErrorException ();
+        }
+      }
+
+      FileUtilities.acceptCloseTag (reader, "link");
+
+      // check everything has been initialised
+      if (test == null || child == null) {
+        throw new ParsingErrorException ();
+      }
+
+      return new ReadLink (test, child);
+    }
+  }
+
+  /**
+   * Class to hold information read in about a node.
+   */
   private static class ReadNode {
+    private int _reference;
+    private ListPattern _contents;
+    private ListPattern _image;
+    private List<ReadLink> _children;
+    private Integer _namedBy;
+    private Integer _followedBy;
+
+    ReadNode (int reference, ListPattern contents, ListPattern image, List<ReadLink> children, 
+        Integer namedBy, Integer followedBy) {
+      _reference = reference;
+      _contents = contents;
+      _image = image;
+      _children = children;
+      _namedBy = namedBy;
+      _followedBy = followedBy;
+    }
+
+    Integer getReference () {
+      return _reference;
+    }
+
+    ListPattern getContents () {
+      return _contents;
+    }
+
+    ListPattern getImage () {
+      return _image;
+    }
+
+    List<ReadLink> getChildren () {
+      return _children;
+    }
+
+    boolean hasNamedByLink () {
+      return _namedBy != null;
+    }
+
+    Integer getNamedByReference () {
+      return _namedBy;
+    }
+
+    boolean hasFollowedByLink () {
+      return _followedBy != null;
+    }
+
+    Integer getFollowedByReference () {
+      return _followedBy;
+    }
 
     static ReadNode readNodeFromFile (BufferedReader reader) throws ParsingErrorException {
-      int reference, namedBy, followedBy;
-      ListPattern contents, image;
+      int reference = -1;
+      Integer namedBy = null;
+      Integer followedBy = null;
+      ListPattern contents = null;
+      ListPattern image = null;
+      List<ReadLink> children = new ArrayList<ReadLink> ();
 
       FileUtilities.acceptOpenTag (reader, "node");
       while (!FileUtilities.checkCloseTag (reader, "node")) {
@@ -521,7 +623,15 @@ public class Chrest extends Observable {
         } else if (FileUtilities.checkOpenTag (reader, "image")) {
           image = ListPattern.readPattern (reader);
         } else if (FileUtilities.checkOpenTag (reader, "children")) {
-
+          FileUtilities.acceptOpenTag (reader, "children");
+          while (!FileUtilities.checkCloseTag (reader, "children")) {
+            if (FileUtilities.checkOpenTag (reader, "link")) {
+              children.add (ReadLink.readLinkFromFile (reader));
+            } else { // unknown tag
+              throw new ParsingErrorException ();
+            }
+          }
+          FileUtilities.acceptCloseTag (reader, "children");
         } else if (FileUtilities.checkOpenTag (reader, "named-by")) {
           FileUtilities.acceptOpenTag (reader, "named-by");
           namedBy = FileUtilities.readIntInTag (reader, "reference");
@@ -536,7 +646,12 @@ public class Chrest extends Observable {
       }
       FileUtilities.acceptCloseTag (reader, "node");
 
-      return new ReadNode ();
+      // must at minimum have reference, contents and image
+      if (reference == -1 || contents == null || image == null) {
+        throw new ParsingErrorException ();
+      }
+
+      return new ReadNode (reference, contents, image, children, namedBy, followedBy);
     }
   }
 
@@ -544,17 +659,40 @@ public class Chrest extends Observable {
    * Read all the nodes up to the close tag.  Construct a Chrest Node with correct object references.
    */
   private static Node readNodeFromFile (BufferedReader reader, String closeTag) throws ParsingErrorException {
-    // 1. Read in all the nodes
+    // -- store a list of read nodes
     List<ReadNode> readNodes = new ArrayList<ReadNode> ();
+    // -- store a map from node reference to the real Chrest node
+    Map<Integer, Node> nodes = new HashMap<Integer, Node> ();
+
+    // 1. Read in all the nodes
     while (!FileUtilities.checkCloseTag (reader, closeTag)) {
       ReadNode newNode = ReadNode.readNodeFromFile (reader);
+      readNodes.add (newNode);
     }
-    // 2. Convert into Chrest Nodes
+    // 2. Convert into Chrest Nodes and store in map indexed by reference number
+    for (ReadNode node : readNodes) {
+      nodes.put (node.getReference (), new Node(node.getReference (), node.getContents (), node.getImage ()));
+    }
     
     // 3. Add in link references
+    for (ReadNode node : readNodes) {
+      Node sourceNode = nodes.get (node.getReference ());
+
+      for (ReadLink link : node.getChildren ()) {
+        sourceNode.addTestLink (link.getTest (), nodes.get (link.getChild ()));
+      }
+
+      if (node.hasNamedByLink ()) {
+        sourceNode.setNamedBy (nodes.get (node.getNamedByReference ()));
+      }
+
+      if (node.hasFollowedByLink ()) {
+        sourceNode.setFollowedBy (nodes.get (node.getFollowedByReference ()));
+      }
+    }
     
     // 4. Return the root node, which should have reference 0
-    return new Node (null);
+    return nodes.get (0);
   }
 
   private final static java.util.Random _random = new java.util.Random ();
