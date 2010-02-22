@@ -495,12 +495,12 @@ public class Chrest extends Observable {
         FileUtilities.acceptOpenTag (reader, "verbal-ltm");
         verbalLtm = readNodeFromFile (reader, "verbal-ltm");
         FileUtilities.acceptCloseTag (reader, "verbal-ltm");
-      } else if (FileUtilities.checkOpenTag (reader, "verbal-ltm")) {
+      } else if (FileUtilities.checkOpenTag (reader, "action-ltm")) {
         FileUtilities.acceptOpenTag (reader, "action-ltm");
         actionLtm = readNodeFromFile (reader, "action-ltm");
         FileUtilities.acceptCloseTag (reader, "action-ltm");
       } else { // no valid tag
-        throw new ParsingErrorException ();
+        throw new ParsingErrorException ("Chrest: unknown tag");
       }
     }
     FileUtilities.acceptCloseTag (reader, "chrest");
@@ -533,12 +533,14 @@ public class Chrest extends Observable {
       Integer child = null;
       FileUtilities.acceptOpenTag (reader, "link");
       while (!FileUtilities.checkCloseTag (reader, "link")) {
-        if (FileUtilities.checkOpenTag (reader, "test")) {
-          child = FileUtilities.readIntInTag (reader, "test");
+        if (FileUtilities.checkOpenTag (reader, "child")) {
+          child = FileUtilities.readIntInTag (reader, "child");
         } else if (FileUtilities.checkOpenTag (reader, "test")) {
+          FileUtilities.acceptOpenTag (reader, "test");
           test = ListPattern.readPattern (reader);
+          FileUtilities.acceptCloseTag (reader, "test");
         } else { // unknown tag
-          throw new ParsingErrorException ();
+          throw new ParsingErrorException ("Link: unknown tag");
         }
       }
 
@@ -546,7 +548,7 @@ public class Chrest extends Observable {
 
       // check everything has been initialised
       if (test == null || child == null) {
-        throw new ParsingErrorException ();
+        throw new ParsingErrorException ("Link not complete");
       }
 
       return new ReadLink (test, child);
@@ -619,16 +621,20 @@ public class Chrest extends Observable {
         if (FileUtilities.checkOpenTag (reader, "reference")) {
           reference = FileUtilities.readIntInTag (reader, "reference");
         } else if (FileUtilities.checkOpenTag (reader, "contents")) {
+          FileUtilities.acceptOpenTag (reader, "contents");
           contents = ListPattern.readPattern (reader);
+          FileUtilities.acceptCloseTag (reader, "contents");
         } else if (FileUtilities.checkOpenTag (reader, "image")) {
+          FileUtilities.acceptOpenTag (reader, "image");
           image = ListPattern.readPattern (reader);
+          FileUtilities.acceptCloseTag (reader, "image");
         } else if (FileUtilities.checkOpenTag (reader, "children")) {
           FileUtilities.acceptOpenTag (reader, "children");
           while (!FileUtilities.checkCloseTag (reader, "children")) {
             if (FileUtilities.checkOpenTag (reader, "link")) {
               children.add (ReadLink.readLinkFromFile (reader));
             } else { // unknown tag
-              throw new ParsingErrorException ();
+              throw new ParsingErrorException ("Node children: unknown tag");
             }
           }
           FileUtilities.acceptCloseTag (reader, "children");
@@ -641,14 +647,14 @@ public class Chrest extends Observable {
           followedBy = FileUtilities.readIntInTag (reader, "reference");
           FileUtilities.acceptCloseTag (reader, "followed-by");
         } else {
-          throw new ParsingErrorException ();
+          throw new ParsingErrorException ("Node: unknown tag");
         }
       }
       FileUtilities.acceptCloseTag (reader, "node");
 
       // must at minimum have reference, contents and image
       if (reference == -1 || contents == null || image == null) {
-        throw new ParsingErrorException ();
+        throw new ParsingErrorException ("Node: not complete");
       }
 
       return new ReadNode (reference, contents, image, children, namedBy, followedBy);

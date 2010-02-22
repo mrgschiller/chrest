@@ -318,7 +318,7 @@ public class ListPattern extends Pattern {
           } else if (FileUtilities.checkOpenTag (reader, "item-on-square")) {
             items.add (ItemSquarePattern.readPattern (reader));
           } else {
-            throw new ParsingErrorException ();
+            throw new ParsingErrorException ("list-pattern");
           }
         }
         FileUtilities.acceptCloseTag (reader, "items");

@@ -90,10 +90,10 @@ public class FileUtilities {
 				readChars[charCount] = (char)c;
 				++charCount;
 			} catch (IOException ioe) {
-				throw new ParsingErrorException ();
+				throw new ParsingErrorException ("readCharsFromFile 1");
 			}
 			if (c == -1) { // hit EOF
-				throw new ParsingErrorException ();
+				throw new ParsingErrorException ("readCharsFromFile 2");
 			}
 		} while (c != until);
 		
@@ -102,7 +102,7 @@ public class FileUtilities {
 			try {
 				inputFile.reset ();
 			} catch (IOException ioe) {
-				throw new ParsingErrorException ();
+				throw new ParsingErrorException ("readCharsFromFile 3");
 			}
 		}
 
@@ -157,10 +157,10 @@ public class FileUtilities {
 					c = inputFile.read();
 				} while ( (c == '\n') || (c == '\r') ); // ignore the newlines
 			} catch (IOException ioe) {
-				throw new ParsingErrorException ();
+				throw new ParsingErrorException ("acceptChars 1");
 			}
 			if (Character.toLowerCase((char)c) != Character.toLowerCase(chars[i])) { // ignore case
-				throw new ParsingErrorException ();
+				throw new ParsingErrorException ("acceptChars 2");
 			}
 		}
 	}
@@ -240,7 +240,7 @@ public class FileUtilities {
 			String data = readUntilChar (inputFile, TAG_START_CHAR);
 			result = java.lang.Integer.parseInt (data);
 		} catch (NumberFormatException e) {
-			throw new ParsingErrorException ();
+			throw new ParsingErrorException ("Failed to read int");
 		}
 
 		return result;
@@ -253,7 +253,7 @@ public class FileUtilities {
 			String data = readUntilChar (inputFile, TAG_START_CHAR);
 			result = java.lang.Float.parseFloat (data);
 		} catch (NumberFormatException e) {
-			throw new ParsingErrorException ();
+			throw new ParsingErrorException ("Failed to read float");
 		}
 
 		return result;

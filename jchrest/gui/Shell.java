@@ -330,7 +330,7 @@ public class Shell extends JFrame {
         JOptionPane.showMessageDialog (
             _parent, 
             "File " + file.getName () + 
-            " could not be loaded due to an error in processing the file.",
+            " could not be loaded due to:" + err.getMessage(),
             "Error: File load error", 
             JOptionPane.ERROR_MESSAGE);
       }
