@@ -80,5 +80,16 @@ public class TestReadModel {
       assertTrue (false);
     }
   }
+
+  @Test public void testFileUtilities () {
+    String pattern = "<float>0.2</float>";
+
+    try {
+      float f = FileUtilities.readFloatInTag (new BufferedReader (new StringReader (pattern)), "float");
+      assertEquals (f, 0.2f, 0.001f);
+    } catch (ParsingErrorException ex) {
+      assertTrue (false);
+    }
+  }
 }
 

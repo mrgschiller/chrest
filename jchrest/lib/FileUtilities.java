@@ -258,38 +258,6 @@ public class FileUtilities {
 
 		return result;
 	}
-/**
-	public static ActionType readActionType (BufferedReader inputFile) 
-		throws ParsingErrorException {
-		
-		ActionType item;
-		
-		if (checkOpenTag (inputFile, TextData.TEXT_DATA_TAG)) {
-			item = TextData.readFromFile (inputFile);
-		} else if (checkOpenTag (inputFile, LineData.LINE_DATA_TAG)) {
-			item = LineData.readFromFile (inputFile);
-		} else if (checkOpenTag (inputFile, CompoundObjectData.COMPOUND_DATA_TAG)) {
-			item = CompoundObjectData.readFromFile (inputFile);
-		} else {
-			throw new ParsingErrorException ();
-		}
-
-		return item;
-	}
-	*/
-  /**
-	public static ActionType readActionTypeInTag (BufferedReader inputFile, String tagName)
-		throws ParsingErrorException {
-		
-		ActionType action;
-		
-		acceptOpenTag (inputFile, tagName);
-		action = readActionType (inputFile);
-		acceptCloseTag (inputFile, tagName);
-	
-		return action;
-	}
-  */
 
 	public static String readStringInTag (BufferedReader inputFile, String tagName) 
 		throws ParsingErrorException {

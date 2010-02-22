@@ -55,6 +55,30 @@ public class Chrest extends Observable {
   }
 
   /**
+   * Private constructor for use when reading a Chrest model from file.
+   * Allows all parameters and data structures to be set.
+   */
+  private Chrest (int addLinkTime, int discriminationTime, int familiarisationTime, float rho,
+      int clock, Node visualLtm, Node verbalLtm, Node actionLtm, 
+      int visualStmSize, int verbalStmSize, int actionStmSize, 
+      int fieldOfView) {
+    _addLinkTime = addLinkTime;
+    _discriminationTime = discriminationTime;
+    _familiarisationTime = familiarisationTime;
+    _rho = rho;
+    _clock = clock;
+    _visualLtm = visualLtm;
+    _verbalLtm = verbalLtm;
+    _actionLtm = actionLtm;
+    _visualStm = new Stm (visualStmSize);
+    _verbalStm = new Stm (verbalStmSize);
+    _actionStm = new Stm (actionStmSize);
+
+    _perceiver = new Perceiver ();
+    _perceiver.setFieldOfView (fieldOfView);
+  }
+
+  /**
    * Accessor to retrieve time to add a new link.
    */
   public int getAddLinkTime () {
@@ -462,10 +486,22 @@ public class Chrest extends Observable {
    * a new instance of Chrest.
    */
   public static Chrest readFromFile (BufferedReader reader) throws ParsingErrorException {
-    int clock, addLinkTime, familiarisationTime, discriminationTime, 
-        visualStmSize, verbalStmSize, actionStmSize, fieldOfView;
-    float rho;
-    Node visualLtm, verbalLtm, actionLtm;
+    int clock = -1;
+    int addLinkTime = -1;
+    int familiarisationTime = -1;
+    int discriminationTime = -1; 
+    int visualStmSize = -1;
+    int verbalStmSize = -1;
+    int actionStmSize = -1;
+    int fieldOfView = -1;
+    float rho = -1.0f;
+    Node visualLtm = null;
+    Node verbalLtm = null;
+    Node actionLtm = null;
+    // -- store a list of read nodes
+    List<ReadNode> allReadNodes = new ArrayList<ReadNode> ();
+    // -- store a map from node reference to the real Chrest node
+    Map<Integer, Node> nodes = new HashMap<Integer, Node> ();
 
     FileUtilities.acceptOpenTag (reader, "chrest");
     while (!FileUtilities.checkCloseTag (reader, "chrest")) {
@@ -489,15 +525,15 @@ public class Chrest extends Observable {
         actionStmSize = FileUtilities.readIntInTag (reader, "action-stm-size");
       } else if (FileUtilities.checkOpenTag (reader, "visual-ltm")) {
         FileUtilities.acceptOpenTag (reader, "visual-ltm");
-        visualLtm = readNodeFromFile (reader, "visual-ltm");
+        visualLtm = readNodeFromFile (allReadNodes, nodes, reader, "visual-ltm");
         FileUtilities.acceptCloseTag (reader, "visual-ltm");
       } else if (FileUtilities.checkOpenTag (reader, "verbal-ltm")) {
         FileUtilities.acceptOpenTag (reader, "verbal-ltm");
-        verbalLtm = readNodeFromFile (reader, "verbal-ltm");
+        verbalLtm = readNodeFromFile (allReadNodes, nodes, reader, "verbal-ltm");
         FileUtilities.acceptCloseTag (reader, "verbal-ltm");
       } else if (FileUtilities.checkOpenTag (reader, "action-ltm")) {
         FileUtilities.acceptOpenTag (reader, "action-ltm");
-        actionLtm = readNodeFromFile (reader, "action-ltm");
+        actionLtm = readNodeFromFile (allReadNodes, nodes, reader, "action-ltm");
         FileUtilities.acceptCloseTag (reader, "action-ltm");
       } else { // no valid tag
         throw new ParsingErrorException ("Chrest: unknown tag");
@@ -505,7 +541,28 @@ public class Chrest extends Observable {
     }
     FileUtilities.acceptCloseTag (reader, "chrest");
 
-    return new Chrest ();
+    if (addLinkTime == -1 || discriminationTime == -1 || familiarisationTime == -1 || rho == -1.0f ||
+        clock == -1 || visualLtm == null || verbalLtm == null || actionLtm == null || 
+        visualStmSize == -1 || verbalStmSize == -1 || actionStmSize == -1 || fieldOfView == -1) {
+      throw new ParsingErrorException ("Chrest: not completely defined");
+        }
+
+    // Add in lateral links
+    for (ReadNode node : allReadNodes) {
+      Node sourceNode = nodes.get (node.getReference ());
+
+      if (node.hasNamedByLink ()) {
+        sourceNode.setNamedBy (nodes.get (node.getNamedByReference ()));
+      }
+
+      if (node.hasFollowedByLink ()) {
+        sourceNode.setFollowedBy (nodes.get (node.getFollowedByReference ()));
+      }
+    }
+
+    return new Chrest (addLinkTime, discriminationTime, familiarisationTime, rho, 
+        clock, visualLtm, verbalLtm, actionLtm, visualStmSize, verbalStmSize, actionStmSize,
+        fieldOfView);
   }
 
   /**
@@ -664,16 +721,17 @@ public class Chrest extends Observable {
   /** 
    * Read all the nodes up to the close tag.  Construct a Chrest Node with correct object references.
    */
-  private static Node readNodeFromFile (BufferedReader reader, String closeTag) throws ParsingErrorException {
-    // -- store a list of read nodes
+  private static Node readNodeFromFile (List<ReadNode> allReadNodes, Map<Integer, Node> nodes, 
+      BufferedReader reader, String closeTag) throws ParsingErrorException {
+
+    // -- store a list of read nodes, just for this set
     List<ReadNode> readNodes = new ArrayList<ReadNode> ();
-    // -- store a map from node reference to the real Chrest node
-    Map<Integer, Node> nodes = new HashMap<Integer, Node> ();
 
     // 1. Read in all the nodes
     while (!FileUtilities.checkCloseTag (reader, closeTag)) {
       ReadNode newNode = ReadNode.readNodeFromFile (reader);
       readNodes.add (newNode);
+      allReadNodes.add (newNode);
     }
     // 2. Convert into Chrest Nodes and store in map indexed by reference number
     for (ReadNode node : readNodes) {
@@ -684,16 +742,10 @@ public class Chrest extends Observable {
     for (ReadNode node : readNodes) {
       Node sourceNode = nodes.get (node.getReference ());
 
-      for (ReadLink link : node.getChildren ()) {
+      // add child links in reverse order, so that original order is preserved
+      for (int i = node.getChildren().size () - 1; i >= 0; --i) {
+        ReadLink link = node.getChildren().get (i);
         sourceNode.addTestLink (link.getTest (), nodes.get (link.getChild ()));
-      }
-
-      if (node.hasNamedByLink ()) {
-        sourceNode.setNamedBy (nodes.get (node.getNamedByReference ()));
-      }
-
-      if (node.hasFollowedByLink ()) {
-        sourceNode.setFollowedBy (nodes.get (node.getFollowedByReference ()));
       }
     }
     
