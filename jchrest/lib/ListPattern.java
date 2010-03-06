@@ -145,10 +145,7 @@ public class ListPattern extends Pattern {
   /** 
    * Two patterns are equal if they contain the same items.
    */
-  public boolean equals (Pattern givenPattern) {
-    if (!(givenPattern instanceof ListPattern)) return false;
-    ListPattern pattern = (ListPattern)givenPattern;
-
+  public boolean equals (ListPattern pattern) { 
     if (_modality != pattern._modality) return false;
 
     // patterns must be equal size to be equal

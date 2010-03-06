@@ -48,21 +48,17 @@ public class ItemSquarePattern extends PrimitivePattern {
   /**
    * Two ItemSquarePatterns are only equal if all their parts are the same.
    */
-  public boolean equals (Pattern givenPattern) {
-    if (givenPattern instanceof ItemSquarePattern) {
-      ItemSquarePattern pattern = (ItemSquarePattern)givenPattern;
-      return (_item.equals (pattern.getItem ()) &&
-          _column == pattern.getColumn () &&
-          _row == pattern.getRow ());
-    } else {
-      return false;
-    }
+  public boolean equals (ItemSquarePattern pattern) {
+    return (_item.equals (pattern.getItem ()) &&
+        _column == pattern.getColumn () &&
+        _row == pattern.getRow ());
   }
 
   /** 
    * Two ItemSquarePatterns only match if they are the same.
    */
   public boolean matches (Pattern givenPattern) {
+    if (!(givenPattern instanceof ItemSquarePattern)) return false;
     return this.equals (givenPattern);
   }
 
