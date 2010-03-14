@@ -55,7 +55,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     AboutAction (Shell parent) {
-      super ("About", new ImageIcon (jchrest.gui.Shell.class.getResource("icons/About24.gif")));
+      super ("About"); // , new ImageIcon (jchrest.gui.Shell.class.getResource("icons/About24.gif")));
       _parent = parent;
     }
 
@@ -113,7 +113,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     LoadDataAction (Shell parent) {
-      super ("Open", new ImageIcon (jchrest.gui.Shell.class.getResource("icons/Open24.gif")));
+      super ("Open"); // , new ImageIcon (jchrest.gui.Shell.class.getResource("icons/Open24.gif")));
 
       _parent = parent;
     }
@@ -229,7 +229,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     ModelPropertiesAction (Shell parent) {
-      super ("Properties", new ImageIcon (jchrest.gui.Shell.class.getResource("icons/Information24.gif")));
+      super ("Properties"); // , new ImageIcon (jchrest.gui.Shell.class.getResource("icons/Information24.gif")));
 
       _parent = parent;
     }
@@ -298,7 +298,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     LoadModelAction (Shell parent) {
-      super ("Load", new ImageIcon (jchrest.gui.Shell.class.getResource ("icons/Open24.gif")));
+      super ("Load"); // , new ImageIcon (jchrest.gui.Shell.class.getResource ("icons/Open24.gif")));
 
       _parent = parent;
     }
@@ -344,7 +344,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     SaveModelAction (Shell parent) {
-      super ("Save", new ImageIcon (jchrest.gui.Shell.class.getResource ("icons/SaveAs24.gif")));
+      super ("Save"); // , new ImageIcon (jchrest.gui.Shell.class.getResource ("icons/SaveAs24.gif")));
 
       _parent = parent;
     }

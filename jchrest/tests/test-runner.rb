@@ -63,6 +63,28 @@ class TestPatterns
     assert_true(list1.equals(list3))
   end
 
+  def test_list_pattern_matches_1
+    list1 = Pattern.make_visual_list([1,2,3,4].to_java(:int))
+    list2 = Pattern.make_visual_list(["a","b","c","d","e"].to_java(:String))
+    list3 = Pattern.make_visual_list([1,2,3].to_java(:int))
+    assert_false(Pattern.make_visual_list([].to_java(:int)).matches(Pattern.make_verbal_list([].to_java(:int))))
+    assert_true(Pattern.make_visual_list([].to_java(:int)).matches(list1))
+    assert_true(list1.matches(list1))
+    assert_false(list1.matches(list2))
+    assert_true(list3.matches(list1))
+    assert_false(list1.matches(list3))
+  end
+
+  def test_list_pattern_matches_2
+    list = Pattern.make_visual_list([1,2].to_java(:int))
+    prim = Pattern.make_visual_list([1].to_java(:int))
+    assert_true(prim.matches(list))
+    prim_clone = prim.clone
+    prim_clone.set_finished
+    assert_true(prim.matches(prim_clone))
+    assert_false(prim_clone.matches(prim))
+  end
+
   def initialize
     @number1 = Pattern.make_number 1
     @number2 = Pattern.make_number 2
@@ -74,7 +96,9 @@ class TestPatterns
                             "test_string_matches",
                             "test_mixed_matches",
                             "test_list_pattern_finished",
-                            "test_list_pattern_equality"
+                            "test_list_pattern_equality",
+                            "test_list_pattern_matches_1",
+                            "test_list_pattern_matches_2"
     ])
   end
 end

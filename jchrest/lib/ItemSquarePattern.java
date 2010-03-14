@@ -97,8 +97,6 @@ public class ItemSquarePattern extends PrimitivePattern {
 
     FileUtilities.acceptCloseTag (reader, "item-on-square-pattern");
 
-    int number = FileUtilities.readIntInTag (reader, "number-pattern");
-    
     if (item == null || column == -1 || row == -1) {
       throw new ParsingErrorException ();
     }

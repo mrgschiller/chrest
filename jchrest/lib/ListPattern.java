@@ -312,7 +312,7 @@ public class ListPattern extends Pattern {
             items.add (StringPattern.readPattern (reader));
           } else if (FileUtilities.checkOpenTag (reader, "number-pattern")) {
             items.add (NumberPattern.readPattern (reader));
-          } else if (FileUtilities.checkOpenTag (reader, "item-on-square")) {
+          } else if (FileUtilities.checkOpenTag (reader, "item-on-square-pattern")) {
             items.add (ItemSquarePattern.readPattern (reader));
           } else {
             throw new ParsingErrorException ("list-pattern");
