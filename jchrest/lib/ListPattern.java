@@ -95,6 +95,13 @@ public class ListPattern extends Pattern {
   }
 
   /**
+   * Accessor to retrieve the modality of the pattern.
+   */
+  public Modality getModality () {
+    return _modality;
+  }
+
+  /**
    * Accessor method to check visual modality.
    */
   public boolean isVisual () {

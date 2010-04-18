@@ -190,56 +190,50 @@ public class Node {
   }
 
   /**
+   * addTest is used to construct a test link using the given pattern, 
+   * with a new empty child node.  It is assumed the given pattern is 
+   * non-empty and constitutes a valid, new test for the current Node.
+   */
+  private Node addTest (Chrest model, ListPattern pattern) {
+    Node child = new Node (_contents.append (pattern), new ListPattern (_contents.getModality ()));
+    addTestLink (pattern, child);
+    model.advanceClock (model.getDiscriminationTime ());
+    return child;
+  }
+
+  /**
    * Discrimination learning extends the LTM network by adding new 
    * nodes.
    */
   Node discriminate (Chrest model, ListPattern pattern) {
     ListPattern newInformation = pattern.remove (_contents);
 
-    // special case if no new items - look for test for 'finished'
+    // cases 1 & 2 if newInformation is empty
     if (newInformation.isEmpty ()) {
-      if (newInformation.isFinished ()) { // add test for < $ >
-        ListPattern newContents = _contents.clone ();
-        newContents.setFinished ();
-        Node newChild = new Node (newContents, new ListPattern ());
-        ListPattern finishTest = new ListPattern ();
-        finishTest.setFinished ();
-        addTestLink (finishTest, newChild);
-        model.advanceClock (model.getDiscriminationTime ());
-        return newChild;
+      if (newInformation.isFinished ()) { // 1. add test for < $ >
+        return addTest (model, newInformation);
+      } else { // 2. no information to make a new test with
+        return this;
       }
-      return this;
     }
 
-    Node retrievedChunk = model.recognise (pattern);
+    Node retrievedChunk = model.recognise (newInformation);
     if (retrievedChunk == model.getLtmByModality (pattern)) {
-      // if root node is retrieved, then the primitive must be learnt
-      return model.getLtmByModality(pattern).learnPrimitive (model, pattern.getFirstItem ());
+      // 3. if root node is retrieved, then the primitive must be learnt
+      return model.getLtmByModality(newInformation).learnPrimitive (model, newInformation.getFirstItem ());
     } else if (retrievedChunk.getImage().isEmpty ()) {
-      // if the retrieved chunk has an empty image, then familiarisation must occur
+      // 4. if the retrieved chunk has an empty image, then familiarisation must occur
       // to extend that image.
-      return retrievedChunk.familiarise (model, pattern);
+      return retrievedChunk.familiarise (model, newInformation);
     } else if (retrievedChunk.getImage().matches (newInformation)) {
-      // else, create a new test link using the provided chunk as a test
-      Node newChild = new Node (_contents.append (retrievedChunk.getImage ()), new ListPattern ());
-      ListPattern contents = retrievedChunk.getImage ().clone ();
-      contents.setNotFinished ();
-      addTestLink (contents, newChild);
-      model.advanceClock (model.getDiscriminationTime ());
-      return newChild;
-    } else { // look for or learn a new primitive chunk
-      ListPattern primitive = newInformation.getFirstItem ();
-      retrievedChunk = model.recognise (primitive);
-      if (retrievedChunk == model.getLtmByModality (pattern)) {
-        return model.getLtmByModality(pattern).learnPrimitive (model, primitive);
-      } else {
-        Node newChild = new Node (_contents.append (primitive), new ListPattern ());
-        ListPattern contents = primitive.clone ();
-        contents.setNotFinished ();
-        addTestLink (contents, newChild);
-        model.advanceClock (model.getDiscriminationTime ());
-        return newChild;
-      }
+      // 5. retrieved chunk can be used as a test
+      return addTest (model, retrievedChunk.getImage ());
+    } else { 
+      // 6. mismatch, so use only the first item for test
+      // NB: first-item must be in network as retrievedChunk was not the root node
+      ListPattern firstItem = newInformation.getFirstItem ();
+      firstItem.setNotFinished ();
+      return addTest (model, firstItem);
     }
   }
 
