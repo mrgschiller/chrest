@@ -209,7 +209,7 @@ public class ListPattern extends Pattern {
       }
       i += 1;
     }
-    if (isFinished () && !pattern.isFinished ()) {
+    if (isFinished () && !(result.isEmpty () && pattern.isFinished ())) {
       result.setFinished ();
     }
 
