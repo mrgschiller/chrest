@@ -202,6 +202,17 @@ public class Node {
   }
 
   /**
+   * extendImage is used to add new information to the node's image.
+   * It is assumed the given pattern is non-empty and is a valid extension.
+   */
+  private Node extendImage (Chrest model, ListPattern newInformation) {
+    _image = _image.append (newInformation);
+    model.advanceClock (model.getFamiliarisationTime ());
+
+    return this;
+  }
+
+  /**
    * Discrimination learning extends the LTM network by adding new 
    * nodes.
    */
@@ -244,49 +255,39 @@ public class Node {
   Node familiarise (Chrest model, ListPattern pattern) {
     ListPattern newInformation = pattern.remove (_image);
 
+    // cases 1 & 2 if newInformation is empty
     if (newInformation.isEmpty ()) {
-      // if there is no more information, check if new pattern is 'complete'
-      // and make this image complete, if so.
-      if (newInformation.isFinished ()) {
-        _image = _image.clone ();
-        _image.setFinished ();
-      }
-    } else {
-      Node retrievedChunk = model.recognise (newInformation);
-      if (retrievedChunk == model.getLtmByModality (pattern)) {
-        return model.getLtmByModality(pattern).learnPrimitive (model, newInformation.getFirstItem ());
-      } else if (retrievedChunk.getImage().isEmpty ()) {
-        // could not retrieve useful chunk, so look for, or learn, a primitive
-        ListPattern primitive = newInformation.getFirstItem ();
-        retrievedChunk = model.recognise (primitive);
-        if (retrievedChunk == model.getLtmByModality (pattern)) {
-          return model.getLtmByModality(pattern).learnPrimitive (model, primitive);
-        } else {
-          ListPattern toadd = primitive.clone ();
-          toadd.setNotFinished ();
-          _image = _image.append (toadd);
-          model.advanceClock (model.getFamiliarisationTime ());
-        }
-      } else if (retrievedChunk.getImage().matches (newInformation)) {
-        ListPattern toadd = retrievedChunk.getImage().clone ();
-        toadd.setNotFinished ();
-        _image = _image.append (toadd);
-        model.advanceClock (model.getFamiliarisationTime ());
-      } else { // could not retrieve a chunk, so look for, or learn a primitive
-        ListPattern primitive = newInformation.getFirstItem ();
-        retrievedChunk = model.recognise (primitive);
-        if (retrievedChunk == model.getLtmByModality (pattern)) {
-          return model.getLtmByModality(pattern).learnPrimitive (model, primitive);
-        } else {
-          ListPattern toadd = primitive.clone ();
-          toadd.setNotFinished ();
-          _image = _image.append (toadd);
-          model.advanceClock (model.getFamiliarisationTime ());
-        }
+      if (newInformation.isFinished ()) { // 1. add end marker
+        return extendImage (model, newInformation);
+      } else {
+        // 2. nothing to do
+        return this;
       }
     }
 
-    return this;
+    Node retrievedChunk = model.recognise (newInformation);
+    if (retrievedChunk == model.getLtmByModality (pattern)) {
+      // 3. if root node is retrieved, first item of newInformation is an unknown primitive
+      return model.getLtmByModality(pattern).learnPrimitive (model, newInformation.getFirstItem ());
+    } else if (retrievedChunk.getImage().isEmpty ()) {
+      // 4. the retrieved chunk is empty, so use first item to extend image
+      // note: first item is known primitive, because new-information sorted to this node
+      ListPattern firstItem = newInformation.getFirstItem ();
+      firstItem.setNotFinished ();
+      return extendImage (model, firstItem);
+    } else if (retrievedChunk.getImage().matches (newInformation)) {
+      // 5. retrieved chunk an be used to extend the image 
+      //   -- make sure extension is not complete
+      ListPattern toadd = retrievedChunk.getImage().clone ();
+      toadd.setNotFinished ();
+      return extendImage (model, toadd);
+    } else { 
+      // 6. mismatch, so only use first item to extend image
+      // note: mismatch cannot be first item, because new-information sorted to this node
+      ListPattern firstItem = retrievedChunk.getImage().getFirstItem ();
+      firstItem.setNotFinished ();
+      return extendImage (model, firstItem);
+    }
   }
 
   /**
