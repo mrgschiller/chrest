@@ -224,6 +224,13 @@ public class Chrest extends Observable {
   }
 
   /**
+   * Return the average image size of nodes in visual long-term memory.
+   */
+  public double getVisualLtmAverageImageSize () {
+    return _visualLtm.averageImageSize ();
+  }
+
+  /**
    * Return a count of the number of nodes in verbal long-term memory.
    */
   public int ltmVerbalSize () {

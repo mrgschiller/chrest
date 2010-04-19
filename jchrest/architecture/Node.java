@@ -138,6 +138,18 @@ public class Node {
   }
 
   /**
+   * Compute the total size of images below the current node.
+   */
+  private int totalImageSize () {
+    int size = _image.size ();
+    for (Link link : _children) {
+      size += link.getChildNode().totalImageSize ();
+    }
+
+    return size;
+  }
+
+  /**
    * If this node is a child node, then add its depth to depths.  
    * Otherwise, continue searching through children for the depth.
    */
@@ -171,6 +183,13 @@ public class Node {
     } else {
       return (double)sum / (double)depths.size ();
     }
+  }
+
+  /**
+   * Compute the average size of the images in nodes below this point.
+   */
+  public double averageImageSize () {
+    return (double)totalImageSize() / size();
   }
 
   /**
