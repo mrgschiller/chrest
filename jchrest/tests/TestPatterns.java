@@ -15,6 +15,7 @@ import jchrest.lib.*;
 public class TestPatterns {
   private NumberPattern _number1, _number2;
   private StringPattern _string1, _string2;
+  private ItemSquarePattern _ios1, _ios1a, _ios2;
   private ListPattern _list1, _list2, _list3;
 
   @Before public void setupExamples () {
@@ -22,23 +23,33 @@ public class TestPatterns {
     _number2 = Pattern.makeNumber (2);
     _string1 = Pattern.makeString ("abc");
     _string2 = Pattern.makeString ("def");
+    _ios1 = new ItemSquarePattern ("P", 2, 3);
+    _ios1a = new ItemSquarePattern ("P", 2, 3);
+    _ios2 = new ItemSquarePattern ("Q", 2, 3);
     _list1 = Pattern.makeVisualList (new int[]{1,2,3,4});
     _list2 = Pattern.makeVisualList (new String[]{"a", "b", "c", "d", "e"});
     _list3 = Pattern.makeVisualList(new int[]{1,2,3});
   }
 
   @Test public void testNumberMatches () {
-    assertTrue (_number1.equals (NumberPattern.create (1)));
-    assertFalse (_number1.equals (_number2));
+    assertTrue (_number1.equalPrimitive (NumberPattern.create (1)));
+    assertFalse (_number1.equalPrimitive (_number2));
     assertTrue (_number1.matches (NumberPattern.create (1)));
     assertFalse (_number1.matches (_number2));
   }
 
   @Test public void testStringMatches () {
-    assertTrue (_string1.equals (StringPattern.create ("abc")));
-    assertFalse (_string1.equals (_string2));
+    assertTrue (_string1.equalPrimitive (StringPattern.create ("abc")));
+    assertFalse (_string1.equalPrimitive (_string2));
     assertTrue (_string1.matches (StringPattern.create ("abc")));
     assertFalse (_string1.matches (_string2));
+  }
+
+  @Test public void testIosMatches () {
+    assertTrue (_ios1.equalPrimitive (_ios1a));
+    assertFalse (_ios1.equalPrimitive (_ios2));
+    assertTrue (_ios1.matches (_ios1a));
+    assertFalse (_ios1.matches (_ios2));
   }
 
   @Test public void testMixedMatches () {
@@ -66,6 +77,15 @@ public class TestPatterns {
     assertFalse (_list1.equals (list1Copy));
     _list1.setFinished ();
     assertTrue (_list1.equals (list1Copy));
+    // for ItemSquarePattern
+    ListPattern iosList1 = new ListPattern ();
+    iosList1.add (_ios1);
+    ListPattern iosList2 = new ListPattern ();
+    iosList2.add (_ios2);
+    ListPattern iosList3 = new ListPattern ();
+    iosList3.add (_ios1a);
+    assertTrue (iosList1.equals (iosList3));
+    assertFalse (iosList1.equals (iosList2));
   }
 
   @Test public void testListPatternMatches1 () {

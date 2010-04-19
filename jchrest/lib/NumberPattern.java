@@ -39,7 +39,7 @@ public class NumberPattern extends PrimitivePattern {
   /**
    * Two NumberPatterns are only equal if their stored numbers are the same.
    */
-  public boolean equals (Pattern pattern) {
+  public boolean equalPrimitive (PrimitivePattern pattern) {
     if (pattern instanceof NumberPattern) {
       return _number == ((NumberPattern)pattern).getNumber ();
     } else {

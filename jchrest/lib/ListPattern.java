@@ -19,7 +19,7 @@ import jchrest.lib.FileUtilities;
  * @author Peter C. R. Lane
  */
 public class ListPattern extends Pattern {
-  private List<Pattern> _list;  // items within the pattern
+  private List<PrimitivePattern> _list;  // items within the pattern
   private Modality _modality;   // record type of ListPattern
   private boolean _finished;    // marker to indicate if pattern complete
 
@@ -28,7 +28,7 @@ public class ListPattern extends Pattern {
   }
 
   public ListPattern (Modality modality) {
-    _list = new ArrayList<Pattern> ();
+    _list = new ArrayList<PrimitivePattern> ();
     _modality = modality;
     _finished = false;
   }
@@ -37,7 +37,7 @@ public class ListPattern extends Pattern {
    * Used in constructing instances by {@link Pattern} class.
    * Add pattern to list, unless the pattern is 'finished'.
    */
-  public void add (Pattern pattern) {
+  public void add (PrimitivePattern pattern) {
     if (!_finished) {
       _list.add (pattern);
     }
@@ -49,7 +49,7 @@ public class ListPattern extends Pattern {
    */
   public ListPattern clone () {
     ListPattern result = new ListPattern (_modality);
-    for (Pattern pattern : _list) {
+    for (PrimitivePattern pattern : _list) {
       result.add (pattern);
     }
     if (isFinished ()) {
@@ -76,7 +76,7 @@ public class ListPattern extends Pattern {
    * Retrieve the indexed item from the list pattern.
    * There is no check on the validity of the index.
    */
-  public Pattern getItem (int index) {
+  public PrimitivePattern getItem (int index) {
     return _list.get (index);
   }
 
@@ -159,7 +159,7 @@ public class ListPattern extends Pattern {
     if (size () != pattern.size ()) return false;
 
     for (int i = 0, n = size (); i < n; ++i) {
-      if (!pattern.getItem(i).equals(getItem(i))) {
+      if (!pattern.getItem(i).equalPrimitive(getItem(i))) {
         return false; // false if any item not the same
       }
     }
@@ -188,7 +188,7 @@ public class ListPattern extends Pattern {
     }
     // now just check that the items in this pattern match up with the given pattern
     for (int i = 0, n = size (); i < n; ++i) {
-      if (!pattern.getItem(i).equals(getItem (i))) {
+      if (!pattern.getItem(i).equalPrimitive(getItem (i))) {
         return false; // false if any item not the same
       }
     }
@@ -208,7 +208,7 @@ public class ListPattern extends Pattern {
     while (i < size ()) {
       if (takingItems) {
         result.add (getItem (i));
-      } else if (i < pattern.size () && pattern.getItem(i).equals(getItem (i))) {
+      } else if (i < pattern.size () && pattern.getItem(i).equalPrimitive(getItem (i))) {
         ;
       } else {
         takingItems = true;
@@ -230,7 +230,7 @@ public class ListPattern extends Pattern {
   public ListPattern append (ListPattern pattern) {
     ListPattern result = new ListPattern (_modality);
 
-    for (Pattern item : _list) {
+    for (PrimitivePattern item : _list) {
       result.add (item);
     }
 
@@ -251,7 +251,7 @@ public class ListPattern extends Pattern {
   public ListPattern append (PrimitivePattern pattern) {
     ListPattern result = new ListPattern (_modality);
 
-    for (Pattern item : _list) {
+    for (PrimitivePattern item : _list) {
       result.add (item);
     }
     result.add (pattern);
@@ -277,7 +277,7 @@ public class ListPattern extends Pattern {
    */
   public String toString () {
     String result = "< ";
-    for (Pattern pattern : _list) {
+    for (PrimitivePattern pattern : _list) {
       result += pattern.toString () + " ";
     }
     if (_finished) result += "$ ";
@@ -291,7 +291,7 @@ public class ListPattern extends Pattern {
   public void writePattern (Writer writer) throws IOException {
     FileUtilities.writeOpenTag (writer, "list-pattern");
     FileUtilities.writeOpenTag (writer, "items");
-    for (Pattern pattern : _list) {
+    for (PrimitivePattern pattern : _list) {
       pattern.writePattern (writer);
     }
     FileUtilities.writeCloseTag (writer, "items");
@@ -307,7 +307,7 @@ public class ListPattern extends Pattern {
   public static ListPattern readPattern (BufferedReader reader) throws ParsingErrorException {
     boolean finished = false;
     Modality modality = Modality.VISUAL;
-    List<Pattern> items = new ArrayList<Pattern> ();
+    List<PrimitivePattern> items = new ArrayList<PrimitivePattern> ();
 
     FileUtilities.acceptOpenTag (reader, "list-pattern");
 
@@ -344,7 +344,7 @@ public class ListPattern extends Pattern {
 
     FileUtilities.acceptCloseTag (reader, "list-pattern");
     ListPattern pattern = new ListPattern (modality);
-    for (Pattern pat : items) {
+    for (PrimitivePattern pat : items) {
       pattern.add (pat);
     }
     if (finished) pattern.setFinished ();

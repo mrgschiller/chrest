@@ -7,4 +7,5 @@ package jchrest.lib;
  * @author Peter C. R. Lane
  */
 public abstract class PrimitivePattern extends Pattern {
+  abstract public boolean equalPrimitive (PrimitivePattern pattern);
 }

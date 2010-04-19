@@ -18,10 +18,13 @@ public class TestChrest {
   private ListPattern _list1, _list2, _list3, _list3Test, _list4, _emptyList;
   private ListPattern _prim1, _prim2;
   private ListPattern _prim1Test;
+  private ListPattern _iosList1, _emptyIosList, _iosPrim1, _iosPrim1Test;
 
   @Before public void setupModels () {
     _model1 = new Chrest ();
     _model2 = new Chrest ();
+
+    // patterns for simple primitives
 
     _list1 = Pattern.makeVisualList (new int[]{1,2,3,4});
     _list1.setFinished ();
@@ -40,20 +43,42 @@ public class TestChrest {
     _prim2.setFinished ();
 
     _emptyList = Pattern.makeVisualList (new int[]{});
+
+    // patterns for ItemOnSquare
+
+    _iosList1 = new ListPattern ();
+    _iosList1.add (new ItemSquarePattern ("P", 1, 2));
+    _iosList1.add (new ItemSquarePattern ("P", 2, 2));
+    _iosList1.add (new ItemSquarePattern ("P", 3, 2));
+    _iosList1.add (new ItemSquarePattern ("P", 4, 2));
+    _emptyIosList = new ListPattern ();
+    _iosPrim1 = new ListPattern ();
+    _iosPrim1.add (new ItemSquarePattern ("P", 1, 2));
+    _iosPrim1.setFinished ();
+    _iosPrim1Test = _iosPrim1.clone ();
+    _iosPrim1Test.setNotFinished ();
   }
 
   @Test public void baseCase () {
     assertTrue (Pattern.makeVisualList(new String[]{"Root"}).equals (_model1.recognise (_emptyList).getImage ()));
   }
 
-  @Test public void simpleLearning1 () {
-    _model1.recogniseAndLearn (_list1);
-    assertEquals (1, _model1.getLtmByModality(_list1).getChildren().size ());
-    Link firstChild = _model1.getLtmByModality(_list1).getChildren().get(0);
-    assertFalse (_emptyList.equals (firstChild.getChildNode().getContents ()));
-    assertTrue (firstChild.getTest().equals (_prim1Test));
-    assertTrue (firstChild.getChildNode().getContents().equals (_prim1Test));
-    assertTrue (firstChild.getChildNode().getImage().equals (_prim1));
+  public void simpleLearning1 (ListPattern list, ListPattern emptyList, ListPattern prim, ListPattern primTest) {
+    _model1.recogniseAndLearn (list);
+    assertEquals (1, _model1.getLtmByModality(list).getChildren().size ());
+    Link firstChild = _model1.getLtmByModality(list).getChildren().get(0);
+    assertFalse (emptyList.equals (firstChild.getChildNode().getContents ()));
+    assertTrue (firstChild.getTest().equals (primTest));
+    assertTrue (firstChild.getChildNode().getContents().equals (primTest));
+    assertTrue (firstChild.getChildNode().getImage().equals (prim));
+  }
+
+  @Test public void learningSimpleList1 () {
+    simpleLearning1 (_list1, _emptyList, _prim1, _prim1Test);
+  }
+
+  @Test public void learningItemList1 () {
+    simpleLearning1 (_iosList1, _emptyIosList, _iosPrim1, _iosPrim1Test);
   }
 
   @Test public void simpleRetrieval1 () {
