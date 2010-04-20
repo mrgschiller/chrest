@@ -17,7 +17,8 @@ import java.util.Observable;
  * @author Peter C. R. Lane
  */
 public class Chrest extends Observable {
-
+  // Domain definitions, if used
+  DomainSpecifics _domainSpecifics;
   // internal clock
   private int _clock;  
   // timing parameters
@@ -38,6 +39,7 @@ public class Chrest extends Observable {
   private Perceiver _perceiver;
 
   public Chrest () {
+    _domainSpecifics = new GenericDomain ();
     _addLinkTime = 10000;
     _discriminationTime = 10000;
     _familiarisationTime = 2000;
@@ -62,6 +64,7 @@ public class Chrest extends Observable {
       int clock, Node visualLtm, Node verbalLtm, Node actionLtm, 
       int visualStmSize, int verbalStmSize, int actionStmSize, 
       int fieldOfView) {
+    _domainSpecifics = new GenericDomain ();
     _addLinkTime = addLinkTime;
     _discriminationTime = discriminationTime;
     _familiarisationTime = familiarisationTime;
@@ -76,6 +79,13 @@ public class Chrest extends Observable {
 
     _perceiver = new Perceiver ();
     _perceiver.setFieldOfView (fieldOfView);
+  }
+
+  /**
+   * Set the domain specification.
+   */
+  public void setDomain (DomainSpecifics domain) {
+    _domainSpecifics = domain;
   }
 
   /**
@@ -770,12 +780,16 @@ public class Chrest extends Observable {
     private int _fixationX, _fixationY, _fieldOfView;
     int _lastHeuristic;
     private Scene _currentScene;
+    private List<Integer> _fixationsX, _fixationsY, _fixationsType;
 
     protected Perceiver () {
       _fixationX = 0;
       _fixationY = 0;
       _fieldOfView = 2;
       _lastHeuristic = 0;
+      _fixationsX = new ArrayList<Integer> ();
+      _fixationsY = new ArrayList<Integer> ();
+      _fixationsType = new ArrayList<Integer> ();
     }
 
     public int getFixationX () {
@@ -810,6 +824,10 @@ public class Chrest extends Observable {
      * Initial fixation point - the centre of the scene.
      */
     public void start () {
+      _fixationsX.clear ();
+      _fixationsY.clear ();
+      _fixationsType.clear ();
+
       _fixationX = _currentScene.getWidth () / 2;
       _fixationY = _currentScene.getHeight () / 2;
     }
@@ -910,13 +928,19 @@ public class Chrest extends Observable {
     public void moveEyeAndLearn () {
       if (ltmHeuristic ()) return;
       if (!randomItemHeuristic()) randomPlaceHeuristic ();
-      recogniseAndLearn (_currentScene.getItems (_fixationX, _fixationY, 2));
+      _fixationsX.add (_fixationX);
+      _fixationsY.add (_fixationY);
+      _fixationsType.add (_lastHeuristic);
+      recogniseAndLearn (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
     }
 
     public void moveEye () {
       if (ltmHeuristic ()) return;
       if (!randomItemHeuristic ()) randomPlaceHeuristic ();
-      recognise (_currentScene.getItems (_fixationX, _fixationY, 2));
+      _fixationsX.add (_fixationX);
+      _fixationsY.add (_fixationY);
+      _fixationsType.add (_lastHeuristic);
+      recognise (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
     }
 
     public String getHeuristicDescription () {
@@ -928,6 +952,22 @@ public class Chrest extends Observable {
         return "Random item heuristic";
       else // if (_lastHeuristic == 3)
         return "Random piece heuristic";
+    }
+
+    public int getNumberFixations () {
+      return _fixationsX.size ();
+    }
+
+    public int getFixationsX (int fixation) {
+      return _fixationsX.get (fixation);
+    }
+
+    public int getFixationsY (int fixation) {
+      return _fixationsY.get (fixation);
+    }
+
+    public int getFixationsType (int fixation) {
+      return _fixationsType.get (fixation);
     }
 
   }

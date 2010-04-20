@@ -2,6 +2,8 @@ package jchrest.lib;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import jchrest.lib.FileUtilities;
@@ -283,6 +285,25 @@ public class ListPattern extends Pattern {
     if (_finished) result += "$ ";
 
     return result + ">";
+  }
+
+  /**
+   * Return a new list pattern with the items sorted using the given comparator.
+   */
+  public ListPattern sort (Comparator<PrimitivePattern> comparator) {
+    ListPattern result = new ListPattern (_modality);
+    List<PrimitivePattern> items = new ArrayList<PrimitivePattern> ();
+    for (PrimitivePattern pattern : _list) {
+      items.add (pattern);
+    }
+    Collections.sort (items, comparator);
+    for (PrimitivePattern pattern : items) {
+      result.add (pattern);
+    }
+    if (isFinished ()) {
+      result.setFinished ();
+    }
+    return result;
   }
 
   /**
