@@ -2,12 +2,16 @@ package jchrest.architecture;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jchrest.lib.FileUtilities;
+import jchrest.lib.ItemSquarePattern;
 import jchrest.lib.ListPattern;
 import jchrest.lib.ParsingErrorException;
 import jchrest.lib.Pattern;
+import jchrest.lib.PrimitivePattern;
 
 /**
  * Represents a node within the model's discrimination network.
@@ -190,6 +194,59 @@ public class Node {
    */
   public double averageImageSize () {
     return (double)totalImageSize() / size();
+  }
+
+  public int countPotentialTemplates () {
+    int count = 0;
+    if (canFormTemplate ()) count += 1;
+
+    for (Link link : _children) {
+      count += link.getChildNode().countPotentialTemplates ();
+    }
+
+    return count;
+  }
+
+  /** Return true if template conditions are met:
+   * 1. contents size > 3
+   * then one of:
+   * 2. gather together current node image and images of all nodes linked by the test links
+   *    remove the contents of current node from those images
+   *    see if any piece or square repeats more than once
+   */
+  public boolean canFormTemplate () {
+    // return false if node is too shallow in network
+    if (_contents.size () <= 3) return false;
+    // gather images of current node and test links together, removing the contents from them
+    List<ListPattern> patterns = new ArrayList<ListPattern> ();
+    patterns.add (_image.remove (_contents));
+    for (Link link : _children) {
+      patterns.add (link.getChildNode().getImage().remove (_contents));
+    }
+    // create a hashmap of counts of occurrences of items and of squares
+    Map<String,Integer> countItems = new HashMap<String,Integer> ();
+    Map<Integer,Integer> countPositions = new HashMap<Integer,Integer> ();
+    for (ListPattern pattern : patterns) {
+      for (int i = 0, n = pattern.size (); i < n; ++i) {
+        PrimitivePattern pattern_item = pattern.getItem (i);
+        if (pattern_item instanceof ItemSquarePattern) {
+          ItemSquarePattern item = (ItemSquarePattern)pattern_item;
+          if (countItems.containsKey (item.getItem ())) {
+            countItems.put (item.getItem (), countItems.get(item.getItem ()) + 1);
+          } else {
+            countItems.put (item.getItem (), 1);
+          }
+          Integer posn_key = item.getRow () + 1000 * item.getColumn ();
+          if (countPositions.containsKey (posn_key)) {
+            countPositions.put (posn_key, countPositions.get(posn_key) + 1);
+          } else {
+            countPositions.put (posn_key, 1);
+          }
+        }
+      }
+    }
+    
+    return countItems.values().contains(2) || countPositions.values().contains(2);
   }
 
   /**

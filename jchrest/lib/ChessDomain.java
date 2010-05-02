@@ -16,7 +16,7 @@ public class ChessDomain implements DomainSpecifics {
         ItemSquarePattern leftIos = (ItemSquarePattern)left;
         ItemSquarePattern rightIos = (ItemSquarePattern)right;
 
-        // P p K k B b N n Q q R r
+        // P p K k B b N n Q q R r - the canonical ordering of chess pieces, from deGroot and Gobet (1996)
         List<String> pieces = new ArrayList<String> ();
         pieces.add ("P"); pieces.add ("p");
         pieces.add ("K"); pieces.add ("k");

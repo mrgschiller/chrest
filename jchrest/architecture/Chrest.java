@@ -268,6 +268,13 @@ public class Chrest extends Observable {
     return _actionLtm.averageDepth ();
   }
 
+  /**
+   * Return a count of the number of potential templates in the model.
+   */
+  public int countPotentialTemplates () {
+    return _visualLtm.countPotentialTemplates();
+  }
+
   public Node getLtmByModality (ListPattern pattern) {
     if (pattern.isVisual ()) {
       return _visualLtm;
@@ -925,21 +932,30 @@ public class Chrest extends Observable {
      * TODO: Add in domain-specific heuristics
      * Also, global strategies for moving to a 'new' part of the scene.
      */
-    public void moveEyeAndLearn () {
-      if (ltmHeuristic ()) return;
+    private void moveEyeUsingHeuristics () {
       if (!randomItemHeuristic()) randomPlaceHeuristic ();
       _fixationsX.add (_fixationX);
       _fixationsY.add (_fixationY);
       _fixationsType.add (_lastHeuristic);
+    }
+
+    /**
+     * Find the next fixation point using one of the available 
+     * heuristics, and then learn from the new pattern.
+     */
+    public void moveEyeAndLearn () {
+      if (ltmHeuristic ()) return;
+      moveEyeUsingHeuristics ();
       recogniseAndLearn (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
     }
 
+    /**
+     * Find the next fixation point using one of the available 
+     * heuristics, and simply move the eye to that point.
+     */
     public void moveEye () {
       if (ltmHeuristic ()) return;
-      if (!randomItemHeuristic ()) randomPlaceHeuristic ();
-      _fixationsX.add (_fixationX);
-      _fixationsY.add (_fixationY);
-      _fixationsType.add (_lastHeuristic);
+      moveEyeUsingHeuristics ();
       recognise (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
     }
 
