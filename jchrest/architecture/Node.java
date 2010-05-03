@@ -242,12 +242,12 @@ public class Node {
 
       // display
       for (String itemKey : countItems.keySet ()) {
-        if (countItems.get(itemKey) >= 2) {
+        if (countItems.get(itemKey) >= Chrest.MIN_OCCURRENCES) {
           System.out.println ("  Piece slot: " + itemKey + "   " + countItems.get(itemKey));
         }
       }
       for (Integer posnKey : countPositions.keySet ()) {
-        if (countPositions.get(posnKey) >= 2) {
+        if (countPositions.get(posnKey) >= Chrest.MIN_OCCURRENCES) {
           System.out.println ("  Square slot: " + posnKey + "    " + countPositions.get(posnKey));
         }
       }
@@ -320,13 +320,13 @@ public class Node {
       // make slots
       // 1. from items which repeat more than minimumNumberOccurrences
       for (String itemKey : countItems.keySet ()) {
-        if (countItems.get(itemKey) >= 2) {
+        if (countItems.get(itemKey) >= Chrest.MIN_OCCURRENCES) {
           System.out.println ("  Piece slot: " + itemKey);
         }
       }
       // 2. from locations which repeat more than minimumNumberOccurrences
       for (Integer posnKey : countPositions.keySet ()) {
-        if (countPositions.get(posnKey) >= 2) {
+        if (countPositions.get(posnKey) >= Chrest.MIN_OCCURRENCES) {
           System.out.println ("  Square slot: " + posnKey);
         }
       }
@@ -340,7 +340,7 @@ public class Node {
   }
 
   /** Return true if template conditions are met:
-   * 1. contents size > 3
+   * 1. contents size > Chrest.MIN_LEVEL
    * then one of:
    * 2. gather together current node image and images of all nodes linked by the test links
    *    remove the contents of current node from those images
@@ -348,7 +348,7 @@ public class Node {
    */
   public boolean canFormTemplate () {
     // return false if node is too shallow in network
-    if (_contents.size () <= 3) return false;
+    if (_contents.size () <= Chrest.MIN_LEVEL) return false;
     // gather images of current node and test links together, removing the contents from them
     List<ListPattern> patterns = new ArrayList<ListPattern> ();
     patterns.add (_image.remove (_contents));
@@ -381,13 +381,13 @@ public class Node {
       // make slots
       // 1. from items which repeat more than minimumNumberOccurrences
       for (String itemKey : countItems.keySet ()) {
-        if (countItems.get(itemKey) >= 3) {
+        if (countItems.get(itemKey) >= Chrest.MIN_OCCURRENCES) {
           return true;
         }
       }
       // 2. from locations which repeat more than minimumNumberOccurrences
       for (Integer posnKey : countPositions.keySet ()) {
-        if (countPositions.get(posnKey) >= 3) {
+        if (countPositions.get(posnKey) >= Chrest.MIN_OCCURRENCES) {
           return true;
         }
       }

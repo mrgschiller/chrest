@@ -27,6 +27,9 @@ public class Chrest extends Observable {
   private int _familiarisationTime;
   // rho is the probability that a given learning operation will occur
   private float _rho;
+  // template construction parameters
+  public static final int MIN_LEVEL = 3;
+  public static final int MIN_OCCURRENCES = 3;
   // long-term-memory holds information within the model permanently
   private Node _visualLtm;
   private Node _verbalLtm;
