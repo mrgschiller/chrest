@@ -243,12 +243,15 @@ public class Node {
       // display
       for (String itemKey : countItems.keySet ()) {
         if (countItems.get(itemKey) >= Chrest.MIN_OCCURRENCES) {
-          System.out.println ("  Piece slot: " + itemKey + "   " + countItems.get(itemKey));
+          System.out.println ("  Piece slot: " + itemKey + 
+              "  appeared " + countItems.get(itemKey) + " times");
         }
       }
       for (Integer posnKey : countPositions.keySet ()) {
         if (countPositions.get(posnKey) >= Chrest.MIN_OCCURRENCES) {
-          System.out.println ("  Square slot: " + posnKey + "    " + countPositions.get(posnKey));
+          System.out.println ("  Square slot: " + 
+              " (" + posnKey / 1000 + ", " + (posnKey - 1000*(posnKey/1000)) + ") " +
+              "  appeared " + countPositions.get(posnKey) + " times");
         }
       }
     }
@@ -275,6 +278,11 @@ public class Node {
     if (_positionSlots.size () > 0) return true;
 
     return false;
+  }
+
+  public void clearTemplate () {
+    if (_itemSlots != null) _itemSlots.clear ();
+    if (_positionSlots != null) _positionSlots.clear ();
   }
 
   /**
@@ -321,13 +329,13 @@ public class Node {
       // 1. from items which repeat more than minimumNumberOccurrences
       for (String itemKey : countItems.keySet ()) {
         if (countItems.get(itemKey) >= Chrest.MIN_OCCURRENCES) {
-          System.out.println ("  Piece slot: " + itemKey);
+          _itemSlots.add (new ItemSquarePattern (itemKey, -1, -1));
         }
       }
       // 2. from locations which repeat more than minimumNumberOccurrences
       for (Integer posnKey : countPositions.keySet ()) {
         if (countPositions.get(posnKey) >= Chrest.MIN_OCCURRENCES) {
-          System.out.println ("  Square slot: " + posnKey);
+          _positionSlots.add (new ItemSquarePattern ("slot", posnKey / 1000, posnKey - (1000 * (posnKey/1000))));
         }
       }
     }

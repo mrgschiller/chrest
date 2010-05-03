@@ -28,8 +28,8 @@ public class Chrest extends Observable {
   // rho is the probability that a given learning operation will occur
   private float _rho;
   // template construction parameters
-  public static final int MIN_LEVEL = 3;
-  public static final int MIN_OCCURRENCES = 3;
+  public static int MIN_LEVEL = 3;
+  public static int MIN_OCCURRENCES = 3;
   // long-term-memory holds information within the model permanently
   private Node _visualLtm;
   private Node _verbalLtm;
@@ -145,6 +145,14 @@ public class Chrest extends Observable {
    */
   public void setRho (float rho) {
     _rho = rho;
+  }
+
+  /**
+   * Modify values for template construction.
+   */
+  public void setTemplateConstructionParameters (int minLevel, int minOccurrences) {
+    MIN_LEVEL = minLevel;
+    MIN_OCCURRENCES = minOccurrences;
   }
 
   /**
