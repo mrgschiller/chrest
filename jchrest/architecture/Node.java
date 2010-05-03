@@ -207,6 +207,138 @@ public class Node {
     return count;
   }
 
+  public void showPotentialTemplates () {
+    if (canFormTemplate ()) {
+      System.out.println("\n--------------------\nNode: " + _reference);
+      System.out.println("Contents: " + _contents.toString ());
+      // gather images of current node and test links together, removing the contents from them
+      List<ListPattern> patterns = new ArrayList<ListPattern> ();
+      patterns.add (_image.remove (_contents));
+      for (Link link : _children) {
+        patterns.add (link.getChildNode().getImage().remove (_contents));
+      }
+      // create a hashmap of counts of occurrences of items and of squares
+      Map<String,Integer> countItems = new HashMap<String,Integer> ();
+      Map<Integer,Integer> countPositions = new HashMap<Integer,Integer> ();
+      for (ListPattern pattern : patterns) {
+        for (int i = 0, n = pattern.size (); i < n; ++i) {
+          PrimitivePattern pattern_item = pattern.getItem (i);
+          if (pattern_item instanceof ItemSquarePattern) {
+            ItemSquarePattern item = (ItemSquarePattern)pattern_item;
+            if (countItems.containsKey (item.getItem ())) {
+              countItems.put (item.getItem (), countItems.get(item.getItem ()) + 1);
+            } else {
+              countItems.put (item.getItem (), 1);
+            }
+            Integer posn_key = item.getRow () + 1000 * item.getColumn ();
+            if (countPositions.containsKey (posn_key)) {
+              countPositions.put (posn_key, countPositions.get(posn_key) + 1);
+            } else {
+              countPositions.put (posn_key, 1);
+            }
+          }
+        }
+      }
+
+      // display
+      for (String itemKey : countItems.keySet ()) {
+        if (countItems.get(itemKey) >= 2) {
+          System.out.println ("  Piece slot: " + itemKey + "   " + countItems.get(itemKey));
+        }
+      }
+      for (Integer posnKey : countPositions.keySet ()) {
+        if (countPositions.get(posnKey) >= 2) {
+          System.out.println ("  Square slot: " + posnKey + "    " + countPositions.get(posnKey));
+        }
+      }
+    }
+
+    for (Link link : _children) {
+      link.getChildNode().showPotentialTemplates ();
+    }
+  }
+
+  private List<ItemSquarePattern> _itemSlots;
+  private List<ItemSquarePattern> _positionSlots;
+
+  /**
+   * Returns true if this node is a template.  To be a template, the node 
+   * must be at least one slot of any kind.
+   */
+  public boolean isTemplate () {
+    if (_itemSlots == null || _positionSlots == null) {
+      return false;
+    }
+
+    // is a template if there is at least one slot
+    if (_itemSlots.size () > 0) return true;
+    if (_positionSlots.size () > 0) return true;
+
+    return false;
+  }
+
+  /**
+   * Converts this node and all child nodes into templates.
+   * If 'canFormTemplate' returns true, then make this node into a template.
+   * Note: usually, this process is done as a whole at the end of training, but 
+   * can also be done on a node-by-node basis, during training.
+   */
+  public void convertIntoTemplate () {
+    _itemSlots = new ArrayList<ItemSquarePattern> ();
+    _positionSlots = new ArrayList<ItemSquarePattern> ();
+
+    if (canFormTemplate ()) {
+      // gather images of current node and test links together, removing the contents from them
+      List<ListPattern> patterns = new ArrayList<ListPattern> ();
+      patterns.add (_image.remove (_contents));
+      for (Link link : _children) {
+        patterns.add (link.getChildNode().getImage().remove (_contents));
+      }
+      // create a hashmap of counts of occurrences of items and of squares
+      Map<String,Integer> countItems = new HashMap<String,Integer> ();
+      Map<Integer,Integer> countPositions = new HashMap<Integer,Integer> ();
+      for (ListPattern pattern : patterns) {
+        for (int i = 0, n = pattern.size (); i < n; ++i) {
+          PrimitivePattern pattern_item = pattern.getItem (i);
+          if (pattern_item instanceof ItemSquarePattern) {
+            ItemSquarePattern item = (ItemSquarePattern)pattern_item;
+            if (countItems.containsKey (item.getItem ())) {
+              countItems.put (item.getItem (), countItems.get(item.getItem ()) + 1);
+            } else {
+              countItems.put (item.getItem (), 1);
+            }
+            Integer posn_key = item.getRow () + 1000 * item.getColumn ();
+            if (countPositions.containsKey (posn_key)) {
+              countPositions.put (posn_key, countPositions.get(posn_key) + 1);
+            } else {
+              countPositions.put (posn_key, 1);
+            }
+          }
+        }
+      }
+
+      // make slots
+      // 1. from items which repeat more than minimumNumberOccurrences
+      for (String itemKey : countItems.keySet ()) {
+        if (countItems.get(itemKey) >= 2) {
+          System.out.println ("  Piece slot: " + itemKey);
+        }
+      }
+      // 2. from locations which repeat more than minimumNumberOccurrences
+      for (Integer posnKey : countPositions.keySet ()) {
+        if (countPositions.get(posnKey) >= 2) {
+          System.out.println ("  Square slot: " + posnKey);
+        }
+      }
+    }
+
+    // continue conversion for children of this node
+    for (Link link : _children) {
+      link.getChildNode().convertIntoTemplate ();
+    }
+
+  }
+
   /** Return true if template conditions are met:
    * 1. contents size > 3
    * then one of:
@@ -245,8 +377,21 @@ public class Node {
         }
       }
     }
-    
-    return countItems.values().contains(2) || countPositions.values().contains(2);
+
+      // make slots
+      // 1. from items which repeat more than minimumNumberOccurrences
+      for (String itemKey : countItems.keySet ()) {
+        if (countItems.get(itemKey) >= 3) {
+          return true;
+        }
+      }
+      // 2. from locations which repeat more than minimumNumberOccurrences
+      for (Integer posnKey : countPositions.keySet ()) {
+        if (countPositions.get(posnKey) >= 3) {
+          return true;
+        }
+      }
+    return false;
   }
 
   /**

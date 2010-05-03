@@ -275,6 +275,18 @@ public class Chrest extends Observable {
     return _visualLtm.countPotentialTemplates();
   }
 
+  public void showPotentialTemplates () {
+    _visualLtm.showPotentialTemplates ();
+  }
+
+  /**
+   * Construct templates.  Note, the template construction process only 
+   * currently works for visual patterns using the ItemSquarePattern primitive.
+   */
+  public void constructTemplates () {
+    _visualLtm.convertIntoTemplate ();
+  }
+
   public Node getLtmByModality (ListPattern pattern) {
     if (pattern.isVisual ()) {
       return _visualLtm;
