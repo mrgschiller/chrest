@@ -286,6 +286,12 @@ public class Node {
   }
 
   /**
+   * Attempt to fill some of the slots using the items in the given pattern.
+   */
+  public void fillSlots (ListPattern pattern) {
+  }
+
+  /**
    * Converts this node and all child nodes into templates.
    * If 'canFormTemplate' returns true, then make this node into a template.
    * Note: usually, this process is done as a whole at the end of training, but 

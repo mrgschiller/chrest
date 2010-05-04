@@ -970,6 +970,8 @@ public class Chrest extends Observable {
       if (ltmHeuristic ()) return;
       moveEyeUsingHeuristics ();
       recogniseAndLearn (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
+      // NB: template construction is only assumed to occur after training, so 
+      // template completion code is not included here
     }
 
     /**
@@ -980,6 +982,11 @@ public class Chrest extends Observable {
       if (ltmHeuristic ()) return;
       moveEyeUsingHeuristics ();
       recognise (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
+      // Attempt to fill out the slots on the top-node of visual STM with the currently 
+      // fixated items
+      if (_visualStm.getCount () >= 1) {
+        _visualStm.getItem(0).fillSlots (_currentScene.getItems (_fixationX, _fixationY, 2));
+      }
     }
 
     public String getHeuristicDescription () {
