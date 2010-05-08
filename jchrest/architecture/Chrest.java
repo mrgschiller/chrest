@@ -27,9 +27,12 @@ public class Chrest extends Observable {
   private int _familiarisationTime;
   // rho is the probability that a given learning operation will occur
   private float _rho;
+  // parameter for construction of similarity link
+  // - determines number of overlapping items in node images
+  public static int SIMILARITY_THRESHOLD = 1;
   // template construction parameters
-  public static int MIN_LEVEL = 3;
-  public static int MIN_OCCURRENCES = 3;
+  public static int MIN_LEVEL = 5;
+  public static int MIN_OCCURRENCES = 2;
   // long-term-memory holds information within the model permanently
   private Node _visualLtm;
   private Node _verbalLtm;
@@ -318,8 +321,20 @@ public class Chrest extends Observable {
     }
   }
 
+  /**
+   * Add given node to STM.  Check for formation of similarity links by
+   * comparing images of nodes.
+   */
   private void addToStm (Node node) {
-    getStmByModality(node.getImage()).add (node);
+    Stm stm = getStmByModality (node.getImage ());
+
+    for (Node check : stm.getContents ()) {
+      if (node.getImage().isSimilarTo (check.getImage (), SIMILARITY_THRESHOLD)) {
+        node.addSimilarNode (check);
+      }
+    }
+
+    stm.add (node);
   }
 
   /**

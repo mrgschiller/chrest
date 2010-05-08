@@ -226,6 +226,9 @@ public class Node {
       for (Link link : _children) {
         patterns.add (link.getChildNode().getImage().remove (_contents));
       }
+      for (Node node : _similarNodes) {
+        patterns.add (node.getImage().remove (_contents));
+      }
       // create a hashmap of counts of occurrences of items and of squares
       Map<String,Integer> countItems = new HashMap<String,Integer> ();
       Map<Integer,Integer> countPositions = new HashMap<Integer,Integer> ();
@@ -311,11 +314,15 @@ public class Node {
     _positionSlots = new ArrayList<ItemSquarePattern> ();
 
     if (canFormTemplate ()) {
-      // gather images of current node and test links together, removing the contents from them
+      // gather images of current node, test links and similar nodes together, 
+      // removing the contents from them
       List<ListPattern> patterns = new ArrayList<ListPattern> ();
       patterns.add (_image.remove (_contents));
       for (Link link : _children) {
         patterns.add (link.getChildNode().getImage().remove (_contents));
+      }
+      for (Node node : _similarNodes) {
+        patterns.add (node.getImage().remove (_contents));
       }
       // create a hashmap of counts of occurrences of items and of squares
       Map<String,Integer> countItems = new HashMap<String,Integer> ();
