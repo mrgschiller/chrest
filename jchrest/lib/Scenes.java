@@ -83,5 +83,9 @@ public class Scenes {
   public Scene get (int i) {
     return _scenes.get (i);
   }
+
+  public int size () {
+    return _scenes.size ();
+  }
 }
 
