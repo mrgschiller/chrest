@@ -25,6 +25,7 @@ public class Node {
   private ListPattern _contents;
   private ListPattern _image;
   private List<Link> _children;
+  private List<Node> _similarNodes;
   private Node _followedBy;
   private Node _namedBy;
 
@@ -50,6 +51,7 @@ public class Node {
     _contents.setNotFinished (); // do not allow contents to be finished
     _image = image;
     _children = new ArrayList<Link> ();
+    _similarNodes = new ArrayList<Node> ();
     _followedBy = null;
     _namedBy = null;
   }
@@ -99,6 +101,13 @@ public class Node {
 
   void addTestLink (ListPattern test, Node child) {
     _children.add (0, new Link (test, child));
+  }
+
+  /**
+   * Add a node to the list of similar nodes.
+   */
+  void addSimilarNode (Node node) {
+    _similarNodes.add (node);
   }
 
   /**

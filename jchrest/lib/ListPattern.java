@@ -287,6 +287,30 @@ public class ListPattern extends Pattern {
     return result + ">";
   }
 
+  private boolean contains (PrimitivePattern given) {
+    for (PrimitivePattern item : _list) {
+      if (item.equalPrimitive (given)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Compare this list pattern with a given list pattern, returning true if 
+   * the two share k or more items.
+   */
+  public boolean isSimilarTo (ListPattern pattern, int k) {
+    int count = 0;
+
+    for (PrimitivePattern item : _list) {
+      if (pattern.contains (item)) { // TODO: Think about duplicate items!
+        count += 1;
+      }
+      if (count >= k) return true;
+    }
+
+    return false;
+  }
+
   /**
    * Return a new list pattern with the items sorted using the given comparator.
    */
