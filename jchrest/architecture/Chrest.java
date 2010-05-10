@@ -34,6 +34,7 @@ public class Chrest extends Observable {
   public static int MIN_LEVEL = 5;
   public static int MIN_OCCURRENCES = 2;
   // long-term-memory holds information within the model permanently
+  private int _totalNodes;
   private Node _visualLtm;
   private Node _verbalLtm;
   private Node _actionLtm;
@@ -52,9 +53,11 @@ public class Chrest extends Observable {
     _rho = 1.0f;
 
     _clock = 0;
-    _visualLtm = new Node (Pattern.makeVisualList (new String[]{"Root"}));
-    _verbalLtm = new Node (Pattern.makeVerbalList (new String[]{"Root"}));
-    _actionLtm = new Node (Pattern.makeActionList (new String[]{"Root"}));
+    _totalNodes = 0;
+    _visualLtm = new Node (this, 0, Pattern.makeVisualList (new String[]{"Root"}));
+    _verbalLtm = new Node (this, 0, Pattern.makeVerbalList (new String[]{"Root"}));
+    _actionLtm = new Node (this, 0, Pattern.makeActionList (new String[]{"Root"}));
+    _totalNodes = 0; // Node constructor will have incremented _totalNodes, so reset to 0
     _visualStm = new Stm (4);
     _verbalStm = new Stm (2);
     _actionStm = new Stm (4);
@@ -76,6 +79,7 @@ public class Chrest extends Observable {
     _familiarisationTime = familiarisationTime;
     _rho = rho;
     _clock = clock;
+    _totalNodes = 1000000; // TODO: This is broken
     _visualLtm = visualLtm;
     _verbalLtm = verbalLtm;
     _actionLtm = actionLtm;
@@ -206,6 +210,22 @@ public class Chrest extends Observable {
   }
 
   /**
+   * Retrieve the next available node number.
+   * Package access only, as should only be used by Node.java.
+   */
+  int getNextNodeNumber () {
+    _totalNodes += 1;
+    return _totalNodes;
+  }
+
+  /**
+   * Accessor to retrieve the total number of nodes within LTM.
+   */
+  public int getTotalLtmNodes () {
+    return _totalNodes;
+  }
+
+  /**
    * Accessor to retrieve visual short-term memory of model.
    */
   public Stm getVisualStm () {
@@ -224,13 +244,6 @@ public class Chrest extends Observable {
    */
   public Node getLtm () {
     return _visualLtm;
-  }
-
-  /** 
-   * Return a count of the number of nodes in long-term memory.
-   */
-  public int ltmSize () {
-    return _visualLtm.size () + _verbalLtm.size () + _actionLtm.size ();
   }
 
   /** 
@@ -499,9 +512,10 @@ public class Chrest extends Observable {
    */
   public void clear () {
     _clock = 0;
-    _visualLtm = new Node (Pattern.makeVisualList (new String[]{"Root"}));
-    _verbalLtm = new Node (Pattern.makeVerbalList (new String[]{"Root"}));
-    _actionLtm = new Node (Pattern.makeActionList (new String[]{"Root"}));
+    _visualLtm = new Node (this, 0, Pattern.makeVisualList (new String[]{"Root"}));
+    _verbalLtm = new Node (this, 0, Pattern.makeVerbalList (new String[]{"Root"}));
+    _actionLtm = new Node (this, 0, Pattern.makeActionList (new String[]{"Root"}));
+    _totalNodes = 0;
     _visualStm.clear ();
     _verbalStm.clear ();
     setChanged ();
@@ -546,6 +560,7 @@ public class Chrest extends Observable {
   /**
    * Read a description of a Chrest model from the given buffered-reader, and construct 
    * a new instance of Chrest.
+   * TODO: This is currently broken.
    */
   public static Chrest readFromFile (BufferedReader reader) throws ParsingErrorException {
     int clock = -1;
@@ -564,6 +579,7 @@ public class Chrest extends Observable {
     List<ReadNode> allReadNodes = new ArrayList<ReadNode> ();
     // -- store a map from node reference to the real Chrest node
     Map<Integer, Node> nodes = new HashMap<Integer, Node> ();
+    Chrest model = new Chrest ();
 
     FileUtilities.acceptOpenTag (reader, "chrest");
     while (!FileUtilities.checkCloseTag (reader, "chrest")) {
@@ -587,15 +603,15 @@ public class Chrest extends Observable {
         actionStmSize = FileUtilities.readIntInTag (reader, "action-stm-size");
       } else if (FileUtilities.checkOpenTag (reader, "visual-ltm")) {
         FileUtilities.acceptOpenTag (reader, "visual-ltm");
-        visualLtm = readNodeFromFile (allReadNodes, nodes, reader, "visual-ltm");
+        visualLtm = readNodeFromFile (model, allReadNodes, nodes, reader, "visual-ltm");
         FileUtilities.acceptCloseTag (reader, "visual-ltm");
       } else if (FileUtilities.checkOpenTag (reader, "verbal-ltm")) {
         FileUtilities.acceptOpenTag (reader, "verbal-ltm");
-        verbalLtm = readNodeFromFile (allReadNodes, nodes, reader, "verbal-ltm");
+        verbalLtm = readNodeFromFile (model, allReadNodes, nodes, reader, "verbal-ltm");
         FileUtilities.acceptCloseTag (reader, "verbal-ltm");
       } else if (FileUtilities.checkOpenTag (reader, "action-ltm")) {
         FileUtilities.acceptOpenTag (reader, "action-ltm");
-        actionLtm = readNodeFromFile (allReadNodes, nodes, reader, "action-ltm");
+        actionLtm = readNodeFromFile (model, allReadNodes, nodes, reader, "action-ltm");
         FileUtilities.acceptCloseTag (reader, "action-ltm");
       } else { // no valid tag
         throw new ParsingErrorException ("Chrest: unknown tag");
@@ -783,7 +799,7 @@ public class Chrest extends Observable {
   /** 
    * Read all the nodes up to the close tag.  Construct a Chrest Node with correct object references.
    */
-  private static Node readNodeFromFile (List<ReadNode> allReadNodes, Map<Integer, Node> nodes, 
+  private static Node readNodeFromFile (Chrest model, List<ReadNode> allReadNodes, Map<Integer, Node> nodes, 
       BufferedReader reader, String closeTag) throws ParsingErrorException {
 
     // -- store a list of read nodes, just for this set
@@ -797,7 +813,7 @@ public class Chrest extends Observable {
     }
     // 2. Convert into Chrest Nodes and store in map indexed by reference number
     for (ReadNode node : readNodes) {
-      nodes.put (node.getReference (), new Node(node.getReference (), node.getContents (), node.getImage ()));
+      nodes.put (node.getReference (), new Node(model, node.getReference (), node.getContents (), node.getImage ()));
     }
     
     // 3. Add in link references

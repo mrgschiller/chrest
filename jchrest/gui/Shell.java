@@ -382,7 +382,7 @@ public class Shell extends JFrame {
       DecimalFormat twoPlaces = new DecimalFormat("0.00");
       JOptionPane.showMessageDialog (_parent,
           "<html><p>" + 
-          "Total nodes in LTM: " + _model.ltmSize () +
+          "Total nodes in LTM: " + _model.getTotalLtmNodes () +
           "<hr>" + 
           "Visual nodes: " + _model.ltmVisualSize () + 
           " Average depth: " + twoPlaces.format (_model.getVisualLtmAverageDepth ()) +

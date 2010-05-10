@@ -44,7 +44,7 @@ public class TestStm {
     _model.recogniseAndLearn (_patternA);
     assertEquals (2, _model.getVisualStm().getCount ());
     assertTrue (_model.getLtmByModality (_patternA) == _model.getVisualStm().getItem (1));
-    assertEquals (1, _model.getVisualStm().getItem(0).getReference ());
+//    assertEquals (1, _model.getVisualStm().getItem(0).getReference ());
   }
 
   /**

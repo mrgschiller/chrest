@@ -20,7 +20,7 @@ import jchrest.lib.PrimitivePattern;
  * @author Peter C. R. Lane
  */
 public class Node {
-  private static int _totalNodes = 0; //TODO: This count should be inside 'Chrest' to support multiple models
+  private Chrest _model;
   private int _reference;
   private ListPattern _contents;
   private ListPattern _image;
@@ -30,22 +30,20 @@ public class Node {
   private Node _namedBy;
 
   /**
-   * Empty constructor is only called to construct a new root node for the 
-   * model.  
+   * Constructor to construct a new root node for the model.  
    */
-  public Node (ListPattern type) {
-    this (type, type);
-    _totalNodes = 1;
-    _reference = 0;
+  public Node (Chrest model, int reference, ListPattern type) {
+    this (model, type, type);
+    _reference = reference;
   }
  
   /**
    * When constructing non-root nodes in the network, the new contents and image 
    * must be defined.  Assume that the image always starts empty.
    */
-  public Node (ListPattern contents, ListPattern image) {
-    _reference = _totalNodes;
-    _totalNodes += 1;
+  public Node (Chrest model, ListPattern contents, ListPattern image) {
+    _model = model;
+    _reference = _model.getNextNodeNumber ();
 
     _contents = contents.clone ();
     _contents.setNotFinished (); // do not allow contents to be finished
@@ -60,9 +58,9 @@ public class Node {
    * Constructor to build a new Chrest node with given reference, contents and image.
    * Package access only, as should only be used by Chrest.java.
    */
-  Node (int reference, ListPattern contents, ListPattern image) {
+  Node (Chrest model, int reference, ListPattern contents, ListPattern image) {
+    _model = model;
     _reference = reference;
-    _totalNodes = Math.max (_totalNodes, reference); // make sure _totalNodes is largest sized node
     _contents = contents.clone ();
     _contents.setNotFinished (); // do not allow contents to be finished
     _image = image;
@@ -433,7 +431,7 @@ public class Node {
     assert (pattern.isFinished () && pattern.size () == 1);
     ListPattern contents = pattern.clone ();
     contents.setNotFinished ();
-    Node child = new Node (contents, pattern);
+    Node child = new Node (_model, contents, pattern);
     addTestLink (contents, child);
     model.advanceClock (model.getDiscriminationTime ());
 
@@ -446,7 +444,7 @@ public class Node {
    * non-empty and constitutes a valid, new test for the current Node.
    */
   private Node addTest (Chrest model, ListPattern pattern) {
-    Node child = new Node (_contents.append (pattern), new ListPattern (_contents.getModality ()));
+    Node child = new Node (_model, _contents.append (pattern), new ListPattern (_contents.getModality ()));
     addTestLink (pattern, child);
     model.advanceClock (model.getDiscriminationTime ());
     return child;
@@ -581,18 +579,6 @@ public class Node {
     for (Link link : _children) {
       link.getChildNode().writeNode (writer);
     }
-  }
-
-  /**
-   * Read a description of a Node from the given buffered-reader, and construct 
-   * a new instance of Node.
-   */
-  public static Node readFromFile (BufferedReader reader) throws ParsingErrorException {
-
-    FileUtilities.acceptOpenTag (reader, "node");
-
-    FileUtilities.acceptCloseTag (reader, "node");
-    return new Node (null);
   }
 }
 
