@@ -149,6 +149,22 @@ public class Node {
   }
 
   /**
+   * Compute the amount of information in current node.  
+   * Information is based on the size of the image + the number of slots.
+   */
+  public int information () {
+    int information = _image.size ();
+    if (_itemSlots != null) {
+      information += _itemSlots.size ();
+    }
+    if (_positionSlots != null) {
+      information += _positionSlots.size ();
+    }
+
+    return information;
+  }
+
+  /**
    * Compute the total size of images below the current node.
    */
   private int totalImageSize () {

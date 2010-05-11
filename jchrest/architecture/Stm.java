@@ -33,9 +33,21 @@ public class Stm {
     return _items.get (index);
   }
 
+  /**
+   * When adding a new node to STM, the most informative node is maintained 
+   * at the top, as the hypothesis.
+   */
   public void add (Node node) {
+    Node hypothesis = node;
+    for (Node check : _items) {
+      if (check.information () > hypothesis.information ()) {
+        hypothesis = check;
+      }
+    }
     _items.remove (node);
     _items.add (0, node);
+    _items.remove (hypothesis);
+    _items.add (0, hypothesis); // if node != hypothesis, then node will be 'below' hypothesis
     while (_items.size () > _size) {
       _items.remove (_items.size () - 1);
     }
