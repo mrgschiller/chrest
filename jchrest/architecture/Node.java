@@ -108,6 +108,10 @@ public class Node {
     _similarNodes.add (node);
   }
 
+  List<Node> getSimilarNodes () {
+    return _similarNodes;
+  }
+
   /**
    * Accessor to node that follows this node.
    */

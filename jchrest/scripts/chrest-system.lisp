@@ -20,30 +20,32 @@
 ;;; ABCL lisp.  Using this wrapper, Chrest models can be defined and 
 ;;; manipulated in Lisp.
 
-;;; Notes on using ABCL:
-;;;
-;;; To identify an array type, e.g. String[], use "[Ljava.lang.String;"
-;;;
-
 (defpackage :chrest
   (:use :common-lisp :java)
   (:export :make-chrest
            :get-clock
+           :get-ltm-size
            :recognise-and-learn
            :recall-pattern
            :name-pattern
            :learn-and-name-pattern
+           :recall-scene
+           :results-recall
+           :results-proportion-fixated-squares
+           :results-proportion-fixated-pieces
            :display-model
            :make-list-pattern
            :make-name-pattern
            :equal-patterns-p
            :to-string
            :read-scene-data
+           :construct-chess-board
            :create-chess-model
            :scenes-ref
            :scenes-number
            :scene-height
            :scene-width
+           :average
            ))
 (in-package :chrest)
 
@@ -56,8 +58,8 @@
   (jcall (jmethod "jchrest.architecture.Chrest" "getClock")
          model))
 
-(defun visual-ltm-size (model)
-  (jcall (jmethod "jchrest.architecture.Chrest" "ltmVisualSize")
+(defun get-ltm-size (model)
+  (jcall (jmethod "jchrest.architecture.Chrest" "getTotalLtmNodes")
          model))
 
 (defun visual-ltm-average-depth (model)
@@ -67,6 +69,23 @@
 (defun visual-ltm-average-image-size (model)
   (jcall (jmethod "jchrest.architecture.Chrest" "getVisualLtmAverageImageSize")
          model))
+
+(defun visual-stm (model)
+  (jcall (jmethod "jchrest.architecture.Chrest" "getVisualStm")
+         model))
+
+(defun get-stm-item (stm index)
+  (jcall (jmethod "jchrest.architecture.Stm" "getItem" "int")
+         stm
+         index))
+
+(defun visual-stm-count (stm)
+  (jcall (jmethod "jchrest.architecture.Stm" "getCount")
+         stm))
+
+(defun get-image (node)
+  (jcall (jmethod "jchrest.architecture.Node" "getImage")
+         node))
 
 (defun recognise-and-learn (model pattern)
   "Pass the given pattern to the model to be recognised and learn"
@@ -91,6 +110,107 @@
     (dotimes (_ num-fixations)
       (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "moveEyeAndLearn")
              perceiver))))
+
+(defun get-perceiver (model)
+  (jcall (jmethod "jchrest.architecture.Chrest" "getPerceiver")
+         model))
+
+(defun get-number-fixations (perceiver)
+  (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "getNumberFixations")
+         perceiver))
+
+(defun get-fixation-x (perceiver index)
+  (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "getFixationsX" "int")
+         perceiver
+         index))
+
+(defun get-fixation-y (perceiver index)
+  (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "getFixationsY" "int")
+         perceiver
+         index))
+
+(defun scan-scene (model scene &optional (num-fixations 20))
+  (let ((perceiver (get-perceiver model)))
+    (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "setScene" "jchrest.lib.Scene")
+           perceiver
+           scene)
+    (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "start")
+           perceiver)
+    (dotimes (_ num-fixations)
+      (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "moveEye")
+             perceiver))))
+
+(defun item-square-p (pattern)
+  (handler-case 
+    (progn (jcall (jmethod "jchrest.lib.ItemSquarePattern" "getItem")
+                  pattern)
+           t)
+    (java-exception (exception)
+                    nil)))
+
+(defstruct fixation row col)
+
+(defun get-fixation-list (model)
+  (let ((fixation-list ()))
+    (dotimes (i (get-number-fixations (get-perceiver model)))
+      (push (make-fixation :row (get-fixation-x (get-perceiver model) i)
+                           :col (get-fixation-y (get-perceiver model) i))
+            fixation-list))
+    (reverse fixation-list)))
+
+(defun fixated-squares (model)
+  (remove-duplicates (get-fixation-list model)
+                     :test #'(lambda (fixation-1 fixation-2)
+                               (and (= (fixation-row fixation-1) 
+                                       (fixation-row fixation-2))
+                                    (= (fixation-col fixation-1)
+                                       (fixation-col fixation-2))))))
+
+(defun proportion-squares-fixated (model)
+  (/ (length (fixated-squares model)) 64))
+
+(defun proportion-pieces-fixated (model scene)
+  (/ (count-if-not #'(lambda (fixation) 
+                       (scene-empty-square-p scene 
+                                             (fixation-row fixation)
+                                             (fixation-col fixation)))
+                   (fixated-squares model))
+     (count-scene-items scene)))
+
+(defstruct results
+  num-target-items
+  num-recalled-items
+  num-correct
+  recall
+  precision
+  proportion-fixated-squares
+  proportion-fixated-pieces)
+
+(defun recall-scene (model scene &optional (num-fixations 20))
+  "Scan the given scene, then return an instance of 'results' structure 
+  containing relevant information."
+  (scan-scene model scene num-fixations)
+  (let ((recalled-items ()))
+    (dotimes (i (visual-stm-count (visual-stm model)))
+      (let ((image (get-image (get-stm-item (visual-stm model) i))))
+        (dotimes (j (pattern-size image))
+          (when (item-square-p (get-pattern-item image j))
+            (push (get-pattern-item image j) recalled-items)))))
+    (setf recalled-items
+          (remove-duplicates recalled-items
+                       :test
+                       #'(lambda (pattern-1 pattern-2)
+                           (jcall (jmethod "jchrest.lib.PrimitivePattern" "equalPrimitive" "jchrest.lib.PrimitivePattern")
+                                  pattern-1
+                                  pattern-2))))
+    (make-results
+      :num-target-items (count-scene-items scene)
+      :num-recalled-items (length recalled-items)
+      :num-correct (count-scene-overlap scene recalled-items)
+      :recall (compute-scene-recall scene recalled-items)
+      :precision 0
+      :proportion-fixated-squares (proportion-squares-fixated model)
+      :proportion-fixated-pieces (proportion-pieces-fixated model scene))))
 
 (defun name-pattern (model pattern)
   (jcall (jmethod "jchrest.architecture.Chrest" "namePattern" "jchrest.lib.ListPattern")
@@ -151,6 +271,15 @@
          pattern)
   pattern)
 
+(defun pattern-size (pattern)
+  (jcall (jmethod "jchrest.lib.ListPattern" "size")
+         pattern))
+  
+(defun get-pattern-item (pattern index)
+  (jcall (jmethod "jchrest.lib.ListPattern" "getItem" "int")
+         pattern
+         index))
+
 (defun equal-patterns-p (pattern-1 pattern-2)
   (jcall (jmethod "jchrest.lib.ListPattern" "equals" "jchrest.lib.ListPattern")
          pattern-1
@@ -177,22 +306,43 @@
       (java-exception (exception)
                       (format t "Caught exception!")))))
 
+(defun construct-chess-board (defn &optional (name "chess board"))
+  "Construct a chess board from a string representation"
+  (let ((scene (jnew (jconstructor "jchrest.lib.Scene" "java.lang.String" "int" "int")
+                     name
+                     8
+                     8)))
+    (dotimes (row 8)
+      (dotimes (col 8)
+        (let ((item (string (aref defn (+ (* 9 row) col)))))
+          (jcall (jmethod "jchrest.lib.Scene" "setItem" "int" "int" "java.lang.String")
+                 scene
+                 row
+                 col
+                 item))))
+    scene))
+
 (defun create-chess-model (scenes &optional (num-cycles 1) (num-fixations 20) (ltm-cap 1000000))
-  "Create and train a new model on given set of scenes, running through the scenes the given number of times"
+  "Create and train a new model on given set of scenes, running through the scenes the 
+  given number of times.  Training ceases when the model's LTM size reaches the ltm-cap."
   (let ((model (make-chrest)))
     (jcall (jmethod "jchrest.architecture.Chrest" "setDomain" "jchrest.lib.DomainSpecifics")
            model
            (jnew (jconstructor "jchrest.lib.ChessDomain")))
     (format t "Learning~&Cycle  Visual LTM size  Avg depth  Avg image size~&")
-    (dotimes (cycle num-cycles)
-      (dotimes (i (scenes-number scenes))
-        (learn-scene model (scenes-ref scenes i) num-fixations))
-      (format t "~d ~d ~$ ~$~&"
-              (1+ cycle)
-              (visual-ltm-size model)
-              (visual-ltm-average-depth model)
-              (visual-ltm-average-image-size model)))
-    model))
+    (do ((cycle 0 (1+ cycle)))
+      ((or (> (get-ltm-size model) ltm-cap)
+           (= cycle num-cycles))
+       model)
+      (do ((i 0 (1+ i)))
+        ((or (> (get-ltm-size model) ltm-cap)
+             (= i (scenes-number scenes)))
+         (format t "~5d  ~15d  ~9,2F  ~14,2F~&"
+                 (1+ cycle)
+                 (get-ltm-size model)
+                 (visual-ltm-average-depth model)
+                 (visual-ltm-average-image-size model)))
+        (learn-scene model (scenes-ref scenes i) num-fixations)))))
 
 (defun scenes-ref (scenes i)
   "Retrieve the ith scene in scenes"
@@ -212,3 +362,41 @@
   (jcall (jmethod "jchrest.lib.Scene" "getWidth")
          scene))
 
+(defun scene-empty-square-p (scene row col)
+  (jcall (jmethod "jchrest.lib.Scene" "isEmpty" "int" "int")
+         scene
+         row
+         col))
+
+(defun count-scene-items (scene)
+  (let ((result 0))
+    (dotimes (row 8)
+      (dotimes (col 8)
+        (unless (scene-empty-square-p scene row col)
+          (incf result))))
+    result))
+
+(defun compute-scene-recall (scene items)
+  (/ (count-scene-overlap scene items)
+     (count-scene-items scene)))
+
+(defun count-scene-overlap (scene items)
+  "Return a count of the number of items in given list which are correctly located in scene"
+  (let ((result 0))
+    (dolist (item items)
+      (when (string= (jcall (jmethod "jchrest.lib.ItemSquarePattern" "getItem")
+                            item)
+                     (jcall (jmethod "jchrest.lib.Scene" "getItem" "int" "int")
+                            scene
+                            (1-
+                             (jcall (jmethod "jchrest.lib.ItemSquarePattern" "getRow")
+                                    item))
+                            (1-
+                             (jcall (jmethod "jchrest.lib.ItemSquarePattern" "getColumn")
+                                    item))))
+        (incf result)))
+    result))
+
+(defun average (results)
+  (* 100 (/ (apply #'+ results)
+            (length results))))

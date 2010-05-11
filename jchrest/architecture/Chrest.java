@@ -386,11 +386,23 @@ public class Chrest extends Observable {
       }
     }
 
+    // see if more informative node in similarity links
+    // TODO: Explore if this should be used during training
+    //       leads to small image size, but quickly produces big networks
+//    for (Node similar : currentNode.getSimilarNodes ()) {
+//      if (similar.information () > currentNode.information ()) {
+//        currentNode = similar;
+//      }
+//    }
+
+    // add to STM
     addToStm (currentNode);
 
+    // inform observers of a change in model's state
     setChanged ();
     notifyObservers ();
 
+    // return it
     return currentNode;
   }
 

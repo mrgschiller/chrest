@@ -34,8 +34,10 @@ public class Stm {
   }
 
   /**
-   * When adding a new node to STM, the most informative node is maintained 
-   * at the top, as the hypothesis.
+   * When adding a new node to STM, the new node is added to the top of STM 
+   * with the queue cut at the bottom to keep STM to the fixed size constraints.
+   * However, the most informative node is maintained in the list, by readding 
+   * it to the end of the list, if lost.
    */
   public void add (Node node) {
     Node hypothesis = node;
@@ -46,10 +48,12 @@ public class Stm {
     }
     _items.remove (node);
     _items.add (0, node);
-    _items.remove (hypothesis);
-    _items.add (0, hypothesis); // if node != hypothesis, then node will be 'below' hypothesis
     while (_items.size () > _size) {
       _items.remove (_items.size () - 1);
+    }
+    if (!_items.contains (hypothesis)) {
+      _items.remove (_items.size () - 1);
+      _items.add (_items.size (), hypothesis);
     }
   }
 
