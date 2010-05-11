@@ -336,12 +336,13 @@ public class Chrest extends Observable {
 
   /**
    * Add given node to STM.  Check for formation of similarity links by
-   * comparing images of nodes.
+   * comparing incoming node with the hypothesis, or 'largest', node.
    */
   private void addToStm (Node node) {
     Stm stm = getStmByModality (node.getImage ());
 
-    for (Node check : stm.getContents ()) {
+    if (stm.getCount () > 0) {
+      Node check = stm.getItem (0);
       if (node.getImage().isSimilarTo (check.getImage (), SIMILARITY_THRESHOLD)) {
         node.addSimilarNode (check);
       }
