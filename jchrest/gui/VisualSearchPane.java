@@ -8,6 +8,18 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
+// Import the JFreeChart classes
+import org.jfree.chart.*;
+import org.jfree.chart.plot.*;
+import org.jfree.data.*;
+import org.jfree.data.general.*;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.ui.RectangleInsets;
+
 /**
  * This panel provides an interface for training and recall of 
  * models on visual search problems.
@@ -27,11 +39,149 @@ public class VisualSearchPane extends JPanel {
     _model.getPerceiver().setScene (_scenes.get (0));
     _sceneDisplay = new SceneDisplay (_scenes.get (0));
 
-    setLayout (new BorderLayout ());
+    JTabbedPane jtb = new JTabbedPane ();
+    jtb.addTab ("Train", trainPanel ());
+    jtb.addTab ("Recall", recallPanel ());
 
-    add (_sceneDisplay);
-    add (constructButtons (), BorderLayout.EAST);
-    add (constructSelector (), BorderLayout.SOUTH);
+    setLayout (new BorderLayout ());
+    add (jtb);
+  }
+
+  private boolean _showCharts = false;
+
+  // -- set up the training panel
+  private JPanel trainPanel () {
+    JPanel panel = new JPanel ();
+    panel.setLayout (new BoxLayout (panel, BoxLayout.Y_AXIS));
+
+    panel.add (constructTrainingOptions ());
+    panel.add (runTrainingButtons ());
+    if (freeChartLoaded ()) {
+      _showCharts = true;
+      panel.add (constructTrainingGraph ());
+    }
+
+    return panel;
+  }
+
+  private JSpinner _maxTrainingCycles;
+  private JSpinner _numFixations;
+  private JSpinner _maxNetworkSize;
+
+  private JPanel constructTrainingOptions () {
+    _maxTrainingCycles = new JSpinner (new SpinnerNumberModel (5, 1, 100, 1));
+    _numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 100, 1));
+    _maxNetworkSize = new JSpinner (new SpinnerNumberModel (1000, 1, 1000000, 1));
+
+    JPanel panel = new JPanel ();
+    panel.setLayout (new GridLayout (4, 2));
+    panel.add (new JLabel ("Number of scenes: ", SwingConstants.RIGHT));
+    panel.add (new JLabel ("" + _scenes.size ()));
+    panel.add (new JLabel ("Maximum training cycles: ", SwingConstants.RIGHT));
+    panel.add (_maxTrainingCycles);
+    panel.add (new JLabel ("Number of fixations per scene: ", SwingConstants.RIGHT));
+    panel.add (_numFixations);
+    panel.add (new JLabel ("Maximum network size: ", SwingConstants.RIGHT));
+    panel.add (_maxNetworkSize);
+
+    return panel;
+  }
+
+  private boolean freeChartLoaded () {
+    try {
+      new DefaultPieDataset ();
+
+      return true;
+    } catch (NoClassDefFoundError ex) {
+      return false;
+    }
+  }
+
+  private JPanel runTrainingButtons () {
+    JPanel panel = new JPanel ();
+
+    _trainingTimes = new XYSeries ("CHREST model");
+    panel.add (new JButton (new TrainAction (_trainingTimes)));
+    panel.add (new JButton (new StopAction ()));
+
+    return panel;
+  }
+
+  private XYSeries _trainingTimes;
+
+  private ChartPanel createPanel () {
+    XYSeriesCollection dataset = new XYSeriesCollection ();
+    _trainingTimes.add (100, 1000);
+    _trainingTimes.add (200, 2000);
+    _trainingTimes.add (300, 2500);
+    _trainingTimes.add (400, 5000);
+    dataset.addSeries (_trainingTimes);
+
+    JFreeChart chart = ChartFactory.createXYLineChart(
+        "Plot of network size vs. number of training patterns",
+        "Number of training patterns",
+        "Network size",
+        dataset, 
+        org.jfree.chart.plot.PlotOrientation.VERTICAL,
+        true, 
+        true, 
+        false
+        );
+
+    XYPlot plot = (XYPlot) chart.getPlot();
+    plot.setBackgroundPaint(Color.lightGray);
+    plot.setDomainGridlinePaint(Color.white);
+    plot.setRangeGridlinePaint(Color.white);
+    plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+    plot.setDomainCrosshairVisible(true);
+    plot.setRangeCrosshairVisible(true);
+
+    XYItemRenderer r = plot.getRenderer();
+    if (r instanceof XYLineAndShapeRenderer) {
+      XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) r;
+      renderer.setBaseShapesVisible(true);
+      renderer.setBaseShapesFilled(true);
+      renderer.setDrawSeriesLineAsPath(true);
+    }
+
+    return new ChartPanel (chart);
+  }
+
+  private JPanel constructTrainingGraph () {
+    return createPanel ();
+  }
+
+  private class TrainAction extends AbstractAction implements ActionListener {
+    private XYSeries _trainingTimes;
+    
+    public TrainAction (XYSeries trainingTimes) {
+      super ("Train");
+      _trainingTimes = trainingTimes;
+    }
+
+    public void actionPerformed (ActionEvent e) {
+      _trainingTimes.add (500, 6000);
+    }
+  }
+
+  private class StopAction extends AbstractAction implements ActionListener {
+    public StopAction () {
+      super ("Stop");
+    }
+    public void actionPerformed (ActionEvent e) {
+    }
+  }
+
+  // -- set up the recall panel
+  private JPanel recallPanel () {
+    JPanel panel = new JPanel ();
+    panel.setLayout (new BorderLayout ());
+
+    panel.add (_sceneDisplay);
+    panel.add (constructButtons (), BorderLayout.EAST);
+    panel.add (constructSelector (), BorderLayout.SOUTH);
+
+    return panel;
   }
 
   private JComboBox _sceneSelector;
