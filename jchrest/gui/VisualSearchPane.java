@@ -103,8 +103,20 @@ public class VisualSearchPane extends JPanel {
     JPanel panel = new JPanel ();
 
     _trainingTimes = new XYSeries ("CHREST model");
-    panel.add (new JButton (new TrainAction ()));
-    panel.add (new JButton (new StopAction ()));
+    _trainAction = new TrainAction ();
+    JButton trainButton = new JButton (_trainAction);
+    trainButton.setToolTipText ("Train a fresh CHREST model up to the given network size");
+    _stopAction = new StopAction ();
+    _stopAction.setEnabled (false);
+    JButton stopButton = new JButton (_stopAction);
+    stopButton.setToolTipText ("Stop the current training");
+    _feedback = new JProgressBar (0, 100);
+    _feedback.setToolTipText ("Proportion of target network size");
+    _feedback.setValue (0);
+    _feedback.setStringPainted (true);
+    panel.add (trainButton);
+    panel.add (stopButton);
+    panel.add (_feedback);
 
     return panel;
   }
@@ -180,46 +192,49 @@ public class VisualSearchPane extends JPanel {
       public List<Pair> doInBackground () {
         _model.clear ();
         List<Pair> results = new ArrayList<Pair> ();
+        Pair result = new Pair (0, 0);
+        results.add (result);
+        publish (result);
 
         int stepSize = (_maxCycles * _scenes.size ()) / 100;
 
         int cycle = 0;
         int positionsSeen = 0;
-        while ((cycle < _maxCycles) && (_model.getTotalLtmNodes () < _maxSize)) {
-          for (int i = 0; i < _scenes.size () && (_model.getTotalLtmNodes () < _maxSize); i++) {
+        while (
+            (cycle < _maxCycles) && 
+            (_model.getTotalLtmNodes () < _maxSize) &&
+            !isCancelled ()) {
+          for (int i = 0; i < _scenes.size () && (_model.getTotalLtmNodes () < _maxSize) && !isCancelled (); i++) {
             _model.learnScene (_scenes.get (i), _numFixations);
             positionsSeen += 1;
             if (positionsSeen % stepSize == 0) {
-              Pair result = new Pair (positionsSeen, _model.getTotalLtmNodes ());
+              result = new Pair (positionsSeen, _model.getTotalLtmNodes ());
               publish (result);
+              setProgress (100 * _model.getTotalLtmNodes () / _maxSize);
               results.add (result);
             }
           }
           cycle += 1;
         }
+        result = new Pair (positionsSeen, _model.getTotalLtmNodes ());
+        results.add (result);
+        publish (result);
+
         return results;
       }
 
-/*    @Override
-      public void done () {
-        try {
-          List<Pair> results = get ();
-          for (Pair pair : results) {
-            _trainingTimes.add (pair.getFirst (), pair.getSecond ());
-          }
-        } catch (InterruptedException ie) {
-          ;
-        } catch (java.util.concurrent.ExecutionException ee) {
-          ;
-        }
-      }
-*/
     @Override
       protected void process (List<Pair> results) {
         for (Pair pair : results) {
           _trainingTimes.add (pair.getFirst (), pair.getSecond ());
         }
       }
+
+    protected void done () {
+      _feedback.setValue (100);
+      _stopAction.setEnabled (false);
+      _trainAction.setEnabled (true);
+    }
   }
 
   private class TrainAction extends AbstractAction implements ActionListener {
@@ -241,18 +256,39 @@ public class VisualSearchPane extends JPanel {
     }
 
     public void actionPerformed (ActionEvent e) {
-      TrainingThread task = new TrainingThread (_model, _scenes, getMaxCycles (), getMaxNetworkSize (), getNumFixations ());
+      _task = new TrainingThread (_model, _scenes, getMaxCycles (), getMaxNetworkSize (), getNumFixations ());
+      _task.addPropertyChangeListener(
+          new java.beans.PropertyChangeListener() {
+            public  void propertyChange(java.beans.PropertyChangeEvent evt) {
+              if ("progress".equals(evt.getPropertyName())) {
+                _feedback.setValue ((Integer)evt.getNewValue());
+              }
+            }
+          });
+
       _trainingTimes.clear (); // make sure we start graph afresh
 
-      task.execute ();
+      _feedback.setValue (0);
+      _trainAction.setEnabled (false);
+      _stopAction.setEnabled (true);
+
+      _task.execute ();
     }
   }
+
+  private TrainingThread _task;
+  private JProgressBar _feedback;
+  private TrainAction _trainAction;
+  private StopAction _stopAction;
 
   private class StopAction extends AbstractAction implements ActionListener {
     public StopAction () {
       super ("Stop");
     }
     public void actionPerformed (ActionEvent e) {
+      _task.cancel (true);
+      _trainAction.setEnabled (true);
+      _stopAction.setEnabled (false);
     }
   }
 
