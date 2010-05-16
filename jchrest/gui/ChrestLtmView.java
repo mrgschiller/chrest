@@ -32,13 +32,20 @@ public class ChrestLtmView extends JPanel {
     setLayout (new BorderLayout ());
 
     // -- the treeview pane
-    _ltmView = new TreeViewPane (new TreeViewNode (constructTree ()));
-    add (new JScrollPane (_ltmView));
+    if (_model.getTotalLtmNodes () > 5000) {
+      _ltmView = null;
+      add (new JLabel ("Sorry - LTM too large to display"));
+    } else {
+      _ltmView = new TreeViewPane (new TreeViewNode (constructTree ()));
+      add (new JScrollPane (_ltmView));
+    }
     add (createToolBar (), BorderLayout.SOUTH);
   }
 
   public void update () {
-    _ltmView.changeRoot (new TreeViewNode (constructTree ()));
+    if (_ltmView != null) {
+      _ltmView.changeRoot (new TreeViewNode (constructTree ()));
+    }
   }
 
   private JComboBox createOrientationBox () {
@@ -84,15 +91,19 @@ public class ChrestLtmView extends JPanel {
 	}
 
 	public void setStandardDisplay () {
-		updateOrientation (Orientation.HORIZONTAL);
-		updateSize (Size.getValues().get (1));
+    if (_ltmView != null) {
+      updateOrientation (Orientation.HORIZONTAL);
+      updateSize (Size.getValues().get (1));
+    }
 	}
 
   /**
    * Relayout and draw the treeview nodes.
    */
 	public void drawTreeView () {
-		_ltmView.relayout();
+    if (_ltmView != null) {
+      _ltmView.relayout();
+    }
 	}
 
   /**
