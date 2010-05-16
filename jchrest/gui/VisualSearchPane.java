@@ -5,6 +5,8 @@ import jchrest.lib.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -101,7 +103,7 @@ public class VisualSearchPane extends JPanel {
     JPanel panel = new JPanel ();
 
     _trainingTimes = new XYSeries ("CHREST model");
-    panel.add (new JButton (new TrainAction (_trainingTimes)));
+    panel.add (new JButton (new TrainAction ()));
     panel.add (new JButton (new StopAction ()));
 
     return panel;
@@ -111,10 +113,6 @@ public class VisualSearchPane extends JPanel {
 
   private ChartPanel createPanel () {
     XYSeriesCollection dataset = new XYSeriesCollection ();
-    _trainingTimes.add (100, 1000);
-    _trainingTimes.add (200, 2000);
-    _trainingTimes.add (300, 2500);
-    _trainingTimes.add (400, 5000);
     dataset.addSeries (_trainingTimes);
 
     JFreeChart chart = ChartFactory.createXYLineChart(
@@ -151,16 +149,102 @@ public class VisualSearchPane extends JPanel {
     return createPanel ();
   }
 
+  private class Pair {
+    private int _first, _second;
+    Pair (int first, int second) {
+      _first = first;
+      _second = second;
+    }
+    int getFirst () {
+      return _first;
+    }
+    int getSecond () {
+      return _second;
+    }
+  }
+
+  private class TrainingThread extends SwingWorker<List<Pair>, Pair> {
+    private Chrest _model;
+    private Scenes _scenes;
+    private int _maxCycles, _maxSize, _numFixations;
+
+    TrainingThread (Chrest model, Scenes scenes, int maxCycles, int maxSize, int numFixations) {
+      _model = model;
+      _scenes = scenes;
+      _maxCycles = maxCycles;
+      _maxSize = maxSize;
+      _numFixations = numFixations;
+    }
+
+    @Override
+      public List<Pair> doInBackground () {
+        _model.clear ();
+        List<Pair> results = new ArrayList<Pair> ();
+
+        int stepSize = (_maxCycles * _scenes.size ()) / 100;
+
+        int cycle = 0;
+        int positionsSeen = 0;
+        while ((cycle < _maxCycles) && (_model.getTotalLtmNodes () < _maxSize)) {
+          for (int i = 0; i < _scenes.size () && (_model.getTotalLtmNodes () < _maxSize); i++) {
+            _model.learnScene (_scenes.get (i), _numFixations);
+            positionsSeen += 1;
+            if (positionsSeen % stepSize == 0) {
+              Pair result = new Pair (positionsSeen, _model.getTotalLtmNodes ());
+              publish (result);
+              results.add (result);
+            }
+          }
+          cycle += 1;
+        }
+        return results;
+      }
+
+/*    @Override
+      public void done () {
+        try {
+          List<Pair> results = get ();
+          for (Pair pair : results) {
+            _trainingTimes.add (pair.getFirst (), pair.getSecond ());
+          }
+        } catch (InterruptedException ie) {
+          ;
+        } catch (java.util.concurrent.ExecutionException ee) {
+          ;
+        }
+      }
+*/
+    @Override
+      protected void process (List<Pair> results) {
+        for (Pair pair : results) {
+          _trainingTimes.add (pair.getFirst (), pair.getSecond ());
+        }
+      }
+  }
+
   private class TrainAction extends AbstractAction implements ActionListener {
-    private XYSeries _trainingTimes;
-    
-    public TrainAction (XYSeries trainingTimes) {
+
+    public TrainAction () {
       super ("Train");
-      _trainingTimes = trainingTimes;
+    }
+
+    private int getNumFixations () {
+      return ((SpinnerNumberModel)(_numFixations.getModel())).getNumber().intValue ();
+    }
+
+    private int getMaxCycles () {
+      return ((SpinnerNumberModel)(_maxTrainingCycles.getModel())).getNumber().intValue ();
+    }
+
+    private int getMaxNetworkSize () {
+      return ((SpinnerNumberModel)(_maxNetworkSize.getModel())).getNumber().intValue ();
     }
 
     public void actionPerformed (ActionEvent e) {
-      _trainingTimes.add (500, 6000);
+      TrainingThread task = new TrainingThread (_model, _scenes, getMaxCycles (), getMaxNetworkSize (), getNumFixations ());
+      _trainingTimes.clear (); // make sure we start graph afresh
+
+      task.execute ();
     }
   }
 

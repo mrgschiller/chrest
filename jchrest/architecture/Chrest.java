@@ -520,6 +520,14 @@ public class Chrest extends Observable {
     learnAndNamePatterns (pattern1, pattern2, _clock);
   }
 
+  public void learnScene (Scene scene, int numFixations) {
+    _perceiver.setScene (scene);
+    _perceiver.start ();
+    for (int i = 0; i < numFixations; i++) {
+      _perceiver.moveEyeAndLearn ();
+    }
+  }
+
   /** 
    * Clear the STM and LTM of the model.
    */
