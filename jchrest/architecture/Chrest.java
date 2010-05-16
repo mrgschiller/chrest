@@ -529,6 +529,34 @@ public class Chrest extends Observable {
   }
 
   /** 
+   * Scan given scene, then return a scene which would be recalled.
+   */
+  public Scene scanScene (Scene scene, int numFixations) {
+    // scan given scene, without learning
+    _visualStm.clear ();
+    _perceiver.setScene (scene);
+    _perceiver.start ();
+    for (int i = 0; i < numFixations; i++) {
+      _perceiver.moveEye ();
+    }
+    // build up and return recalled scene
+    Scene recalledScene = new Scene ("Recalled scene of " + scene.getName (), 
+        scene.getHeight (), scene.getWidth ());
+    // -- get items from images in STM
+    for (Node node : _visualStm.getContents ()) {
+      for (int i = 0; i < node.getImage().size (); i++) {
+        PrimitivePattern item = node.getImage().getItem (i);
+        if (item instanceof ItemSquarePattern) {
+          ItemSquarePattern ios = (ItemSquarePattern)item;
+          recalledScene.setItem (ios.getRow ()-1, ios.getColumn ()-1, ios.getItem ());
+        }
+      }
+    }
+
+    return recalledScene;
+  }
+
+  /** 
    * Clear the STM and LTM of the model.
    */
   public void clear () {

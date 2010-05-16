@@ -12,6 +12,12 @@ public class Scene {
     _height = height;
     _width = width;
     _scene = new String[_height][_width];
+    // make scene empty to start
+    for (int row = 0; row < _height; row++) {
+      for (int col = 0; col < _width; col++) {
+        _scene[row][col] = ".";
+      }
+    }
   }
 
   public String getName () {
@@ -73,6 +79,92 @@ public class Scene {
     }
 
     return items;
+  }
+
+  /**
+   * Count the number of non-empty squares in the scene.
+   */
+  public int countItems () {
+    int items = 0;
+    for (int row = 0; row < _height; row++) {
+      for (int col = 0; col < _width; col++) {
+        if (isEmpty (row, col)) {
+          ;
+        } else {
+          items += 1;
+        }
+      }
+    }
+    return items;
+  }
+
+  public int countOverlappingPieces (Scene scene) {
+    int items = 0;
+    for (int row = 0; row < _height; row++) {
+      for (int col = 0; col < _width; col++) {
+        if (isEmpty (row, col)) {
+          ;
+        } else if (_scene[row][col].equals (scene.getItem (row, col))) {
+          items += 1;
+        } else {
+          ;
+        }
+      }
+    }
+    return items;
+  }         
+
+  /**
+   * Compute precision of given scene against this one.
+   */
+  public float computePrecision (Scene scene) {
+    return (float)countOverlappingPieces(scene) / (float)scene.countItems();
+  }
+
+  /**
+   * Compute recall of given scene against this one.
+   */
+  public float computeRecall (Scene scene) {
+    return (float)countOverlappingPieces(scene) / (float)this.countItems();
+  }
+  
+  /**
+   * Compute errors of omission of given scene against this one.
+   */
+  public int computeErrorsOfOmission (Scene scene) {
+    int errors = 0;
+    for (int row = 0; row < _height; row++) {
+      for (int col = 0; col < _width; col++) {
+        if (isEmpty(row, col)) {
+          ; // do nothing for empty squares
+        } else if (_scene[row][col].equals (scene.getItem (row, col))) {
+          ; // no error if this and given scene have the same item
+        } else { // an item in this scene is not in given scene
+          errors += 1;
+        }
+      }
+    }
+    return errors;
+  }
+
+  /**
+   * Compute errors of commission of given scene against this one.
+   */
+  public int computeErrorsOfCommission (Scene scene) {
+    int errors = 0;
+    for (int row = 0; row < _height; row++) {
+      for (int col = 0; col < _width; col++) {
+        if (scene.isEmpty (row, col)) {
+          ; // do nothing for empty squares in given scene
+        } else if (scene.getItem(row, col).equals (_scene[row][col])) {
+          ; // no error if given and this scene have the same item
+        } else { // an item in given scene is not in this scene
+          errors += 1;
+        }
+      }
+    }
+
+    return errors;
   }
 }
 

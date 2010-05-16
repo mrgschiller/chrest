@@ -40,6 +40,17 @@ public class VisualSearchPane extends JPanel {
     _scenes = scenes;
     _model.getPerceiver().setScene (_scenes.get (0));
     _sceneDisplay = new SceneDisplay (_scenes.get (0));
+    _domainSelector = new JComboBox (new String[]{"Generic", "Chess"});
+    _domainSelector.addActionListener (new AbstractAction () {
+      public void actionPerformed (ActionEvent e){
+        int index = _domainSelector.getSelectedIndex ();
+        if (index == 0) {
+          _model.setDomain (new GenericDomain ());
+        } else { // if (index == 1) 
+          _model.setDomain (new ChessDomain ());
+        }
+      }
+    });
 
     JTabbedPane jtb = new JTabbedPane ();
     jtb.addTab ("Train", trainPanel ());
@@ -76,7 +87,9 @@ public class VisualSearchPane extends JPanel {
     _maxNetworkSize = new JSpinner (new SpinnerNumberModel (1000, 1, 1000000, 1));
 
     JPanel panel = new JPanel ();
-    panel.setLayout (new GridLayout (4, 2));
+    panel.setLayout (new GridLayout (5, 2));
+    panel.add (new JLabel ("Domain of scenes: ", SwingConstants.RIGHT));
+    panel.add (_domainSelector);
     panel.add (new JLabel ("Number of scenes: ", SwingConstants.RIGHT));
     panel.add (new JLabel ("" + _scenes.size ()));
     panel.add (new JLabel ("Maximum training cycles: ", SwingConstants.RIGHT));
@@ -292,18 +305,73 @@ public class VisualSearchPane extends JPanel {
     }
   }
 
+  private JLabel _recallSceneLabel;
+  private SceneDisplay _recalledSceneDisplay;
+
   // -- set up the recall panel
   private JPanel recallPanel () {
     JPanel panel = new JPanel ();
-    panel.setLayout (new BorderLayout ());
+    panel.setLayout (new GridLayout (1, 1));
 
-    panel.add (_sceneDisplay);
-    panel.add (constructButtons (), BorderLayout.EAST);
-    panel.add (constructSelector (), BorderLayout.SOUTH);
+    JSplitPane sp = new JSplitPane (
+        JSplitPane.VERTICAL_SPLIT, 
+        recallSetupPanel (),
+        recallResultsPanel ());
+
+    panel.add (sp);
 
     return panel;
   }
 
+  private JPanel recallSetupPanel () {
+    JPanel panel = new JPanel ();
+    panel.setLayout (new BorderLayout ());
+
+    panel.add (constructSelector (), BorderLayout.NORTH);
+    panel.add (_sceneDisplay);
+    panel.add (constructButtons (), BorderLayout.EAST);
+
+    return panel;
+  }
+
+  private JLabel _precision, _recall, _omission, _commission;
+  private JPanel recallResultsPanel () {
+    _recallSceneLabel = new JLabel ("RECALLED SCENE");
+    _recalledSceneDisplay = new SceneDisplay (new Scene ("empty", 
+          _scenes.get(0).getHeight (), 
+          _scenes.get(0).getWidth ()));
+    _precision = new JLabel ("");
+    _recall = new JLabel ("");
+    _omission = new JLabel ("");
+    _commission = new JLabel ("");
+
+    JPanel panel = new JPanel ();
+    panel.setLayout (new BorderLayout ());
+
+    JPanel statistics = new JPanel ();
+    statistics.setLayout (new GridLayout (4, 2));
+    statistics.add (new JLabel ("Precision: ", SwingConstants.RIGHT));
+    statistics.add (_precision);
+    statistics.add (new JLabel ("Recall: ", SwingConstants.RIGHT));
+    statistics.add (_recall);
+    statistics.add (new JLabel ("Errors of omission: ", SwingConstants.RIGHT));
+    statistics.add (_omission);
+    statistics.add (new JLabel ("Errors of commission: ", SwingConstants.RIGHT));
+    statistics.add (_commission);
+
+    // TODO: there must be a better solution to stop the statistics panel spreading out
+    JPanel statisticsPanel = new JPanel ();
+    statisticsPanel.setLayout (new BorderLayout ());
+    statisticsPanel.add (statistics, BorderLayout.NORTH);
+
+    panel.add (_recallSceneLabel, BorderLayout.NORTH);
+    panel.add (_recalledSceneDisplay);
+    panel.add (statisticsPanel, BorderLayout.EAST);
+
+    return panel;
+  }
+
+  private JComboBox _domainSelector;
   private JComboBox _sceneSelector;
 
   private JPanel constructSelector () {
@@ -322,6 +390,27 @@ public class VisualSearchPane extends JPanel {
     panel.add (_sceneSelector);
 
     return panel;
+  }
+
+  class RecallAction extends AbstractAction implements ActionListener {
+    private JSpinner _numFixations;
+
+    public RecallAction (JSpinner numFixations) {
+      super ("Recall Scene");
+
+      _numFixations = numFixations;
+    }
+
+    public void actionPerformed (ActionEvent e) {
+      Scene scene =  _scenes.get(_sceneSelector.getSelectedIndex ());
+      Scene recalledScene = _model.scanScene (scene, ((SpinnerNumberModel)(_numFixations.getModel())).getNumber().intValue ());
+      _recallSceneLabel.setText (recalledScene.getName ());
+      _recalledSceneDisplay.updateScene (recalledScene);
+      _precision.setText ("" + scene.computePrecision (recalledScene));
+      _recall.setText ("" + scene.computeRecall (recalledScene));
+      _omission.setText ("" + scene.computeErrorsOfOmission (recalledScene));
+      _commission.setText ("" + scene.computeErrorsOfCommission (recalledScene));
+    }
   }
 
   class StartAction extends AbstractAction implements ActionListener {
@@ -356,22 +445,29 @@ public class VisualSearchPane extends JPanel {
     }
   }
 
-  private Box constructButtons () {
-    JLabel heuristicLabel = new JLabel ("");
+  private JPanel constructButtons () {
 
     Box buttons = Box.createVerticalBox ();
-    JButton startButton = new JButton (new StartAction (heuristicLabel));
-    JButton stepButton = new JButton (new StepAction (heuristicLabel));
+    JSpinner numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 100, 1));
+    
+    JPanel labelledSpinner = new JPanel ();
+    labelledSpinner.setLayout (new GridLayout (1, 2));
+    labelledSpinner.add (new JLabel ("Number of fixations: "));
+    labelledSpinner.add (numFixations);
 
-    stepButton.setMaximumSize (stepButton.getPreferredSize ());
+    JButton recallButton = new JButton (new RecallAction (numFixations));
+    recallButton.setToolTipText ("Scan shown scene and display results");
 
-    buttons.add (Box.createGlue ());
-    buttons.add (startButton);
-    buttons.add (stepButton);
-    buttons.add (heuristicLabel);
-    buttons.add (Box.createGlue ());
+    buttons.add (Box.createRigidArea (new Dimension (0, 20)));
+    buttons.add (labelledSpinner);
+    buttons.add (recallButton);
 
-    return buttons;
+    // TODO: There must be a better solution to this problem!
+    JPanel panel = new JPanel ();
+    panel.setLayout (new BorderLayout ());
+    panel.add (buttons, BorderLayout.NORTH);
+
+    return panel;
   }
 }
 
@@ -383,7 +479,6 @@ class SceneDisplay extends JPanel {
     super ();
 
     setLayout (new GridLayout (1, 1));
-    setBorder (new TitledBorder ("Scene"));
     _scene = scene;
     _sceneView = new SceneView ();
     add (new JScrollPane (_sceneView));

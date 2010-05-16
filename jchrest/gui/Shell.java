@@ -442,8 +442,8 @@ public class Shell extends JFrame {
   private JMenu createModelMenu () {
     JMenu menu = new JMenu ("Model");
     menu.add (new ClearModelAction (this));
-    menu.add (new LoadModelAction (this));
-    menu.add (new SaveModelAction (this));
+//    menu.add (new LoadModelAction (this));
+//    menu.add (new SaveModelAction (this));
     menu.add (new ModelPropertiesAction (this));
     menu.add (new JSeparator ());
     menu.add (new ModelInformationAction (this));
