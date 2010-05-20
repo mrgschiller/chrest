@@ -31,7 +31,8 @@ public class Chrest extends Observable {
   // - determines number of overlapping items in node images
   public static int SIMILARITY_THRESHOLD = 1;
   // template construction parameters
-  public static int MIN_LEVEL = 5;
+  private boolean _createTemplates;
+  public static int MIN_LEVEL = 3;
   public static int MIN_OCCURRENCES = 2;
   // long-term-memory holds information within the model permanently
   private int _totalNodes;
@@ -62,6 +63,7 @@ public class Chrest extends Observable {
     _verbalStm = new Stm (2);
     _actionStm = new Stm (4);
 
+    _createTemplates = true;
     _perceiver = new Perceiver ();
   }
 
@@ -152,6 +154,20 @@ public class Chrest extends Observable {
    */
   public void setRho (float rho) {
     _rho = rho;
+  }
+
+  /**
+   * Modify option to create templates.
+   */
+  public void setCreateTemplates (boolean value) {
+    _createTemplates = value;
+  }
+
+  /**
+   * Accessor to option of whether to create templates.
+   */
+  public boolean getCreateTemplates () {
+    return _createTemplates;
   }
 
   /**
@@ -311,7 +327,9 @@ public class Chrest extends Observable {
    * currently works for visual patterns using the ItemSquarePattern primitive.
    */
   public void constructTemplates () {
-    _visualLtm.convertIntoTemplate ();
+    if (_createTemplates) {
+      _visualLtm.convertIntoTemplate ();
+    }
   }
 
   public Node getLtmByModality (ListPattern pattern) {

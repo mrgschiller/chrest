@@ -229,6 +229,8 @@ public class VisualSearchPane extends JPanel {
           }
           cycle += 1;
         }
+        _model.constructTemplates ();
+        
         result = new Pair (positionsSeen, _model.getTotalLtmNodes ());
         results.add (result);
         publish (result);

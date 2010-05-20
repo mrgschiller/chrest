@@ -248,6 +248,7 @@ public class Shell extends JFrame {
         _model.setVisualStmSize (((SpinnerNumberModel)_visualStmSize.getModel()).getNumber().intValue ());
         _model.setVerbalStmSize (((SpinnerNumberModel)_verbalStmSize.getModel()).getNumber().intValue ());
         _model.getPerceiver().setFieldOfView (((SpinnerNumberModel)_fieldOfView.getModel()).getNumber().intValue ());
+        _model.setCreateTemplates(_createTemplates.isSelected ());
       }
     }
 
@@ -258,6 +259,7 @@ public class Shell extends JFrame {
     private JSpinner _visualStmSize;
     private JSpinner _verbalStmSize;
     private JSpinner _fieldOfView;
+    private JCheckBox _createTemplates;
 
     private JPanel properties () {
       // -- create entry widgets
@@ -268,9 +270,10 @@ public class Shell extends JFrame {
       _visualStmSize = new JSpinner (new SpinnerNumberModel (_model.getVisualStmSize (), 1, 10, 1));
       _verbalStmSize = new JSpinner (new SpinnerNumberModel (_model.getVerbalStmSize (), 1, 10, 1));
       _fieldOfView = new JSpinner (new SpinnerNumberModel (_model.getPerceiver().getFieldOfView (), 1, 100, 1));
+      _createTemplates = new JCheckBox ("Create templates", _model.getCreateTemplates ());
 
       JPanel panel = new JPanel ();
-      panel.setLayout (new GridLayout (7, 2));
+      panel.setLayout (new GridLayout (8, 2));
       panel.add (new JLabel ("Add link time (ms)", SwingConstants.RIGHT));
       panel.add (_addLinkTime);
       panel.add (new JLabel ("Discrimination time (ms)", SwingConstants.RIGHT));
@@ -285,6 +288,8 @@ public class Shell extends JFrame {
       panel.add (_verbalStmSize);
       panel.add (new JLabel ("Field of view", SwingConstants.RIGHT));
       panel.add (_fieldOfView);
+      panel.add (new JLabel (""));
+      panel.add (_createTemplates);
 
       return panel;
     }
@@ -390,6 +395,7 @@ public class Shell extends JFrame {
           " Average depth: " + twoPlaces.format (_model.getVerbalLtmAverageDepth ()) +
           "<br>Action nodes: " + _model.ltmActionSize () + 
           " Average depth: " + twoPlaces.format (_model.getActionLtmAverageDepth ()) +
+          "<br>Number of templates: " + _model.countPotentialTemplates () +
           "</p></html>",
           "Chrest: Model information",
           JOptionPane.INFORMATION_MESSAGE);
