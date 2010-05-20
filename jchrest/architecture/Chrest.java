@@ -918,6 +918,7 @@ public class Chrest extends Observable {
       _fixationsX = new ArrayList<Integer> ();
       _fixationsY = new ArrayList<Integer> ();
       _fixationsType = new ArrayList<Integer> ();
+      _fixations = new ArrayList<Fixation> ();
     }
 
     public int getFixationX () {
@@ -946,6 +947,7 @@ public class Chrest extends Observable {
 
     public void setScene (Scene scene) {
       _currentScene = scene;
+      clearFixations ();
     }
 
     /** 
@@ -1058,6 +1060,7 @@ public class Chrest extends Observable {
       _fixationsX.add (_fixationX);
       _fixationsY.add (_fixationY);
       _fixationsType.add (_lastHeuristic);
+      addFixation (new Fixation (_lastHeuristic, _fixationX, _fixationY));
     }
 
     /**
@@ -1114,6 +1117,19 @@ public class Chrest extends Observable {
       return _fixationsType.get (fixation);
     }
 
+    List<Fixation> _fixations = new ArrayList<Fixation> ();
+
+    public void clearFixations () {
+      _fixations.clear ();
+    }
+
+    public List<Fixation> getFixations () {
+      return _fixations;
+    }
+
+    private void addFixation (Fixation fixation) {
+      _fixations.add (fixation);
+    }
   }
 }
 

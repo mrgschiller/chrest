@@ -412,38 +412,7 @@ public class VisualSearchPane extends JPanel {
       _recall.setText ("" + scene.computeRecall (recalledScene));
       _omission.setText ("" + scene.computeErrorsOfOmission (recalledScene));
       _commission.setText ("" + scene.computeErrorsOfCommission (recalledScene));
-    }
-  }
-
-  class StartAction extends AbstractAction implements ActionListener {
-    private JLabel _lastHeuristic;
-
-    public StartAction (JLabel lastHeuristic) {
-      super ("Start");
-      _lastHeuristic = lastHeuristic;
-    }
-    public void actionPerformed (ActionEvent e) {
-      _model.getPerceiver().start ();
-      _sceneDisplay.updateFixation (_model.getPerceiver().getFixationX (), 
-          _model.getPerceiver().getFixationY (), 
-          _model.getPerceiver().getFieldOfView ());
-      _lastHeuristic.setText ("");
-    }
-  }
-
-  class StepAction extends AbstractAction implements ActionListener {
-    private JLabel _lastHeuristic;
-
-    public StepAction (JLabel lastHeuristic) {
-      super ("Step");
-      _lastHeuristic = lastHeuristic;
-    }
-    public void actionPerformed (ActionEvent e) {
-      _model.getPerceiver().moveEyeAndLearn ();
-      _sceneDisplay.updateFixation (_model.getPerceiver().getFixationX (),
-         _model.getPerceiver().getFixationY (),
-         _model.getPerceiver().getFieldOfView ());
-      _lastHeuristic.setText (_model.getHeuristicDescription ());
+      _sceneDisplay.setFixations (_model.getPerceiver().getFixations ());
     }
   }
 
@@ -460,9 +429,19 @@ public class VisualSearchPane extends JPanel {
     JButton recallButton = new JButton (new RecallAction (numFixations));
     recallButton.setToolTipText ("Scan shown scene and display results");
 
+    final JCheckBox showFixations = new JCheckBox ("Show fixations", false);
+    showFixations.setToolTipText ("Show fixations for recalled scene");
+    showFixations.addActionListener (new ActionListener () {
+      public void actionPerformed (ActionEvent e) {
+        _sceneDisplay.setShowFixations (showFixations.isSelected ());
+      }
+    });
+
     buttons.add (Box.createRigidArea (new Dimension (0, 20)));
     buttons.add (labelledSpinner);
     buttons.add (recallButton);
+    buttons.add (Box.createRigidArea (new Dimension (0, 20)));
+    buttons.add (showFixations);
 
     // TODO: There must be a better solution to this problem!
     JPanel panel = new JPanel ();
@@ -476,6 +455,8 @@ public class VisualSearchPane extends JPanel {
 class SceneDisplay extends JPanel {
   private Scene _scene;
   private SceneView _sceneView;
+  private List<Fixation> _fixations;
+  private boolean _showFixations;
 
   public SceneDisplay (Scene scene) {
     super ();
@@ -483,6 +464,8 @@ class SceneDisplay extends JPanel {
     setLayout (new GridLayout (1, 1));
     _scene = scene;
     _sceneView = new SceneView ();
+    _fixations = new ArrayList<Fixation> ();
+    _showFixations = false;
     add (new JScrollPane (_sceneView));
   }
 
@@ -491,13 +474,18 @@ class SceneDisplay extends JPanel {
     _sceneView.update ();
   }
 
-  public void updateFixation (int x, int y, int fov) {
-    _sceneView.setFixation (x, y, fov);
+  public void setFixations (List<Fixation> fixations) {
+    _fixations = fixations;
+    _sceneView.update ();
+  }
+
+  public void setShowFixations (boolean showFixations) {
+    _showFixations = showFixations;
+    _sceneView.update ();
   }
 
   class SceneView extends JPanel {
     private int _maxX, _maxY;
-    private int _fixationX, _fixationY, _fov;
 
     SceneView () {
       super ();
@@ -512,8 +500,6 @@ class SceneDisplay extends JPanel {
 
     public void update () {
 
-      _fixationX = _fixationY = -1; // set no fixation
-
       _maxX = scale * (_scene.getWidth () + 2); // + 2 for row heading and gaps
       _maxY = scale * (_scene.getHeight () + 2); // + 2 for column heading and gaps
 
@@ -522,16 +508,10 @@ class SceneDisplay extends JPanel {
       repaint ();
     }
 
-    public void setFixation (int x, int y, int fov) {
-      _fixationX = x;
-      _fixationY = y;
-      _fov = fov;
-      repaint ();
-    }
-
     public void paint (Graphics g) {
       super.paint (g); // make sure the background of the JPanel is drawn
       Graphics2D g2 = (Graphics2D)g;
+      int fov = 2; // TODO ???
 
       g2.setBackground (Color.WHITE);
       g2.clearRect (0, 0, _maxX, _maxY);
@@ -561,15 +541,29 @@ class SceneDisplay extends JPanel {
         }
       }
 
-      // draw fixation
-      if (_fixationX >= 0 && _fixationY >= 0) {
-        g2.setColor (Color.BLUE);
-        g2.setStroke (new BasicStroke (2));
-        g2.drawRoundRect (offsetX + scale * _fixationX, offsetY + scale * _fixationY,
-            scale, scale, 5, 5);
-        g2.drawRoundRect (offsetX + scale * (_fixationX - _fov), offsetY + scale * (_fixationY - _fov), 
-            scale * (_fov * 2 + 1), scale * (_fov * 2 + 1),
-            5, 5);
+      // draw fixations
+      int prevX = -1;
+      int prevY = -1;
+      if (_showFixations) {
+        for (Fixation fixation : _fixations) {
+          g2.setColor (Color.BLUE);
+          g2.setStroke (new BasicStroke (2));
+          int nextX = offsetX + scale * fixation.getX () - 2;
+          int nextY = offsetY + scale * fixation.getY () - 2;
+          if (prevX == -1 && prevY == -1) {
+            ; // draw nothing for first oval
+          } else {
+            g2.drawLine (prevX, prevY, nextX, nextY);
+          }
+          g2.drawOval (nextX, nextY, scale-4, scale-4); 
+//          g2.drawRoundRect (offsetX + scale * fixation.getX (), 
+//              offsetY + scale * fixation.getY (),
+//              scale, scale, 5, 5);
+//          g2.drawRoundRect (offsetX + scale * (fixation.getX () - fov), 
+ //             offsetY + scale * (fixation.getY () - fov), 
+  //            scale * (fov * 2 + 1), scale * (fov * 2 + 1),
+   //           5, 5);
+        }
       }
     }
   }
