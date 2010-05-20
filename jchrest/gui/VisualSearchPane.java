@@ -548,21 +548,16 @@ class SceneDisplay extends JPanel {
         for (Fixation fixation : _fixations) {
           g2.setColor (Color.BLUE);
           g2.setStroke (new BasicStroke (2));
-          int nextX = offsetX + scale * fixation.getX () - 2;
-          int nextY = offsetY + scale * fixation.getY () - 2;
+          int nextX = offsetX + scale * fixation.getX () + 5;
+          int nextY = offsetY + scale * fixation.getY () + 5;
           if (prevX == -1 && prevY == -1) {
             ; // draw nothing for first oval
           } else {
-            g2.drawLine (prevX, prevY, nextX, nextY);
+            g2.drawLine (prevX, prevY, nextX+5, nextY+5);
           }
-          g2.drawOval (nextX, nextY, scale-4, scale-4); 
-//          g2.drawRoundRect (offsetX + scale * fixation.getX (), 
-//              offsetY + scale * fixation.getY (),
-//              scale, scale, 5, 5);
-//          g2.drawRoundRect (offsetX + scale * (fixation.getX () - fov), 
- //             offsetY + scale * (fixation.getY () - fov), 
-  //            scale * (fov * 2 + 1), scale * (fov * 2 + 1),
-   //           5, 5);
+          g2.drawOval (nextX, nextY, scale-10, scale-10); 
+          prevX = nextX+5; 
+          prevY = nextY+5;
         }
       }
     }

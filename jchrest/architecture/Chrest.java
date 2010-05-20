@@ -976,8 +976,8 @@ public class Chrest extends Observable {
         Pattern first = test.getItem (0);
         if (first instanceof ItemSquarePattern) {
           ItemSquarePattern ios = (ItemSquarePattern)first;
-          _fixationX = ios.getColumn ();
-          _fixationY = ios.getRow (); 
+          _fixationX = ios.getColumn ()-1; // because ios start from 1
+          _fixationY = ios.getRow ()-1; 
 
           // look at square given by first test link
           // then look to see if a test link has the same square and observed piece
@@ -986,8 +986,8 @@ public class Chrest extends Observable {
               if (link.getTest().getItem (0) instanceof ItemSquarePattern) {
                 ItemSquarePattern testIos = (ItemSquarePattern)link.getTest().getItem (0);
                 // check all details of test are correct
-                if (testIos.getColumn () == _fixationX && 
-                    testIos.getRow () == _fixationY &&
+                if (testIos.getColumn () - 1 == _fixationX && 
+                    testIos.getRow () - 1 == _fixationY &&
                     testIos.getItem().equals (_currentScene.getItem (_fixationY, _fixationX))) {
                   _visualStm.replaceHypothesis (link.getChildNode ());
                   _lastHeuristic = 1;
@@ -1009,7 +1009,9 @@ public class Chrest extends Observable {
       for (int i = 0; i < 10; ++i) {
         int xDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
         int yDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
-        if (!_currentScene.isEmpty (_fixationY + yDisplacement, _fixationX + xDisplacement)) {
+        if (!_currentScene.isEmpty (_fixationY + yDisplacement, _fixationX + xDisplacement)
+            && _fixationX < _currentScene.getWidth ()
+            && _fixationY < _currentScene.getHeight ()) {
           _fixationX += xDisplacement;
           _fixationY += yDisplacement;
           _lastHeuristic = 2;
