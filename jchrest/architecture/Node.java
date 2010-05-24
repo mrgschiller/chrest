@@ -223,17 +223,21 @@ public class Node {
     return (double)totalImageSize() / size();
   }
 
-  public int countPotentialTemplates () {
+  /**
+   * Count templates in part of network rooted at this node.
+   */
+  public int countTemplates () {
     int count = 0;
-    if (canFormTemplate ()) count += 1;
+    if (isTemplate ()) count += 1;
 
     for (Link link : _children) {
-      count += link.getChildNode().countPotentialTemplates ();
+      count += link.getChildNode().countTemplates ();
     }
 
     return count;
   }
 
+  /**
   public void showPotentialTemplates () {
     if (canFormTemplate ()) {
       System.out.println("\n--------------------\nNode: " + _reference);
@@ -290,9 +294,11 @@ public class Node {
       link.getChildNode().showPotentialTemplates ();
     }
   }
-
+*/
   private List<ItemSquarePattern> _itemSlots;
   private List<ItemSquarePattern> _positionSlots;
+  private List<ItemSquarePattern> _filledItemSlots;
+  private List<ItemSquarePattern> _filledPositionSlots;
 
   /**
    * Returns true if this node is a template.  To be a template, the node 
@@ -310,6 +316,9 @@ public class Node {
     return false;
   }
 
+  /**
+   * Clear out the template slots.
+   */
   public void clearTemplate () {
     if (_itemSlots != null) _itemSlots.clear ();
     if (_positionSlots != null) _positionSlots.clear ();
@@ -319,15 +328,63 @@ public class Node {
    * Attempt to fill some of the slots using the items in the given pattern.
    */
   public void fillSlots (ListPattern pattern) {
+    if (_itemSlots == null) _itemSlots = new ArrayList<ItemSquarePattern> ();
+    if (_positionSlots == null) _positionSlots = new ArrayList<ItemSquarePattern> ();
+    if (_filledItemSlots == null) _filledItemSlots = new ArrayList<ItemSquarePattern> ();
+    if (_filledPositionSlots == null) _filledPositionSlots = new ArrayList<ItemSquarePattern> ();
+
+    for (int index = 0; index < pattern.size (); index++) {
+      if (pattern.getItem(index) instanceof ItemSquarePattern) {
+        ItemSquarePattern item = (ItemSquarePattern)(pattern.getItem (index));
+        // 1. check the item slots
+        for (ItemSquarePattern slot : _itemSlots) {
+          if (slot.getItem().equals(item.getItem ())) {
+            _filledItemSlots.add (item);
+          }
+        }
+
+        // 2. check the position slots
+        for (ItemSquarePattern slot : _positionSlots) {
+          if (slot.getRow () == item.getRow () &&
+              slot.getColumn () == item.getColumn ()) {
+            _filledPositionSlots.add (item);
+              }
+        }
+      }
+    }
+  }
+
+  public void clearFilledSlots () {
+    if (_filledItemSlots == null) _filledItemSlots = new ArrayList<ItemSquarePattern> ();
+    if (_filledPositionSlots == null) _filledPositionSlots = new ArrayList<ItemSquarePattern> ();
+
+    _filledItemSlots.clear ();
+    _filledPositionSlots.clear ();
   }
 
   /**
-   * Converts this node and all child nodes into templates.
-   * If 'canFormTemplate' returns true, then make this node into a template.
+   * Retrieve all primitive items stored in slots of template as a ListPattern.
+   * The retrieved pattern may contain duplicate primitive items, but will be 
+   * untangled in Chrest#scanScene.
+   */
+  ListPattern getFilledSlots () {
+    ListPattern filledSlots = new ListPattern ();
+    for (ItemSquarePattern filledSlot : _filledItemSlots) {
+      filledSlots.add (filledSlot);
+    }
+    for (ItemSquarePattern filledSlot : _filledPositionSlots) {
+      filledSlots.add (filledSlot);
+    }
+    return filledSlots;
+  }
+
+  /**
+   * Converts this node into a template, if appropriate, and repeats for 
+   * all child nodes.
    * Note: usually, this process is done as a whole at the end of training, but 
    * can also be done on a node-by-node basis, during training.
    */
-  public void convertIntoTemplate () {
+  public void constructTemplates () {
     _itemSlots = new ArrayList<ItemSquarePattern> ();
     _positionSlots = new ArrayList<ItemSquarePattern> ();
 
@@ -355,6 +412,7 @@ public class Node {
             } else {
               countItems.put (item.getItem (), 1);
             }
+            // TODO: Check construction of 'posn_key', try 1000 = scene.getWidth ?
             Integer posn_key = item.getRow () + 1000 * item.getColumn ();
             if (countPositions.containsKey (posn_key)) {
               countPositions.put (posn_key, countPositions.get(posn_key) + 1);
@@ -382,7 +440,7 @@ public class Node {
 
     // continue conversion for children of this node
     for (Link link : _children) {
-      link.getChildNode().convertIntoTemplate ();
+      link.getChildNode().constructTemplates ();
     }
 
   }

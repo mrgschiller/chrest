@@ -395,7 +395,7 @@ public class Shell extends JFrame {
           " Average depth: " + twoPlaces.format (_model.getVerbalLtmAverageDepth ()) +
           "<br>Action nodes: " + _model.ltmActionSize () + 
           " Average depth: " + twoPlaces.format (_model.getActionLtmAverageDepth ()) +
-          "<br>Number of templates: " + _model.countPotentialTemplates () +
+          "<br>Number of templates: " + _model.countTemplates () +
           "</p></html>",
           "Chrest: Model information",
           JOptionPane.INFORMATION_MESSAGE);

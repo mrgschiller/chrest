@@ -312,26 +312,26 @@ public class Chrest extends Observable {
   }
 
   /**
-   * Return a count of the number of potential templates in the model.
-   */
-  public int countPotentialTemplates () {
-    return _visualLtm.countPotentialTemplates();
-  }
-
-  public void showPotentialTemplates () {
-    _visualLtm.showPotentialTemplates ();
-  }
-
-  /**
    * Construct templates.  Note, the template construction process only 
    * currently works for visual patterns using the ItemSquarePattern primitive.
    */
   public void constructTemplates () {
     if (_createTemplates) {
-      _visualLtm.convertIntoTemplate ();
+      _visualLtm.constructTemplates ();
     }
   }
 
+  /**
+   * Return a count of the number of templates in the model's visual LTM.
+   */
+  public int countTemplates () {
+    return _visualLtm.countTemplates ();
+  }
+
+  /**
+   * Return the root node of the long-term memory which the given pattern
+   * would be sorted through, based on its modality.
+   */
   public Node getLtmByModality (ListPattern pattern) {
     if (pattern.isVisual ()) {
       return _visualLtm;
@@ -366,6 +366,10 @@ public class Chrest extends Observable {
       }
     }
 
+    // TODO: Check if this is the best place
+    // Idea is that node's filled slots are cleared when put into STM, 
+    // are filled whilst in STM, and forgotten when it leaves.
+    node.clearFilledSlots (); 
     stm.add (node);
   }
 
@@ -560,10 +564,15 @@ public class Chrest extends Observable {
     // build up and return recalled scene
     Scene recalledScene = new Scene ("Recalled scene of " + scene.getName (), 
         scene.getHeight (), scene.getWidth ());
-    // -- get items from images in STM
+    // -- get items from image in STM, and optionally template slots
+    // TODO: use frequency count in recall
     for (Node node : _visualStm.getContents ()) {
-      for (int i = 0; i < node.getImage().size (); i++) {
-        PrimitivePattern item = node.getImage().getItem (i);
+      ListPattern recalledInformation = node.getImage();
+      if (_createTemplates) { // check if templates needed
+        recalledInformation = recalledInformation.append(node.getFilledSlots ());
+      }
+      for (int i = 0; i < recalledInformation.size (); i++) {
+        PrimitivePattern item = recalledInformation.getItem (i);
         if (item instanceof ItemSquarePattern) {
           ItemSquarePattern ios = (ItemSquarePattern)item;
           recalledScene.setItem (ios.getRow ()-1, ios.getColumn ()-1, ios.getItem ());
