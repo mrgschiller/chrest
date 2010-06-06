@@ -270,7 +270,7 @@ public class Shell extends JFrame {
       _visualStmSize = new JSpinner (new SpinnerNumberModel (_model.getVisualStmSize (), 1, 10, 1));
       _verbalStmSize = new JSpinner (new SpinnerNumberModel (_model.getVerbalStmSize (), 1, 10, 1));
       _fieldOfView = new JSpinner (new SpinnerNumberModel (_model.getPerceiver().getFieldOfView (), 1, 100, 1));
-      _createTemplates = new JCheckBox ("Create templates", _model.getCreateTemplates ());
+      _createTemplates = new JCheckBox ("Use templates", _model.getCreateTemplates ());
 
       JPanel panel = new JPanel ();
       panel.setLayout (new GridLayout (8, 2));

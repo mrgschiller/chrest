@@ -300,6 +300,14 @@ public class Node {
   private List<ItemSquarePattern> _filledItemSlots;
   private List<ItemSquarePattern> _filledPositionSlots;
 
+  public List<ItemSquarePattern> getFilledItemSlots () {
+    return _filledItemSlots;
+  }
+
+  public List<ItemSquarePattern> getFilledPositionSlots () {
+    return _filledPositionSlots;
+  }
+
   /**
    * Returns true if this node is a template.  To be a template, the node 
    * must be at least one slot of any kind.
@@ -336,19 +344,22 @@ public class Node {
     for (int index = 0; index < pattern.size (); index++) {
       if (pattern.getItem(index) instanceof ItemSquarePattern) {
         ItemSquarePattern item = (ItemSquarePattern)(pattern.getItem (index));
-        // 1. check the item slots
-        for (ItemSquarePattern slot : _itemSlots) {
-          if (slot.getItem().equals(item.getItem ())) {
-            _filledItemSlots.add (item);
+        // only try to fill a slot if item is not already in image
+        if (!_image.contains (item)) { 
+          // 1. check the item slots
+          for (ItemSquarePattern slot : _itemSlots) {
+            if (slot.getItem().equals(item.getItem ())) {
+              _filledItemSlots.add (item);
+            }
           }
-        }
 
-        // 2. check the position slots
-        for (ItemSquarePattern slot : _positionSlots) {
-          if (slot.getRow () == item.getRow () &&
-              slot.getColumn () == item.getColumn ()) {
-            _filledPositionSlots.add (item);
-              }
+          // 2. check the position slots
+          for (ItemSquarePattern slot : _positionSlots) {
+            if (slot.getRow () == item.getRow () &&
+                slot.getColumn () == item.getColumn ()) {
+              _filledPositionSlots.add (item);
+                }
+          }
         }
       }
     }

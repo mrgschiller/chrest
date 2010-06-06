@@ -287,7 +287,7 @@ public class ListPattern extends Pattern {
     return result + ">";
   }
 
-  private boolean contains (PrimitivePattern given) {
+  public boolean contains (PrimitivePattern given) {
     for (PrimitivePattern item : _list) {
       if (item.equalPrimitive (given)) return true;
     }

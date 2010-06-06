@@ -1043,14 +1043,15 @@ public class Chrest extends Observable {
       if ((xDisplacement == 0 && yDisplacement == 0) || 
           (_fixationX + xDisplacement < 0) ||
           (_fixationY + yDisplacement < 0) ||
-          (_fixationX + xDisplacement > _currentScene.getWidth ()) ||
-          (_fixationY + yDisplacement > _currentScene.getHeight ())) {
+          (_fixationX + xDisplacement >= _currentScene.getWidth ()) ||
+          (_fixationY + yDisplacement >= _currentScene.getHeight ())) {
         _fixationX += 1;
-        if (_fixationX == _currentScene.getWidth ()) {
+        // check legality of new fixation
+        if (_fixationX >= _currentScene.getWidth ()) {
           _fixationY += 1;
           _fixationX = 0;
         }
-        if (_fixationY == _currentScene.getHeight ()) {
+        if (_fixationY >= _currentScene.getHeight ()) {
           _fixationX = 0;
           _fixationY = 0;
         }
@@ -1109,7 +1110,7 @@ public class Chrest extends Observable {
       else if (_lastHeuristic == 2)
         return "Random item heuristic";
       else // if (_lastHeuristic == 3)
-        return "Random piece heuristic";
+        return "Random place heuristic";
     }
 
     public int getNumberFixations () {

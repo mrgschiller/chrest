@@ -15,12 +15,28 @@ public class Fixation {
     return _type;
   }
 
+  private final String[] _descriptions = 
+    new String[] {
+      "No heuristic", 
+      "LTM heuristic", 
+      "Random item heuristic", 
+      "Random place heuristic"
+    };
+
+  public String getHeuristicDescription () {
+    return _descriptions[_type];
+  }
+ 
   public int getX () {
     return _x;
   }
 
   public int getY () {
     return _y;
+  }
+
+  public String toString () {
+    return "(" + _x + ", " + _y + ") " + getHeuristicDescription ();
   }
 
 }

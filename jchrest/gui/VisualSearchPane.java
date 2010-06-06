@@ -1,6 +1,7 @@
 package jchrest.gui;
 
 import jchrest.architecture.Chrest;
+import jchrest.architecture.Node;
 import jchrest.lib.*;
 
 import java.awt.*;
@@ -55,6 +56,7 @@ public class VisualSearchPane extends JPanel {
     JTabbedPane jtb = new JTabbedPane ();
     jtb.addTab ("Train", trainPanel ());
     jtb.addTab ("Recall", recallPanel ());
+    jtb.addTab ("Log", logPanel ());
 
     setLayout (new BorderLayout ());
     add (jtb);
@@ -413,6 +415,33 @@ public class VisualSearchPane extends JPanel {
       _omission.setText ("" + scene.computeErrorsOfOmission (recalledScene));
       _commission.setText ("" + scene.computeErrorsOfCommission (recalledScene));
       _sceneDisplay.setFixations (_model.getPerceiver().getFixations ());
+      // log results
+      addLog ("\n" + recalledScene.getName ());
+      addLog ("Fixations: ");
+      for (Fixation fixation : _model.getPerceiver().getFixations ()) {
+        addLog ("   " + fixation.toString ());
+      }
+      addLog ("Chunks used: ");
+      for (Node node : _model.getVisualStm().getContents ()) {
+        addLog ("   " + node.getImage().toString ());
+        if (_model.getCreateTemplates() && node.isTemplate ()) {
+          addLog ("     Template:");
+          addLog ("        filled item slots: ");
+          for (ItemSquarePattern isp : node.getFilledItemSlots ()) {
+            addLog ("         " + isp.toString ());
+          }
+          addLog ("        filled position slots: ");
+          for (ItemSquarePattern isp : node.getFilledPositionSlots ()) {
+            addLog ("         " + isp.toString ());
+          }
+
+        }
+      }
+      addLog ("Performance: ");
+      addLog ("   Precision: " + scene.computePrecision (recalledScene));
+      addLog ("   Recall: " + scene.computeRecall (recalledScene));
+      addLog ("   Errors of Omission: " + scene.computeErrorsOfOmission (recalledScene));
+      addLog ("   Errors of Commission: " + scene.computeErrorsOfCommission (recalledScene));
     }
   }
 
@@ -449,6 +478,22 @@ public class VisualSearchPane extends JPanel {
     panel.add (buttons, BorderLayout.NORTH);
 
     return panel;
+  }
+
+  // -- setup the log display
+  private JTextArea _logScreen;
+
+  private JPanel logPanel () {
+    _logScreen = new JTextArea ();
+    JPanel panel = new JPanel ();
+    panel.setLayout (new GridLayout (1, 1));
+    panel.add (new JScrollPane (_logScreen));
+
+    return panel;
+  }
+
+  private void addLog (String string) {
+    _logScreen.append (string + "\n");
   }
 }
 
