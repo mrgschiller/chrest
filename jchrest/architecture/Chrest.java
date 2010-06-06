@@ -1000,6 +1000,10 @@ public class Chrest extends Observable {
                     testIos.getItem().equals (_currentScene.getItem (_fixationY, _fixationX))) {
                   _visualStm.replaceHypothesis (link.getChildNode ());
                   _lastHeuristic = 1;
+                  _fixationsX.add (_fixationX);
+                  _fixationsY.add (_fixationY);
+                  _fixationsType.add (_lastHeuristic);
+                  addFixation (new Fixation (_lastHeuristic, _fixationX, _fixationY));
                   return true;
                     }
               }
