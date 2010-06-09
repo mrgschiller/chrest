@@ -93,7 +93,7 @@
 		(test-compare #'eq expected actual msg))
 	(defun assert-equalp (expected actual &optional (msg ""))
 	       (test-compare #'equalp expected actual msg))
-	(defun assert= (expected actual &optional (msg ""))
+	(defun assert-= (expected actual &optional (msg ""))
 	       (test-compare #'= expected actual msg))
 	(defun assert-string= (expected actual &optional (msg ""))
 	       (test-compare #'string= expected actual msg)))
@@ -142,8 +142,8 @@
   (assert-equalp 4 (adder 2 2)))
 
 (def-unit-tests x2 ()
-  (assert= 7 (adder 2 1))
-  (assert= 7 (adder 2 1) "adding error"))
+  (assert-= 7 (adder 2 1))
+  (assert-= 7 (adder 2 1) "adding error"))
 
 (def-unit-tests x3 ()
   (assert-true (< 2 (adder 2 1)))

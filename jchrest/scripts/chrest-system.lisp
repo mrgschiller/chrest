@@ -37,6 +37,7 @@
            :make-list-pattern
            :make-name-pattern
            :equal-patterns-p
+           :pattern-size
            :to-string
            :read-scene-data
            :construct-chess-board
@@ -47,11 +48,15 @@
            :scene-width
            :average
            ; for fixations
-           make-fixation
-           fixation-type
-           fixation-x
-           fixation-y
-           fixation-heuristic-description
+           :make-fixation
+           :fixation-type
+           :fixation-x
+           :fixation-y
+           :fixation-heuristic-description
+           :make-item-on-square
+           :big-piece-p
+           :offensive-piece-p
+           :get-salient-pieces
            ))
 (in-package :chrest)
 
@@ -135,6 +140,12 @@
          model
          scene 
          num-fixations))
+
+(defun make-item-on-square (item row col)
+  (jnew (jconstructor "jchrest.lib.ItemSquarePattern" "java.lang.String" "int" "int")
+        item
+        row
+        col))
 
 (defun item-square-p (pattern)
   (handler-case 
@@ -228,7 +239,7 @@
 
 (defun make-list-pattern (items)
   "Make a list pattern from the given items, invoking the appropriate constructor 
-  for the primitive items"
+  for the primitive items where needed"
   (let ((lp (jnew (jconstructor "jchrest.lib.ListPattern"))))
     (dolist (item items)
       (jcall (jmethod "jchrest.lib.ListPattern" "add" "jchrest.lib.PrimitivePattern")
@@ -238,8 +249,9 @@
                    ((stringp item)
                     (make-string-primitive item))
                    (t
-                     (error "Unknown type of item")))))
-    (set-finished lp)))
+                     item))))
+    (set-finished lp)
+    lp))
 
 (defun make-name-pattern (str)
   (set-finished
@@ -388,4 +400,17 @@
 (defun fixation-heuristic-description (fixation)
   (jcall (jmethod "jchrest.lib.Fixation" "getHeuristicDescription")
          fixation))
+
+;; for chess domain, calling static methods
+(defun big-piece-p (ios) 
+  (jstatic "isBigPiece" "jchrest.lib.ChessDomain" ios))
+
+(defun offensive-piece-p (ios)
+  (jstatic "isOffensivePiece" "jchrest.lib.ChessDomain" ios))
+
+(defun get-salient-pieces (list-pattern experiencedp)
+  (jstatic "getSalientPieces" 
+           "jchrest.lib.ChessDomain" 
+           list-pattern
+           (if experiencedp 1 0)))
 
