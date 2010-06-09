@@ -6,6 +6,9 @@ import jchrest.lib.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -423,7 +426,7 @@ public class VisualSearchPane extends JPanel {
       }
       addLog ("Chunks used: ");
       for (Node node : _model.getVisualStm().getContents ()) {
-        addLog ("   " + node.getImage().toString ());
+        addLog ("   " + "Node: " + node.getReference() + " " + node.getImage().toString ());
         if (_model.getCreateTemplates() && node.isTemplate ()) {
           addLog ("     Template:");
           addLog ("        filled item slots: ");
@@ -486,10 +489,42 @@ public class VisualSearchPane extends JPanel {
   private JPanel logPanel () {
     _logScreen = new JTextArea ();
     JPanel panel = new JPanel ();
-    panel.setLayout (new GridLayout (1, 1));
+    panel.setLayout (new BorderLayout ());
     panel.add (new JScrollPane (_logScreen));
 
+    Box buttons = Box.createHorizontalBox ();
+    buttons.add (new JButton (new SaveAction ()));
+    buttons.add (new JButton (new ClearAction ()));
+    panel.add (buttons, BorderLayout.SOUTH);
+
     return panel;
+  }
+
+  private class SaveAction extends AbstractAction implements ActionListener {
+    public SaveAction () {
+      super ("Save");
+    }
+    public void actionPerformed (ActionEvent e) {
+      File file = FileUtilities.getSaveFilename (_logScreen);
+      if (file != null) {
+        try {
+          FileWriter fw = new FileWriter (file);
+          _logScreen.write (fw);
+          fw.close ();
+        } catch (IOException ioe) {
+          ; // ignore any problems
+        }
+      }
+    }
+  }
+
+  private class ClearAction extends AbstractAction implements ActionListener {
+    public ClearAction () {
+      super ("Clear");
+    }
+    public void actionPerformed (ActionEvent e) {
+      _logScreen.setText ("");
+    }
   }
 
   private void addLog (String string) {

@@ -46,6 +46,12 @@
            :scene-height
            :scene-width
            :average
+           ; for fixations
+           make-fixation
+           fixation-type
+           fixation-x
+           fixation-y
+           fixation-heuristic-description
            ))
 (in-package :chrest)
 
@@ -100,16 +106,10 @@
          pattern))
 
 (defun learn-scene (model scene &optional (num-fixations 20))
-  (let ((perceiver (jcall (jmethod "jchrest.architecture.Chrest" "getPerceiver")
-                          model)))
-    (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "setScene" "jchrest.lib.Scene")
-           perceiver
-           scene)
-    (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "start")
-           perceiver)
-    (dotimes (_ num-fixations)
-      (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "moveEyeAndLearn")
-             perceiver))))
+  (jcall (jmethod "jchrest.architecture.Chrest" "learnScene" "jchrest.lib.Scene" "int")
+         model
+         scene
+         num-fixations))
 
 (defun get-perceiver (model)
   (jcall (jmethod "jchrest.architecture.Chrest" "getPerceiver")
@@ -130,15 +130,11 @@
          index))
 
 (defun scan-scene (model scene &optional (num-fixations 20))
-  (let ((perceiver (get-perceiver model)))
-    (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "setScene" "jchrest.lib.Scene")
-           perceiver
-           scene)
-    (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "start")
-           perceiver)
-    (dotimes (_ num-fixations)
-      (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "moveEye")
-             perceiver))))
+  "Returns a Scene, as would be recalled using information in STM"
+  (jcall (jmethod "jchrest.architecture.Chrest" "scanScene" "jchrest.lib.Scene" "int")
+         model
+         scene 
+         num-fixations))
 
 (defun item-square-p (pattern)
   (handler-case 
@@ -182,33 +178,18 @@
   num-recalled-items
   num-correct
   recall
-  precision
   proportion-fixated-squares
   proportion-fixated-pieces)
 
 (defun recall-scene (model scene &optional (num-fixations 20))
   "Scan the given scene, then return an instance of 'results' structure 
   containing relevant information."
-  (scan-scene model scene num-fixations)
-  (let ((recalled-items ()))
-    (dotimes (i (visual-stm-count (visual-stm model)))
-      (let ((image (get-image (get-stm-item (visual-stm model) i))))
-        (dotimes (j (pattern-size image))
-          (when (item-square-p (get-pattern-item image j))
-            (push (get-pattern-item image j) recalled-items)))))
-    (setf recalled-items
-          (remove-duplicates recalled-items
-                       :test
-                       #'(lambda (pattern-1 pattern-2)
-                           (jcall (jmethod "jchrest.lib.PrimitivePattern" "equalPrimitive" "jchrest.lib.PrimitivePattern")
-                                  pattern-1
-                                  pattern-2))))
+  (let ((recalled-scene (scan-scene model scene num-fixations)))
     (make-results
       :num-target-items (count-scene-items scene)
-      :num-recalled-items (length recalled-items)
-      :num-correct (count-scene-overlap scene recalled-items)
-      :recall (compute-scene-recall scene recalled-items)
-      :precision 0
+      :num-recalled-items (count-scene-items recalled-scene)
+      :num-correct (count-scene-overlap scene recalled-scene)
+      :recall (compute-scene-recall scene recalled-scene)
       :proportion-fixated-squares (proportion-squares-fixated model)
       :proportion-fixated-pieces (proportion-pieces-fixated model scene))))
 
@@ -368,35 +349,43 @@
          row
          col))
 
+(defun count-scene-overlap (scene-1 scene-2)
+  (jcall (jmethod "jchrest.lib.Scene" "countOverlappingPieces" "jchrest.lib.Scene")
+         scene-1 
+         scene-2))
+
 (defun count-scene-items (scene)
-  (let ((result 0))
-    (dotimes (row 8)
-      (dotimes (col 8)
-        (unless (scene-empty-square-p scene row col)
-          (incf result))))
-    result))
+  (jcall (jmethod "jchrest.lib.Scene" "countItems")
+         scene))
 
-(defun compute-scene-recall (scene items)
-  (/ (count-scene-overlap scene items)
-     (count-scene-items scene)))
-
-(defun count-scene-overlap (scene items)
-  "Return a count of the number of items in given list which are correctly located in scene"
-  (let ((result 0))
-    (dolist (item items)
-      (when (string= (jcall (jmethod "jchrest.lib.ItemSquarePattern" "getItem")
-                            item)
-                     (jcall (jmethod "jchrest.lib.Scene" "getItem" "int" "int")
-                            scene
-                            (1-
-                             (jcall (jmethod "jchrest.lib.ItemSquarePattern" "getRow")
-                                    item))
-                            (1-
-                             (jcall (jmethod "jchrest.lib.ItemSquarePattern" "getColumn")
-                                    item))))
-        (incf result)))
-    result))
+(defun compute-scene-recall (scene recalled)
+  (jcall (jmethod "jchrest.lib.Scene" "computeRecall" "jchrest.lib.Scene")
+         scene
+         recalled))
 
 (defun average (results)
   (* 100 (/ (apply #'+ results)
             (length results))))
+
+(defun make-fixation (fixation-type x y)
+  (jnew (jconstructor "jchrest.lib.Fixation" "int" "int" "int")
+        fixation-type
+        x
+        y))
+
+(defun fixation-type (fixation)
+  (jcall (jmethod "jchrest.lib.Fixation" "getType")
+         fixation))
+
+(defun fixation-x (fixation)
+  (jcall (jmethod "jchrest.lib.Fixation" "getX")
+         fixation))
+
+(defun fixation-y (fixation)
+  (jcall (jmethod "jchrest.lib.Fixation" "getY")
+         fixation))
+
+(defun fixation-heuristic-description (fixation)
+  (jcall (jmethod "jchrest.lib.Fixation" "getHeuristicDescription")
+         fixation))
+
