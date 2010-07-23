@@ -72,11 +72,11 @@ public class Stm {
   }
 
   public void learnLateralLinks (Chrest model) {
-    if (_items.size () >= 2) {
+    if (_items.size () >= 2 && 
+        _items.get(1).getFollowedBy () != _items.get(0)) {
       _items.get(1).setFollowedBy (_items.get(0));
       model.advanceClock (model.getAddLinkTime ());
     }
   }
 }
-
 

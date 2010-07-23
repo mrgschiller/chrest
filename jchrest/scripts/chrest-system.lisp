@@ -124,6 +124,11 @@
   (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "getNumberFixations")
          perceiver))
 
+(defun get-fixation-type (perceiver index)
+  (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "getFixationsType" "int")
+         perceiver
+         index))
+
 (defun get-fixation-x (perceiver index)
   (jcall (jmethod "jchrest.architecture.Chrest$Perceiver" "getFixationsX" "int")
          perceiver
@@ -160,8 +165,9 @@
 (defun get-fixation-list (model)
   (let ((fixation-list ()))
     (dotimes (i (get-number-fixations (get-perceiver model)))
-      (push (make-fixation :row (get-fixation-x (get-perceiver model) i)
-                           :col (get-fixation-y (get-perceiver model) i))
+      (push (make-fixation 
+              :row (get-fixation-x (get-perceiver model) i)
+              :col (get-fixation-y (get-perceiver model) i))
             fixation-list))
     (reverse fixation-list)))
 
@@ -379,11 +385,11 @@
   (* 100 (/ (apply #'+ results)
             (length results))))
 
-(defun make-fixation (fixation-type x y)
-  (jnew (jconstructor "jchrest.lib.Fixation" "int" "int" "int")
-        fixation-type
-        x
-        y))
+;(defun make-fixation (fixation-type x y)
+;  (jnew (jconstructor "jchrest.lib.Fixation" "int" "int" "int")
+;        fixation-type
+;        x
+;        y))
 
 (defun fixation-type (fixation)
   (jcall (jmethod "jchrest.lib.Fixation" "getType")

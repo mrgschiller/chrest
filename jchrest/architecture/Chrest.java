@@ -443,12 +443,11 @@ public class Chrest extends Observable {
         if (!currentNode.getImage().equals (pattern)) { // only try any learning if image differs from pattern
           if (currentNode == getLtmByModality (pattern) || !currentNode.getImage().matches (pattern) || currentNode.getImage().isFinished ()) {
             currentNode = currentNode.discriminate (this, pattern);
-            setChanged ();
           } else if (!currentNode.getImage().equals (pattern)) {
             currentNode = currentNode.familiarise (this, pattern);
-            setChanged ();
           }
           addToStm (currentNode);
+          setChanged ();
           notifyObservers ();
         }
       }
