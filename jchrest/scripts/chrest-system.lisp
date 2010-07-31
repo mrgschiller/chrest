@@ -47,6 +47,10 @@
            :scene-height
            :scene-width
            :average
+           ; for chess domain
+           :scene-empty-square-p
+           :make-square
+           :find-moves
            ; for fixations
            :make-fixation
            :fixation-type
@@ -384,6 +388,24 @@
 (defun average (results)
   (* 100 (/ (apply #'+ results)
             (length results))))
+
+(defun make-square (x y)
+  (jnew (jconstructor "jchrest.lib.Square" "int" "int")
+        x 
+        y))
+
+;; need to convert java list into a lisp list
+(defun find-moves (board square)
+  (let ((result ())
+        (moves 
+          (jcall (jmethod "jchrest.lib.ChessDomain" "findMoves" "jchrest.lib.Scene" "jchrest.lib.Square")
+                 (jnew (jconstructor "jchrest.lib.ChessDomain"))
+                 board
+                 square)))
+    (dotimes (i (jcall (jmethod "java.util.List" "size") moves))
+      (push (jcall (jmethod "java.util.List" "get" "int") moves i)
+            result))
+    (reverse result)))
 
 ;(defun make-fixation (fixation-type x y)
 ;  (jnew (jconstructor "jchrest.lib.Fixation" "int" "int" "int")
