@@ -398,7 +398,7 @@
 (defun find-moves (board square)
   (let ((result ())
         (moves 
-          (jcall (jmethod "jchrest.lib.ChessDomain" "findMoves" "jchrest.lib.Scene" "jchrest.lib.Square")
+          (jcall (jmethod "jchrest.lib.ChessDomain" "proposeMovementFixations" "jchrest.lib.Scene" "jchrest.lib.Square")
                  (jnew (jconstructor "jchrest.lib.ChessDomain"))
                  board
                  square)))

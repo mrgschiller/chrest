@@ -87,7 +87,7 @@ public class ChessDomain implements DomainSpecifics {
     return result;
   }
 
-  private static boolean differentColour (Scene board, Square square1, Square square2) {
+  private boolean differentColour (Scene board, Square square1, Square square2) {
     char item1 = board.getItem (square1.getRow (), square1.getColumn ()).charAt (0);
     char item2 = board.getItem (square2.getRow (), square2.getColumn ()).charAt (0);
 
@@ -97,7 +97,7 @@ public class ChessDomain implements DomainSpecifics {
   }
 
   // add destination square to given list if the move would be to an empty square, or a capture
-  private static void addValidMove (Scene board, Square source, Square destination, List<Square> moves) {
+  private void addValidMove (Scene board, Square source, Square destination, List<Square> moves) {
     if (board.isEmpty (destination.getRow (), destination.getColumn ()) ||
         differentColour (board, source, destination)) {
       moves.add (destination);
@@ -106,7 +106,7 @@ public class ChessDomain implements DomainSpecifics {
 
   // compute possible pawn moves
   // -- assume square is position of a black pawn
-  private static List<Square> findBlackPawnMoves (Scene board, Square square) {
+  private List<Square> findBlackPawnMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
 
     // check move forward
@@ -136,7 +136,7 @@ public class ChessDomain implements DomainSpecifics {
   }
 
   // -- assume square is position of a white pawn
-  private static List<Square> findWhitePawnMoves (Scene board, Square square) {
+  private List<Square> findWhitePawnMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
 
     // check move forward
@@ -167,7 +167,7 @@ public class ChessDomain implements DomainSpecifics {
 
   // compute possible knight moves
   // -- assume square is position of a knight 
-  private static List<Square> findKnightMoves (Scene board, Square square) {
+  private List<Square> findKnightMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
 
     if (square.getRow () < 6) { // not rows 7 or 8
@@ -212,7 +212,7 @@ public class ChessDomain implements DomainSpecifics {
   // compute possible king moves
   // -- assume square is position of a king
   // -- does not check if move is to an undefended square
-  private static List<Square> findKingMoves (Scene board, Square square) {
+  private List<Square> findKingMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
 
     if (square.getRow () > 0) { // not in row 8
@@ -245,7 +245,7 @@ public class ChessDomain implements DomainSpecifics {
 
   // compute possible queen moves
   // -- assume square is position of a queen
-  private static List<Square> findQueenMoves (Scene board, Square square) {
+  private List<Square> findQueenMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
 
     // moves upwards
@@ -389,7 +389,7 @@ public class ChessDomain implements DomainSpecifics {
 
   // compute possible rook moves
   // -- assume square is position of a rook
-  private static List<Square> findRookMoves (Scene board, Square square) {
+  private List<Square> findRookMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
 
     // moves upwards
@@ -461,7 +461,7 @@ public class ChessDomain implements DomainSpecifics {
 
   // compute possible bishop moves
   // -- assume square is location of a bishop
-  private static List<Square> findBishopMoves (Scene board, Square square) {
+  private List<Square> findBishopMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
     
     // moves up and left
@@ -542,7 +542,7 @@ public class ChessDomain implements DomainSpecifics {
   /**
    * Calculate a list of possible destination squares for a piece in a scene.
    */
-  public static List<Square> findMoves (Scene board, Square square) {
+  public List<Square> proposeMovementFixations (Scene board, Square square) {
     String piece = board.getItem (square.getRow (), square.getColumn ());
 
     if (piece.equals ("P")) {
