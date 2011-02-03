@@ -576,7 +576,9 @@ public class Node {
       return retrievedChunk.familiarise (model, newInformation);
     } else if (retrievedChunk.getImage().matches (newInformation)) {
       // 5. retrieved chunk can be used as a test
-      return addTest (model, retrievedChunk.getImage ());
+      ListPattern testPattern = retrievedChunk.getImage().clone ();
+      testPattern.setNotFinished (); // ensure test link is not finished
+      return addTest (model, testPattern);
     } else { 
       // 6. mismatch, so use only the first item for test
       // NB: first-item must be in network as retrievedChunk was not the root node

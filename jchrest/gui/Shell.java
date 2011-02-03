@@ -118,12 +118,17 @@ public class Shell extends JFrame {
       _parent = parent;
     }
 
-    private List<ListPattern> readItems (BufferedReader input) throws IOException {
+    private List<ListPattern> readItems (BufferedReader input, boolean verbal) throws IOException {
       List<ListPattern> items = new ArrayList<ListPattern> ();
       String line = input.readLine ();
 
       while (line != null) {
-        ListPattern pattern = Pattern.makeVisualList (line.trim().split("[, ]"));
+        ListPattern pattern;
+        if (verbal) {
+          pattern = Pattern.makeVerbalList (line.trim().split("[, ]"));
+        } else {
+          pattern = Pattern.makeVisualList (line.trim().split("[, ]"));
+        }
         pattern.setFinished ();
         items.add (pattern);
         line = input.readLine ();
@@ -132,20 +137,22 @@ public class Shell extends JFrame {
       return items;
     }
 
-    private List<PairedPattern> readPairedItems (BufferedReader input, boolean secondVerbal) throws IOException {
+    // categorisation = false => make both verbal
+    // categorisation = true  => make first visual, second verbal
+    private List<PairedPattern> readPairedItems (BufferedReader input, boolean categorisation) throws IOException {
       List<PairedPattern> items = new ArrayList<PairedPattern> ();
       String line = input.readLine ();
       while (line != null) {
         String[] pair = line.split (":");
         if (pair.length != 2) throw new IOException (); // malformed pair
-        ListPattern pat1 = Pattern.makeVisualList (pair[0].trim().split("[, ]"));
-        pat1.setFinished ();
-        ListPattern pat2;
-        if (secondVerbal) {
-          pat2 = Pattern.makeVerbalList (pair[1].trim().split("[, ]"));
+        ListPattern pat1;
+        if (categorisation) {
+          pat1 = Pattern.makeVisualList (pair[0].trim().split("[, ]"));
         } else {
-          pat2 = Pattern.makeVisualList (pair[1].trim().split("[, ]"));
+          pat1 = Pattern.makeVerbalList (pair[0].trim().split("[, ]"));
         }
+        pat1.setFinished ();
+        ListPattern pat2 = Pattern.makeVerbalList (pair[1].trim().split("[, ]"));
         pat2.setFinished ();
         items.add (new PairedPattern (pat1, pat2));
 
@@ -167,10 +174,10 @@ public class Shell extends JFrame {
           }              
 
           if (task.equals ("recognise-and-learn")) {
-            _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input)));
+            _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input, false)));
             _parent.validate ();
           } else if (task.equals ("serial-anticipation")) {
-            _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(readItems (input))));
+            _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(readItems (input, true))));
             _parent.validate ();
           } else if (task.equals ("paired-associate")) {
             _parent.setContentPane (new PairedAssociateExperiment (_model, readPairedItems (input, false)));
