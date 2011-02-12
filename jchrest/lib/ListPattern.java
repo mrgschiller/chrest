@@ -104,6 +104,13 @@ public class ListPattern extends Pattern {
   }
 
   /**
+   * Mutator to change modality of pattern.
+   */
+  public void setModality (Modality modality) {
+    _modality = modality;
+  }
+
+  /**
    * Accessor method to check visual modality.
    */
   public boolean isVisual () {
@@ -398,4 +405,3 @@ public class ListPattern extends Pattern {
   }
 }
 
-enum Modality { VISUAL, VERBAL, ACTION }

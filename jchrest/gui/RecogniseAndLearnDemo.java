@@ -2,6 +2,7 @@ package jchrest.gui;
 
 import jchrest.architecture.Chrest;
 import jchrest.lib.ListPattern;
+import jchrest.lib.Modality;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -58,6 +59,7 @@ class RecogniseAndLearnDemo extends JPanel {
       ListPattern pattern = null;
       if (isSelected ()) {
         pattern = (ListPattern)_patternList.getSelectedValue ();
+        pattern.setModality ((Modality)_modeButton.getSelectedItem ());
       }
       return pattern;
     }
@@ -85,7 +87,9 @@ class RecogniseAndLearnDemo extends JPanel {
 
     public void actionPerformed (ActionEvent e) {
       for (ListPattern pattern : _patterns) {
-        _model.recogniseAndLearn (pattern);
+        ListPattern patternInCorrectMode = pattern.clone ();
+        patternInCorrectMode.setModality ((Modality)_modeButton.getSelectedItem ());
+        _model.recogniseAndLearn (patternInCorrectMode);
       }
       _feedback.setText ("Learnt all patterns");
     }
@@ -106,8 +110,12 @@ class RecogniseAndLearnDemo extends JPanel {
     }
   }
 
+  private JComboBox _modeButton;
+  private int _currentMode;
+
   private Box constructButtons () {
     Box buttons = Box.createVerticalBox ();
+    _modeButton = new JComboBox (Modality.values ()); 
     JButton learnButton = new JButton (new LearnPatternAction ());
     JButton learnAllButton = new JButton (new LearnAllPatternAction ());
     JButton recogniseButton = new JButton (new RecognisePatternAction ());
@@ -116,10 +124,15 @@ class RecogniseAndLearnDemo extends JPanel {
     learnAllButton.setToolTipText ("Train model on all patterns");
     recogniseButton.setToolTipText ("Recall currently selected pattern from model");
 
+    _modeButton.setMaximumSize (recogniseButton.getPreferredSize ());
+    _modeButton.setAlignmentX(0.0f); // correct the alignment of buttons and combobox
     learnButton.setMaximumSize (recogniseButton.getPreferredSize ());
     learnAllButton.setMaximumSize (recogniseButton.getPreferredSize ());
 
     buttons.add (Box.createGlue ());
+    buttons.add (new JLabel ("Pattern type:"));
+    buttons.add (_modeButton);
+    buttons.add (Box.createVerticalStrut (20)); // add a small gap before buttons
     buttons.add (learnButton);
     buttons.add (learnAllButton);
     buttons.add (recogniseButton);
