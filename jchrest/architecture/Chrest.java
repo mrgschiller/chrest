@@ -601,6 +601,16 @@ public class Chrest extends Observable {
     return _perceiver.getHeuristicDescription ();
   }
 
+  /** 
+   * Write model to given Writer object in VNA format
+   */
+  public void writeModelAsVna (Writer writer) throws IOException {
+    writer.write ("*Node data\n\"ID\", \"contents\"\n");
+    _visualLtm.writeNodeAsVna (writer);
+    writer.write ("*Tie data\nFROM TO\n");
+    _visualLtm.writeLinksAsVna (writer);
+  }
+
   /**
    * Write a description of the CHREST model to the given Writer object.
    */
@@ -988,45 +998,50 @@ public class Chrest extends Observable {
       if (_visualStm.getCount () >= 1) {
         List<Link> hypothesisChildren = _visualStm.getItem(0).getChildren ();
         if (hypothesisChildren.isEmpty ()) return false;
-        ListPattern test = hypothesisChildren.get(0).getTest ();
-        if (test.isEmpty ()) return false;
-        Pattern first = test.getItem (0);
-        if (first instanceof ItemSquarePattern) {
-          ItemSquarePattern ios = (ItemSquarePattern)first;
+//        System.out.println ("Checking LTM heuristic");
+        for (int i = 0; i < hypothesisChildren.size () && i < 1; ++i) { // *** i == 0 only
+          ListPattern test = hypothesisChildren.get(i).getTest ();
+          if (test.isEmpty ()) continue; // return false;
+          Pattern first = test.getItem (0);
+          //        System.out.println ("Checking: " + first);
+          if (first instanceof ItemSquarePattern) {
+            ItemSquarePattern ios = (ItemSquarePattern)first;
 
-          // check if we should make the fixation
-          // 1. is it a different square?
-          if (ios.getColumn()-1 == _fixationX && 
-              ios.getRow()-1 == _fixationY) {
-            return false; // we are already at this square
-          }
-          // all ok, so we make the fixation
-          _fixationX = ios.getColumn ()-1; // because ios start from 1
-          _fixationY = ios.getRow ()-1; 
-          _lastHeuristic = 1;
-          _fixationsX.add (_fixationX);
-          _fixationsY.add (_fixationY);
-          _fixationsType.add (_lastHeuristic);
+            // check if we should make the fixation
+            // 1. is it a different square?
+            if (ios.getColumn()-1 == _fixationX && 
+                ios.getRow()-1 == _fixationY) {
+              ; // return false; // we are already at this square
+            } else {
+              // all ok, so we make the fixation
+              _fixationX = ios.getColumn ()-1; // because ios start from 1
+              _fixationY = ios.getRow ()-1; 
+              _lastHeuristic = 1;
+              _fixationsX.add (_fixationX);
+              _fixationsY.add (_fixationY);
+              _fixationsType.add (_lastHeuristic);
 
-          addFixation (new Fixation (_lastHeuristic, _fixationX, _fixationY));
-          // look at square given by first test link
-          // then look to see if a test link has the same square and observed piece
-          for (Link link : hypothesisChildren) {
-            if (link.getTest().size () == 1) {
-              // Note: using first test created gives more uses of LTM heuristic
-              if (link.getTest().getItem (link.getTest().size() - 1) instanceof ItemSquarePattern) {
-                ItemSquarePattern testIos = (ItemSquarePattern)link.getTest().getItem (0);
-                // check all details of test are correct
-                if (testIos.getColumn () - 1 == _fixationX && 
-                    testIos.getRow () - 1 == _fixationY &&
-                    testIos.getItem().equals (_currentScene.getItem (_fixationY, _fixationX))) {
-                  _visualStm.replaceHypothesis (link.getChildNode ());
-                    }
+              addFixation (new Fixation (_lastHeuristic, _fixationX, _fixationY));
+              // look at square given by first test link
+              // then look to see if a test link has the same square and observed piece
+              for (Link link : hypothesisChildren) {
+                if (link.getTest().size () == 1) {
+                  // Note: using first test created gives more uses of LTM heuristic
+                  if (link.getTest().getItem (link.getTest().size() - 1) instanceof ItemSquarePattern) {
+                    ItemSquarePattern testIos = (ItemSquarePattern)link.getTest().getItem (0);
+                    // check all details of test are correct
+                    if (testIos.getColumn () - 1 == _fixationX && 
+                        testIos.getRow () - 1 == _fixationY &&
+                        testIos.getItem().equals (_currentScene.getItem (_fixationY, _fixationX))) {
+                      _visualStm.replaceHypothesis (link.getChildNode ());
+                        }
+                  }
+                }
               }
+              // return true, as we made the fixation
+              return true;
             }
           }
-          // return true, as we made the fixation
-          return true;
         }
       }
       return false;
@@ -1037,7 +1052,7 @@ public class Chrest extends Observable {
      */
     private boolean randomItemHeuristic () {
 
-      for (int i = 0; i < 10; ++i) {
+      for (int i = 0; i < 3; ++i) { // *** Parameter controls how likely 'item' over 'place'
         int xDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
         int yDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
         if (!_currentScene.isEmpty (_fixationY + yDisplacement, _fixationX + xDisplacement)

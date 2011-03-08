@@ -55,7 +55,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     AboutAction (Shell parent) {
-      super ("About"); // , new ImageIcon (jchrest.gui.Shell.class.getResource("icons/About24.gif")));
+      super ("About");
       _parent = parent;
     }
 
@@ -66,11 +66,11 @@ public class Shell extends JFrame {
           "Chrest cognitive architecture.  You can load <BR>" +
           "data, train models, and visualise results in a <BR>" +
           "range of typical modelling problems for Chrest.</P>" +
-          "<P><P>Copyright (c) 2010, Peter C. R. Lane.</P></P>" +
+          "<P><P>Copyright (c) 2010-11, Peter C. R. Lane.</P></P>" +
           "<P>Released under GNU General Public License</a>, version 3.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell", 
+          "About Chrest Shell v.0.8", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -113,7 +113,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     LoadDataAction (Shell parent) {
-      super ("Open"); // , new ImageIcon (jchrest.gui.Shell.class.getResource("icons/Open24.gif")));
+      super ("Open"); 
 
       _parent = parent;
     }
@@ -236,7 +236,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     ModelPropertiesAction (Shell parent) {
-      super ("Properties"); // , new ImageIcon (jchrest.gui.Shell.class.getResource("icons/Information24.gif")));
+      super ("Properties"); 
 
       _parent = parent;
     }
@@ -310,7 +310,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     LoadModelAction (Shell parent) {
-      super ("Load"); // , new ImageIcon (jchrest.gui.Shell.class.getResource ("icons/Open24.gif")));
+      super ("Load"); 
 
       _parent = parent;
     }
@@ -356,7 +356,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     SaveModelAction (Shell parent) {
-      super ("Save"); // , new ImageIcon (jchrest.gui.Shell.class.getResource ("icons/SaveAs24.gif")));
+      super ("Save"); 
 
       _parent = parent;
     }
@@ -366,7 +366,7 @@ public class Shell extends JFrame {
       if (file == null) return;
       try {
         FileWriter writer = new FileWriter (file);
-        _model.writeModel (writer);
+        _model.writeModelAsVna (writer);
         writer.close ();
       } catch (IOException ioe) {
         JOptionPane.showMessageDialog (_parent,
@@ -456,7 +456,7 @@ public class Shell extends JFrame {
     JMenu menu = new JMenu ("Model");
     menu.add (new ClearModelAction (this));
 //    menu.add (new LoadModelAction (this));
-//    menu.add (new SaveModelAction (this));
+    menu.add (new SaveModelAction (this));
     menu.add (new ModelPropertiesAction (this));
     menu.add (new JSeparator ());
     menu.add (new ModelInformationAction (this));

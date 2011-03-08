@@ -631,6 +631,27 @@ public class Node {
   }
 
   /**
+   * Write node information in VNA format.
+   */
+  public void writeNodeAsVna (Writer writer) throws IOException {
+    writer.write ("" + _reference + " \"" + _contents.toString() + "\"\n");
+    for (Link link : _children) {
+      link.getChildNode().writeNodeAsVna (writer);
+    }
+  }
+
+  public void writeLinksAsVna (Writer writer) throws IOException {
+    // write my links
+    for (Link link : _children) {
+      writer.write ("" + _reference + " " + link.getChildNode().getReference () + "\n");
+    }
+    // repeat for children
+    for (Link link : _children) {
+      link.getChildNode().writeLinksAsVna (writer);
+    }
+  }
+
+  /**
    * Write a description of the node to the given Writer object.
    */
   public void writeNode (Writer writer) throws IOException {
