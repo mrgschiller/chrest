@@ -927,6 +927,7 @@ public class Chrest extends Observable {
     int _lastHeuristic;
     private Scene _currentScene;
     private List<Integer> _fixationsX, _fixationsY, _fixationsType;
+    private List<Node> _recognisedNodes;
 
     protected Perceiver () {
       _fixationX = 0;
@@ -937,6 +938,7 @@ public class Chrest extends Observable {
       _fixationsY = new ArrayList<Integer> ();
       _fixationsType = new ArrayList<Integer> ();
       _fixations = new ArrayList<Fixation> ();
+      _recognisedNodes = new ArrayList<Node> ();
     }
 
     public int getFixationX () {
@@ -975,6 +977,7 @@ public class Chrest extends Observable {
       _fixationsX.clear ();
       _fixationsY.clear ();
       _fixationsType.clear ();
+      _recognisedNodes.clear ();
 
       _fixationX = _currentScene.getWidth () / 2;
       _fixationY = _currentScene.getHeight () / 2;
@@ -1130,9 +1133,16 @@ public class Chrest extends Observable {
      * heuristics, and simply move the eye to that point.
      */
     public void moveEye () {
-      if (ltmHeuristic ()) return;
-      moveEyeUsingHeuristics ();
-      recognise (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
+      Node node = _visualLtm;
+      if (ltmHeuristic ()) {
+        if (_visualStm.getCount () >= 1) {
+          node = _visualStm.getItem(0);
+        }
+      } else {
+        moveEyeUsingHeuristics ();
+        node = recognise (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
+      }
+      _recognisedNodes.add (node);
       // Attempt to fill out the slots on the top-node of visual STM with the currently 
       // fixated items
       if (_visualStm.getCount () >= 1) {
@@ -1179,6 +1189,10 @@ public class Chrest extends Observable {
 
     private void addFixation (Fixation fixation) {
       _fixations.add (fixation);
+    }
+
+    public List<Node> getRecognisedNodes () {
+      return _recognisedNodes;
     }
   }
 }

@@ -10,7 +10,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -60,6 +62,7 @@ public class VisualSearchPane extends JPanel {
     jtb.addTab ("Train", trainPanel ());
     jtb.addTab ("Recall", recallPanel ());
     jtb.addTab ("Log", logPanel ());
+    jtb.addTab ("Analyse", analysePanel ());
 
     setLayout (new BorderLayout ());
     add (jtb);
@@ -399,6 +402,39 @@ public class VisualSearchPane extends JPanel {
     return panel;
   }
 
+  class AnalyseAction extends AbstractAction implements ActionListener {
+    private JSpinner _numFixations;
+
+    public AnalyseAction (JSpinner numFixations) {
+      super ("Analyse Scenes");
+
+      _numFixations = numFixations;
+    }
+
+    public void actionPerformed (ActionEvent e) {
+      Map<Integer, Integer> recallFrequencies = new HashMap<Integer, Integer> ();
+
+      // loop through each scene, doing recall
+      for (int i = 0; i < _scenes.size (); i++) {
+        Scene scene = _scenes.get (i);
+        _model.scanScene (scene, ((SpinnerNumberModel)(_numFixations.getModel())).getNumber().intValue ());
+        for (Node node : _model.getPerceiver().getRecognisedNodes ()) {
+          int id = node.getReference ();
+          if (recallFrequencies.containsKey (id)) {
+            recallFrequencies.put (id, recallFrequencies.get(id) + 1);
+          } else {
+            recallFrequencies.put (id, 1);
+          }
+        }
+      }
+
+      // finally, show results in window
+      for (Integer key : recallFrequencies.keySet ()) {
+        _analysisScreen.append ("" + key + ", " + recallFrequencies.get(key) + "\n");
+      }
+    }
+  }
+
   class RecallAction extends AbstractAction implements ActionListener {
     private JSpinner _numFixations;
 
@@ -493,23 +529,25 @@ public class VisualSearchPane extends JPanel {
     panel.add (new JScrollPane (_logScreen));
 
     Box buttons = Box.createHorizontalBox ();
-    buttons.add (new JButton (new SaveAction ()));
-    buttons.add (new JButton (new ClearAction ()));
+    buttons.add (new JButton (new SaveAction (_logScreen)));
+    buttons.add (new JButton (new ClearAction (_logScreen)));
     panel.add (buttons, BorderLayout.SOUTH);
 
     return panel;
   }
 
   private class SaveAction extends AbstractAction implements ActionListener {
-    public SaveAction () {
+    private JTextArea _text;
+    public SaveAction (JTextArea text) {
       super ("Save");
+      _text = text;
     }
     public void actionPerformed (ActionEvent e) {
-      File file = FileUtilities.getSaveFilename (_logScreen);
+      File file = FileUtilities.getSaveFilename (_text);
       if (file != null) {
         try {
           FileWriter fw = new FileWriter (file);
-          _logScreen.write (fw);
+          _text.write (fw);
           fw.close ();
         } catch (IOException ioe) {
           ; // ignore any problems
@@ -519,16 +557,55 @@ public class VisualSearchPane extends JPanel {
   }
 
   private class ClearAction extends AbstractAction implements ActionListener {
-    public ClearAction () {
+    private JTextArea _text;
+    public ClearAction (JTextArea text) {
       super ("Clear");
+      _text = text;
     }
     public void actionPerformed (ActionEvent e) {
-      _logScreen.setText ("");
+      _text.setText ("");
     }
   }
 
   private void addLog (String string) {
     _logScreen.append (string + "\n");
+  }
+
+  // -- setup the analyse display
+  private JTextArea _analysisScreen;
+
+  private JPanel analysePanel () {
+    _analysisScreen = new JTextArea ();
+
+     Box buttons = Box.createVerticalBox ();
+
+    JSpinner numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 100, 1));
+    
+    JPanel labelledSpinner = new JPanel ();
+    labelledSpinner.setLayout (new GridLayout (1, 2));
+    labelledSpinner.add (new JLabel ("Number of fixations: ", SwingConstants.RIGHT));
+    labelledSpinner.add (numFixations);
+
+    JButton runAnalysis = new JButton (new AnalyseAction (numFixations));
+    runAnalysis.setToolTipText ("Scan all scenes, and record the frequencies of retrieved nodes");
+
+    buttons.add (labelledSpinner);
+    buttons.add (runAnalysis);
+
+    // main panel
+    JPanel panel = new JPanel ();
+    panel.setLayout (new BorderLayout ());
+
+    panel.add (buttons, BorderLayout.NORTH);
+
+    panel.add (new JScrollPane (_analysisScreen));
+
+    Box displayButtons = Box.createHorizontalBox ();
+    displayButtons.add (new JButton (new SaveAction (_analysisScreen)));
+    displayButtons.add (new JButton (new ClearAction (_analysisScreen)));
+    panel.add (displayButtons, BorderLayout.SOUTH);
+
+    return panel;
   }
 }
 

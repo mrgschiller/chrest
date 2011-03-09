@@ -70,7 +70,7 @@ public class Shell extends JFrame {
           "<P>Released under GNU General Public License</a>, version 3.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell v.0.8", 
+          "About Chrest Shell v.0.9", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }
