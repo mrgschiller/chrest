@@ -118,6 +118,122 @@ public class Shell extends JFrame {
       _parent = parent;
     }
 
+    public void actionPerformed (ActionEvent e) {
+/*      File file = FileUtilities.getLoadFilename (_parent);
+      if (file != null) {
+        try {
+          String task = "";
+          BufferedReader input = new BufferedReader (new FileReader (file));
+          String line = input.readLine ();
+          if (line != null) {
+            task = line.trim ();
+          }              
+
+          if (task.equals ("recognise-and-learn")) {
+            _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input, false)));
+            _parent.validate ();
+          } else if (task.equals ("serial-anticipation")) {
+            _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(readItems (input, true))));
+            _parent.validate ();
+          } else if (task.equals ("paired-associate")) {
+            _parent.setContentPane (new PairedAssociateExperiment (_model, readPairedItems (input, false)));
+            _parent.validate ();
+          } else if (task.equals ("categorisation")) {
+            _parent.setContentPane (new CategorisationExperiment (_model, readPairedItems (input, true)));
+            _parent.validate ();
+          } else if (task.equals ("visual-search")) {
+            Scenes scenes = Scenes.read (input); // throws IOException if any problem
+            _parent.setContentPane (new VisualSearchPane (_model, scenes));
+            _parent.validate ();
+          } else {
+            JOptionPane.showMessageDialog (_parent,
+                "Invalid task on first line of file",
+                "File error",
+                JOptionPane.ERROR_MESSAGE);
+          }
+        } catch (IOException ioe) {
+          JOptionPane.showMessageDialog (_parent, 
+              "There was an error in processing your file", 
+              "File error",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      }
+*/    }
+  }
+
+  /**
+   * Worker thread to handle loading the data.
+   */
+  private class LoadDataThread extends SwingWorker<Void, Void> {
+    private Shell _parent;
+    private String _task;
+    private List<ListPattern> _items;
+    private List<PairedPattern> _pairs;
+    private Scenes _scenes;
+
+    LoadDataThread (Shell parent) {
+      _parent = parent;
+      _task = "";
+      _items = null;
+      _pairs = null;
+      _scenes = null;
+    }
+
+    @Override
+      public Void doInBackground () {
+        File file = FileUtilities.getLoadFilename (_parent);
+        if (file != null) {
+          try {
+            _task = "";
+            BufferedReader input = new BufferedReader (new FileReader (file));
+            String line = input.readLine ();
+            if (line != null) {
+              _task = line.trim ();
+            }              
+
+            if (_task.equals ("recognise-and-learn")) {
+              _items = readItems (input, false);
+            } else if (_task.equals ("serial-anticipation")) {
+              _items = readItems (input, true);
+            } else if (_task.equals ("paired-associate")) {
+              _pairs = readPairedItems (input, false);
+            } else if (_task.equals ("categorisation")) {
+              _pairs = readPairedItems (input, true);
+            } else if (_task.equals ("visual-search")) {
+              _scenes = Scenes.read (input); // throws IOException if any problem
+            } 
+          } catch (IOException ioe) {
+
+          }
+        }
+        return null;
+      }
+
+    @Override
+      protected void done () {
+        if (_task.equals ("recognise-and-learn") && _items != null) {
+          _parent.setContentPane (new RecogniseAndLearnDemo (_model, _items));
+          _parent.validate ();
+        } else if (_task.equals ("serial-anticipation") && _items != null) {
+          _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(_items)));
+          _parent.validate ();
+        } else if (_task.equals ("paired-associate") && _pairs != null) {
+          _parent.setContentPane (new PairedAssociateExperiment (_model, _pairs));
+          _parent.validate ();
+        } else if (_task.equals ("categorisation") && _pairs != null) {
+          _parent.setContentPane (new CategorisationExperiment (_model, _pairs));
+          _parent.validate ();
+        } else if (_task.equals ("visual-search") && _scenes != null) {
+          _parent.setContentPane (new VisualSearchPane (_model, _scenes));
+          _parent.validate ();
+        } else {
+          JOptionPane.showMessageDialog (_parent,
+              "Invalid task on first line of file",
+              "File error",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      }
+
     private List<ListPattern> readItems (BufferedReader input, boolean verbal) throws IOException {
       List<ListPattern> items = new ArrayList<ListPattern> ();
       String line = input.readLine ();
@@ -160,48 +276,6 @@ public class Shell extends JFrame {
       }
 
       return items;
-    }
-
-    public void actionPerformed (ActionEvent e) {
-      File file = FileUtilities.getLoadFilename (_parent);
-      if (file != null) {
-        try {
-          String task = "";
-          BufferedReader input = new BufferedReader (new FileReader (file));
-          String line = input.readLine ();
-          if (line != null) {
-            task = line.trim ();
-          }              
-
-          if (task.equals ("recognise-and-learn")) {
-            _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input, false)));
-            _parent.validate ();
-          } else if (task.equals ("serial-anticipation")) {
-            _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(readItems (input, true))));
-            _parent.validate ();
-          } else if (task.equals ("paired-associate")) {
-            _parent.setContentPane (new PairedAssociateExperiment (_model, readPairedItems (input, false)));
-            _parent.validate ();
-          } else if (task.equals ("categorisation")) {
-            _parent.setContentPane (new CategorisationExperiment (_model, readPairedItems (input, true)));
-            _parent.validate ();
-          } else if (task.equals ("visual-search")) {
-            Scenes scenes = Scenes.read (input); // throws IOException if any problem
-            _parent.setContentPane (new VisualSearchPane (_model, scenes));
-            _parent.validate ();
-          } else {
-            JOptionPane.showMessageDialog (_parent,
-                "Invalid task on first line of file",
-                "File error",
-                JOptionPane.ERROR_MESSAGE);
-          }
-        } catch (IOException ioe) {
-          JOptionPane.showMessageDialog (_parent, 
-              "There was an error in processing your file", 
-              "File error",
-              JOptionPane.ERROR_MESSAGE);
-        }
-      }
     }
   }
 
