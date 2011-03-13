@@ -412,26 +412,61 @@ public class VisualSearchPane extends JPanel {
     }
 
     public void actionPerformed (ActionEvent e) {
-      Map<Integer, Integer> recallFrequencies = new HashMap<Integer, Integer> ();
+       _analysisTask = new AnalysisThread (_numFixations);
+       _analysisTask.addPropertyChangeListener(
+           new java.beans.PropertyChangeListener() {
+             public void propertyChange(java.beans.PropertyChangeEvent evt) {
+               if ("progress".equals(evt.getPropertyName())) {
+                 _feedbackAnalysis.setValue ((Integer)evt.getNewValue());
+               }
+             }
+           });
+       _feedbackAnalysis.setValue (0);
+       _analyseAction.setEnabled (false);
+       _stopAnalysisAction.setEnabled (true);
 
-      // loop through each scene, doing recall
-      for (int i = 0; i < _scenes.size (); i++) {
-        Scene scene = _scenes.get (i);
-        _model.scanScene (scene, ((SpinnerNumberModel)(_numFixations.getModel())).getNumber().intValue ());
-        for (Node node : _model.getPerceiver().getRecognisedNodes ()) {
-          int id = node.getReference ();
-          if (recallFrequencies.containsKey (id)) {
-            recallFrequencies.put (id, recallFrequencies.get(id) + 1);
-          } else {
-            recallFrequencies.put (id, 1);
+       _analysisTask.execute ();
+    }
+  }
+
+  private class AnalysisThread extends SwingWorker<Void, Void> {
+    private Map<Integer, Integer> _recallFrequencies;
+    private JSpinner _numFixations;
+
+    public AnalysisThread (JSpinner numFixations) {
+      _numFixations = numFixations;
+    }
+
+    @Override
+      public Void doInBackground () {
+        _recallFrequencies = new HashMap<Integer, Integer> ();
+
+        // loop through each scene, doing recall
+        for (int i = 0; i < _scenes.size () && !isCancelled (); i++) {
+          Scene scene = _scenes.get (i);
+          _model.scanScene (scene, ((SpinnerNumberModel)(_numFixations.getModel())).getNumber().intValue ());
+          for (Node node : _model.getPerceiver().getRecognisedNodes ()) {
+            int id = node.getReference ();
+            if (_recallFrequencies.containsKey (id)) {
+              _recallFrequencies.put (id, _recallFrequencies.get(id) + 1);
+            } else {
+              _recallFrequencies.put (id, 1);
+            }
           }
+          setProgress (100 * i / _scenes.size ());
         }
+        return null;
       }
 
+    protected void done () {
       // finally, show results in window
-      for (Integer key : recallFrequencies.keySet ()) {
-        _analysisScreen.append ("" + key + ", " + recallFrequencies.get(key) + "\n");
+      for (Integer key : _recallFrequencies.keySet ()) {
+        _analysisScreen.append ("" + key + ", " + _recallFrequencies.get(key) + "\n");
       }
+
+      _feedbackAnalysis.setValue (100);
+      _stopAnalysisAction.setEnabled (false);
+      _analyseAction.setEnabled (true);
     }
   }
 
@@ -586,11 +621,11 @@ public class VisualSearchPane extends JPanel {
     labelledSpinner.add (new JLabel ("Number of fixations: ", SwingConstants.RIGHT));
     labelledSpinner.add (numFixations);
 
-    JButton runAnalysis = new JButton (new AnalyseAction (numFixations));
-    runAnalysis.setToolTipText ("Scan all scenes, and record the frequencies of retrieved nodes");
+//    JButton runAnalysis = new JButton (new AnalyseAction (numFixations));
+//    runAnalysis.setToolTipText ("Scan all scenes, and record the frequencies of retrieved nodes");
 
     buttons.add (labelledSpinner);
-    buttons.add (runAnalysis);
+    buttons.add (runAnalysisButtons (numFixations));
 
     // main panel
     JPanel panel = new JPanel ();
@@ -606,6 +641,43 @@ public class VisualSearchPane extends JPanel {
     panel.add (displayButtons, BorderLayout.SOUTH);
 
     return panel;
+  }
+
+  private AnalysisThread _analysisTask;
+  private AnalyseAction _analyseAction;
+  private StopAnalysisAction _stopAnalysisAction;
+  private JProgressBar _feedbackAnalysis;
+
+  private JPanel runAnalysisButtons (JSpinner numFixations) {
+    JPanel panel = new JPanel ();
+
+    _analyseAction = new AnalyseAction (numFixations);
+    JButton analyseButton = new JButton (_analyseAction);
+    analyseButton.setToolTipText ("Analyse CHREST model on all scenes");
+    _stopAnalysisAction = new StopAnalysisAction ();
+    _stopAnalysisAction.setEnabled (false);
+    JButton stopAnalysisButton = new JButton (_stopAnalysisAction);
+    stopAnalysisButton.setToolTipText ("Stop the current analysis");
+    _feedbackAnalysis = new JProgressBar (0, 100);
+    _feedbackAnalysis.setToolTipText ("Proportion of scenes analysed");
+    _feedbackAnalysis.setValue (0);
+    _feedbackAnalysis.setStringPainted (true);
+    panel.add (analyseButton);
+    panel.add (stopAnalysisButton);
+    panel.add (_feedbackAnalysis);
+
+    return panel;
+  }
+
+  private class StopAnalysisAction extends AbstractAction implements ActionListener {
+    public StopAnalysisAction () {
+      super ("Stop");
+    }
+    public void actionPerformed (ActionEvent e) {
+      _analysisTask.cancel (true);
+      _analyseAction.setEnabled (true);
+      _stopAnalysisAction.setEnabled (false);
+    }
   }
 }
 
