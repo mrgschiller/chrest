@@ -64,6 +64,7 @@ public class CategorisationExperiment extends JPanel {
 
   private JCheckBox _randomOrder;
   private List<List<ListPattern>> _responses;
+  private JScrollBar _protocolHorizontalBar;
   private JTable _protocol;
 
   class RestartAction extends AbstractAction implements ActionListener {
@@ -204,6 +205,10 @@ public class CategorisationExperiment extends JPanel {
           return "Trial " + (column - 1);
         }
       }
+      public void fireTableStructureChanged() {
+        super.fireTableStructureChanged ();
+        _protocolHorizontalBar.setValue (_protocolHorizontalBar.getMaximum ());
+      }
     };
     _protocol = new JTable (tm);
     _protocol.setAutoResizeMode (JTable.AUTO_RESIZE_OFF);
@@ -215,7 +220,9 @@ public class CategorisationExperiment extends JPanel {
     panel.setLayout (new GridLayout (1, 1));
     _responses = new ArrayList<List<ListPattern>> ();
     createProtocolTable ();
-    panel.add (new JScrollPane (_protocol));
+    JScrollPane scrollPane = new JScrollPane (_protocol);
+    _protocolHorizontalBar = scrollPane.getHorizontalScrollBar ();
+    panel.add (scrollPane);
 
     return panel;
   }

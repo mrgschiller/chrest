@@ -68,8 +68,6 @@ public class VisualSearchPane extends JPanel {
     add (jtb);
   }
 
-  private boolean _showCharts = false;
-
   // -- set up the training panel
   private JPanel trainPanel () {
     JPanel panel = new JPanel ();
@@ -78,8 +76,7 @@ public class VisualSearchPane extends JPanel {
     panel.add (constructTrainingOptions ());
     panel.add (runTrainingButtons ());
     if (freeChartLoaded ()) {
-      _showCharts = true;
-      panel.add (constructTrainingGraph ());
+      panel.add (createPanel ());
     }
 
     return panel;
@@ -110,9 +107,10 @@ public class VisualSearchPane extends JPanel {
     return panel;
   }
 
+  // confirm if FreeChart has been included in classpath
   private boolean freeChartLoaded () {
     try {
-      new DefaultPieDataset ();
+      new XYSeriesCollection ();
 
       return true;
     } catch (NoClassDefFoundError ex) {
@@ -176,10 +174,6 @@ public class VisualSearchPane extends JPanel {
     }
 
     return new ChartPanel (chart);
-  }
-
-  private JPanel constructTrainingGraph () {
-    return createPanel ();
   }
 
   private class Pair {

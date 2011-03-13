@@ -131,6 +131,7 @@ public class PairedAssociateExperiment extends JPanel {
   private JSpinner _endTrialTime;
   private JSpinner _interItemTime;
   private JCheckBox _randomOrder;
+  private JScrollBar _protocolHorizontalBar;
   private JTable _protocol;
 
   private void updateControls () {
@@ -225,6 +226,10 @@ public class PairedAssociateExperiment extends JPanel {
           return "Trial " + (column - 1);
         }
       }
+      public void fireTableStructureChanged() {
+        super.fireTableStructureChanged ();
+        _protocolHorizontalBar.setValue (_protocolHorizontalBar.getMaximum ());
+      }
     };
     _protocol = new JTable (tm);
     _protocol.setAutoResizeMode (JTable.AUTO_RESIZE_OFF);
@@ -236,7 +241,9 @@ public class PairedAssociateExperiment extends JPanel {
     panel.setLayout (new GridLayout (1, 1));
     _responses = new ArrayList<List<ListPattern>> ();
     createProtocolTable ();
-    panel.add (new JScrollPane (_protocol));
+    JScrollPane scrollPane = new JScrollPane (_protocol);
+    _protocolHorizontalBar = scrollPane.getHorizontalScrollBar ();
+    panel.add (scrollPane);
 
     return panel;
   }

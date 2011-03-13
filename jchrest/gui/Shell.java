@@ -120,46 +120,7 @@ public class Shell extends JFrame {
 
     public void actionPerformed (ActionEvent e) {
       (new LoadDataThread (_parent)).execute ();
-/*      File file = FileUtilities.getLoadFilename (_parent);
-      if (file != null) {
-        try {
-          String task = "";
-          BufferedReader input = new BufferedReader (new FileReader (file));
-          String line = input.readLine ();
-          if (line != null) {
-            task = line.trim ();
-          }              
-
-          if (task.equals ("recognise-and-learn")) {
-            _parent.setContentPane (new RecogniseAndLearnDemo (_model, readItems (input, false)));
-            _parent.validate ();
-          } else if (task.equals ("serial-anticipation")) {
-            _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(readItems (input, true))));
-            _parent.validate ();
-          } else if (task.equals ("paired-associate")) {
-            _parent.setContentPane (new PairedAssociateExperiment (_model, readPairedItems (input, false)));
-            _parent.validate ();
-          } else if (task.equals ("categorisation")) {
-            _parent.setContentPane (new CategorisationExperiment (_model, readPairedItems (input, true)));
-            _parent.validate ();
-          } else if (task.equals ("visual-search")) {
-            Scenes scenes = Scenes.read (input); // throws IOException if any problem
-            _parent.setContentPane (new VisualSearchPane (_model, scenes));
-            _parent.validate ();
-          } else {
-            JOptionPane.showMessageDialog (_parent,
-                "Invalid task on first line of file",
-                "File error",
-                JOptionPane.ERROR_MESSAGE);
-          }
-        } catch (IOException ioe) {
-          JOptionPane.showMessageDialog (_parent, 
-              "There was an error in processing your file", 
-              "File error",
-              JOptionPane.ERROR_MESSAGE);
-        }
-      }
-*/    }
+    }
   }
 
   /**
@@ -211,6 +172,8 @@ public class Shell extends JFrame {
             } else if (_task.equals ("visual-search")) {
               _scenes = Scenes.read (input); // throws IOException if any problem
             } 
+          } catch (InterruptedIOException ioe) {
+            _status = 2; // flag cancelled error
           } catch (IOException ioe) {
             _status = 1; // flag an IO error
           }
@@ -225,28 +188,29 @@ public class Shell extends JFrame {
               "There was an error in processing your file", 
               "File error",
               JOptionPane.ERROR_MESSAGE);
+        } else if (_status == 2) {
+          JOptionPane.showMessageDialog (_parent, 
+              "You cancelled the operation : no change", 
+              "File Load Cancelled",
+              JOptionPane.WARNING_MESSAGE);
         } else { // (_status == 0)
           if (_task.equals ("recognise-and-learn") && _items != null) {
             _parent.setContentPane (new RecogniseAndLearnDemo (_model, _items));
-            _parent.validate ();
           } else if (_task.equals ("serial-anticipation") && _items != null) {
             _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(_items)));
-            _parent.validate ();
           } else if (_task.equals ("paired-associate") && _pairs != null) {
             _parent.setContentPane (new PairedAssociateExperiment (_model, _pairs));
-            _parent.validate ();
           } else if (_task.equals ("categorisation") && _pairs != null) {
             _parent.setContentPane (new CategorisationExperiment (_model, _pairs));
-            _parent.validate ();
           } else if (_task.equals ("visual-search") && _scenes != null) {
             _parent.setContentPane (new VisualSearchPane (_model, _scenes));
-            _parent.validate ();
           } else {
             JOptionPane.showMessageDialog (_parent,
                 "Invalid task on first line of file",
                 "File error",
                 JOptionPane.ERROR_MESSAGE);
           }
+          _parent.validate ();
         }
       }
 
