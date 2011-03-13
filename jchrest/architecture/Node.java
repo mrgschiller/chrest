@@ -168,6 +168,32 @@ public class Node {
     return information;
   }
 
+  public void getContentCounts (Map<Integer, Integer> size) {
+    int csize = _contents.size ();
+    if (size.containsKey (csize)) {
+      size.put (csize, size.get(csize) + 1);
+    } else {
+      size.put (csize, 1);
+    }
+
+    for (Link child : _children) {
+      child.getChildNode().getContentCounts (size);
+    }
+  }
+
+  public void getImageCounts (Map<Integer, Integer> size) {
+    int csize = _image.size ();
+    if (size.containsKey (csize)) {
+      size.put (csize, size.get(csize) + 1);
+    } else {
+      size.put (csize, 1);
+    }
+
+    for (Link child : _children) {
+      child.getChildNode().getImageCounts (size);
+    }
+  }
+
   /**
    * Compute the total size of images below the current node.
    */

@@ -278,7 +278,9 @@ class TreeViewPane extends JPanel {
 	}
 
 	public void relayout () {
+    System.out.println ("Starting layout");
 		_rootnode.layoutNode (getGraphics (), 10, 10, _orientation, _size);
+    System.out.println ("Ended layout");
 		_maxX = 20 + _rootnode.getExtentWidth (getGraphics (), _orientation, _size);
 		_maxY = 20 + _rootnode.getExtentHeight (getGraphics (), _orientation, _size);
 		setPreferredSize (new Dimension (_maxX, _maxY));

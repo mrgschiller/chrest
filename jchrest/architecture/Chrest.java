@@ -352,6 +352,26 @@ public class Chrest extends Observable {
     }
   }
 
+  public Map<Integer, Integer> getContentCounts () {
+    Map<Integer, Integer> size = new HashMap<Integer, Integer> ();
+
+    _visualLtm.getContentCounts (size);
+    _verbalLtm.getContentCounts (size);
+    _actionLtm.getContentCounts (size);
+
+    return size;
+  }
+
+  public Map<Integer, Integer> getImageCounts () {
+    Map<Integer, Integer> size = new HashMap<Integer, Integer> ();
+
+    _visualLtm.getImageCounts (size);
+    _verbalLtm.getImageCounts (size);
+    _actionLtm.getImageCounts (size);
+
+    return size;
+  }
+
   /**
    * Add given node to STM.  Check for formation of similarity links by
    * comparing incoming node with the hypothesis, or 'largest', node.

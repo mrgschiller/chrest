@@ -13,8 +13,15 @@ import java.awt.event.*;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
+
+import org.jfree.chart.*;
+import org.jfree.chart.plot.*;
+import org.jfree.data.*;
+import org.jfree.data.statistics.*;
 
 /**
  * The main frame for the Chrest shell.
@@ -445,22 +452,61 @@ public class Shell extends JFrame {
     }
 
     public void actionPerformed (ActionEvent e) {
-      DecimalFormat twoPlaces = new DecimalFormat("0.00");
-      JOptionPane.showMessageDialog (_parent,
-          "<html><p>" + 
-          "Total nodes in LTM: " + _model.getTotalLtmNodes () +
-          "<hr>" + 
-          "Visual nodes: " + _model.ltmVisualSize () + 
-          " Average depth: " + twoPlaces.format (_model.getVisualLtmAverageDepth ()) +
-          "<br>Verbal nodes: " + _model.ltmVerbalSize () + 
-          " Average depth: " + twoPlaces.format (_model.getVerbalLtmAverageDepth ()) +
-          "<br>Action nodes: " + _model.ltmActionSize () + 
-          " Average depth: " + twoPlaces.format (_model.getActionLtmAverageDepth ()) +
-          "<br>Number of templates: " + _model.countTemplates () +
-          "</p></html>",
-          "Chrest: Model information",
-          JOptionPane.INFORMATION_MESSAGE);
+      JPanel base = new JPanel ();
+      base.setLayout (new GridLayout(1,1));
+
+      JTabbedPane jtb = new JTabbedPane ();
+      jtb.addTab ("Info", getInfoPane ());
+      jtb.addTab ("Contents", getHistogramPane (_model.getContentCounts(), "contents", "Histogram of Contents Sizes", "Contents size"));
+      jtb.addTab ("Images", getHistogramPane (_model.getImageCounts(), "images", "Histogram of Image Sizes", "Image size"));
+      base.add (jtb);
+
+      JOptionPane pane = new JOptionPane (base, JOptionPane.INFORMATION_MESSAGE);
+      JDialog dialog = pane.createDialog (_parent, "Chrest: Model information");
+      dialog.setResizable (true);
+      dialog.setVisible (true);
     }
+  }
+
+  private JLabel getInfoPane () {
+    DecimalFormat twoPlaces = new DecimalFormat("0.00");
+    return new JLabel (
+        "<html><p>" + 
+        "Total nodes in LTM: " + _model.getTotalLtmNodes () +
+        "<hr>" + 
+        "Visual nodes: " + _model.ltmVisualSize () + 
+        " Average depth: " + twoPlaces.format (_model.getVisualLtmAverageDepth ()) +
+        "<br>Verbal nodes: " + _model.ltmVerbalSize () + 
+        " Average depth: " + twoPlaces.format (_model.getVerbalLtmAverageDepth ()) +
+        "<br>Action nodes: " + _model.ltmActionSize () + 
+        " Average depth: " + twoPlaces.format (_model.getActionLtmAverageDepth ()) +
+        "<br>Number of templates: " + _model.countTemplates () +
+        "</p></html>"
+        );
+  }
+
+  private ChartPanel getHistogramPane (Map<Integer, Integer> contentSizes, String label, String title, String xAxis) {
+    int largest = 0;
+    for (Integer key : contentSizes.keySet ()) {
+      if (key > largest) largest = key;
+    }
+    SimpleHistogramDataset dataset = new SimpleHistogramDataset (label);
+    for (int i = 0; i <= largest; ++i) {
+      SimpleHistogramBin bin = new SimpleHistogramBin ((double)i, (double)(i+1), true, false);
+      int count = 0;
+      if (contentSizes.containsKey (i)) {
+        count = contentSizes.get (i);
+      }
+      bin.setItemCount (count);
+      dataset.addBin (bin);
+    }
+    PlotOrientation orientation = PlotOrientation.VERTICAL; 
+    boolean show = false; 
+    boolean toolTips = true;
+    boolean urls = false; 
+    JFreeChart chart = ChartFactory.createHistogram( title, xAxis, "frequency", 
+        dataset, orientation, show, toolTips, urls);
+    return new ChartPanel (chart, 400, 300, 200, 100, 600, 600, true, true, true, true, true, true);
   }
 
   /** 
