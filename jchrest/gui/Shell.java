@@ -70,7 +70,7 @@ public class Shell extends JFrame {
           "<P>Released under GNU General Public License</a>, version 3.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell v.0.9", 
+          "About Chrest Shell v.0.10", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -119,6 +119,7 @@ public class Shell extends JFrame {
     }
 
     public void actionPerformed (ActionEvent e) {
+      (new LoadDataThread (_parent)).execute ();
 /*      File file = FileUtilities.getLoadFilename (_parent);
       if (file != null) {
         try {
@@ -170,6 +171,7 @@ public class Shell extends JFrame {
     private List<ListPattern> _items;
     private List<PairedPattern> _pairs;
     private Scenes _scenes;
+    private int _status;
 
     LoadDataThread (Shell parent) {
       _parent = parent;
@@ -184,8 +186,15 @@ public class Shell extends JFrame {
         File file = FileUtilities.getLoadFilename (_parent);
         if (file != null) {
           try {
+            _status = 0; // assume all will be fine
             _task = "";
-            BufferedReader input = new BufferedReader (new FileReader (file));
+            // add a monitor to the input stream, to show a message if input is taking a while
+            InputStream inputStream = new ProgressMonitorInputStream(
+                _parent, 
+                "Reading the input file", 
+                new FileInputStream (file));
+            BufferedReader input = new BufferedReader (new InputStreamReader (inputStream));
+
             String line = input.readLine ();
             if (line != null) {
               _task = line.trim ();
@@ -203,7 +212,7 @@ public class Shell extends JFrame {
               _scenes = Scenes.read (input); // throws IOException if any problem
             } 
           } catch (IOException ioe) {
-
+            _status = 1; // flag an IO error
           }
         }
         return null;
@@ -211,26 +220,33 @@ public class Shell extends JFrame {
 
     @Override
       protected void done () {
-        if (_task.equals ("recognise-and-learn") && _items != null) {
-          _parent.setContentPane (new RecogniseAndLearnDemo (_model, _items));
-          _parent.validate ();
-        } else if (_task.equals ("serial-anticipation") && _items != null) {
-          _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(_items)));
-          _parent.validate ();
-        } else if (_task.equals ("paired-associate") && _pairs != null) {
-          _parent.setContentPane (new PairedAssociateExperiment (_model, _pairs));
-          _parent.validate ();
-        } else if (_task.equals ("categorisation") && _pairs != null) {
-          _parent.setContentPane (new CategorisationExperiment (_model, _pairs));
-          _parent.validate ();
-        } else if (_task.equals ("visual-search") && _scenes != null) {
-          _parent.setContentPane (new VisualSearchPane (_model, _scenes));
-          _parent.validate ();
-        } else {
-          JOptionPane.showMessageDialog (_parent,
-              "Invalid task on first line of file",
+        if (_status == 1) {
+          JOptionPane.showMessageDialog (_parent, 
+              "There was an error in processing your file", 
               "File error",
               JOptionPane.ERROR_MESSAGE);
+        } else { // (_status == 0)
+          if (_task.equals ("recognise-and-learn") && _items != null) {
+            _parent.setContentPane (new RecogniseAndLearnDemo (_model, _items));
+            _parent.validate ();
+          } else if (_task.equals ("serial-anticipation") && _items != null) {
+            _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(_items)));
+            _parent.validate ();
+          } else if (_task.equals ("paired-associate") && _pairs != null) {
+            _parent.setContentPane (new PairedAssociateExperiment (_model, _pairs));
+            _parent.validate ();
+          } else if (_task.equals ("categorisation") && _pairs != null) {
+            _parent.setContentPane (new CategorisationExperiment (_model, _pairs));
+            _parent.validate ();
+          } else if (_task.equals ("visual-search") && _scenes != null) {
+            _parent.setContentPane (new VisualSearchPane (_model, _scenes));
+            _parent.validate ();
+          } else {
+            JOptionPane.showMessageDialog (_parent,
+                "Invalid task on first line of file",
+                "File error",
+                JOptionPane.ERROR_MESSAGE);
+          }
         }
       }
 
