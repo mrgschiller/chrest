@@ -29,7 +29,7 @@ public class Chrest extends Observable {
   private float _rho;
   // parameter for construction of similarity link
   // - determines number of overlapping items in node images
-  public static int SIMILARITY_THRESHOLD = 1;
+  private int _similarityThreshold;
   // template construction parameters
   private boolean _createTemplates;
   public static int MIN_LEVEL = 3;
@@ -52,6 +52,7 @@ public class Chrest extends Observable {
     _discriminationTime = 10000;
     _familiarisationTime = 2000;
     _rho = 1.0f;
+    _similarityThreshold = 3;
 
     _clock = 0;
     _totalNodes = 0;
@@ -154,6 +155,21 @@ public class Chrest extends Observable {
    */
   public void setRho (float rho) {
     _rho = rho;
+  }
+
+  /**
+   * Accessor to retrieve value of similarity threshold, the number of items 
+   * which must be shared between two images for a similarity link to be formed.
+   */
+  public float getSimilarityThreshold () {
+    return _similarityThreshold;
+  }
+
+  /**
+   * Modify value of similarity threshold.
+   */
+  public void setSimilarityThreshold (int threshold) {
+    _similarityThreshold = threshold;
   }
 
   /**
@@ -372,6 +388,16 @@ public class Chrest extends Observable {
     return size;
   }
 
+  public Map<Integer, Integer> getSimilarityCounts () {
+    Map<Integer, Integer> size = new HashMap<Integer, Integer> ();
+
+    _visualLtm.getSimilarityCounts (size);
+    _verbalLtm.getSimilarityCounts (size);
+    _actionLtm.getSimilarityCounts (size);
+
+    return size;
+  }
+
   /**
    * Add given node to STM.  Check for formation of similarity links by
    * comparing incoming node with the hypothesis, or 'largest', node.
@@ -381,8 +407,8 @@ public class Chrest extends Observable {
 
     if (stm.getCount () > 0) {
       Node check = stm.getItem (0);
-      if (node.getImage().isSimilarTo (check.getImage (), SIMILARITY_THRESHOLD)) {
-        node.addSimilarNode (check);
+      if (node.getImage().isSimilarTo (check.getImage (), _similarityThreshold)) {
+        node.addSimilarNode (check); 
       }
     }
 
@@ -629,6 +655,16 @@ public class Chrest extends Observable {
     _visualLtm.writeNodeAsVna (writer);
     writer.write ("*Tie data\nFROM TO\n");
     _visualLtm.writeLinksAsVna (writer);
+  }
+
+  /** 
+   * Write model similarity links to given Writer object in VNA format
+   */
+  public void writeModelSimilarityLinksAsVna (Writer writer) throws IOException {
+    writer.write ("*Node data\n\"ID\", \"contents\"\n");
+    _visualLtm.writeNodeAsVna (writer);
+    writer.write ("*Tie data\nFROM TO\n");
+    _visualLtm.writeSimilarityLinksAsVna (writer);
   }
 
   /**

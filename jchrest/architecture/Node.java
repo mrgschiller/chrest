@@ -102,10 +102,12 @@ public class Node {
   }
 
   /**
-   * Add a node to the list of similar nodes.
+   * Add a node to the list of similar nodes.  Do not add duplicates.
    */
   void addSimilarNode (Node node) {
-    _similarNodes.add (node);
+    if (!_similarNodes.contains (node)) {
+      _similarNodes.add (node);
+    }
   }
 
   List<Node> getSimilarNodes () {
@@ -191,6 +193,21 @@ public class Node {
 
     for (Link child : _children) {
       child.getChildNode().getImageCounts (size);
+    }
+  }
+
+  public void getSimilarityCounts (Map<Integer, Integer> size) {
+    int csize = _similarNodes.size ();
+    if (csize > 0) { // do not count nodes with no similarity links
+      if (size.containsKey (csize)) {
+        size.put (csize, size.get(csize) + 1);
+      } else {
+        size.put (csize, 1);
+      }
+    }
+
+    for (Link child : _children) {
+      child.getChildNode().getSimilarityCounts (size);
     }
   }
 
@@ -674,6 +691,17 @@ public class Node {
     // repeat for children
     for (Link link : _children) {
       link.getChildNode().writeLinksAsVna (writer);
+    }
+  }
+
+  public void writeSimilarityLinksAsVna (Writer writer) throws IOException {
+    // write my links
+    for (Node node : _similarNodes) {
+      writer.write ("" + _reference + " " + node.getReference () + "\n");
+    }
+    // repeat for children
+    for (Link link : _children) {
+      link.getChildNode().writeSimilarityLinksAsVna (writer);
     }
   }
 

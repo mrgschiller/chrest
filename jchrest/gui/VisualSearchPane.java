@@ -87,9 +87,9 @@ public class VisualSearchPane extends JPanel {
   private JSpinner _maxNetworkSize;
 
   private JPanel constructTrainingOptions () {
-    _maxTrainingCycles = new JSpinner (new SpinnerNumberModel (5, 1, 100, 1));
+    _maxTrainingCycles = new JSpinner (new SpinnerNumberModel (5, 1, 1000, 1));
     _numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 100, 1));
-    _maxNetworkSize = new JSpinner (new SpinnerNumberModel (1000, 1, 1000000, 1));
+    _maxNetworkSize = new JSpinner (new SpinnerNumberModel (100000, 1, 10000000, 1));
 
     JPanel panel = new JPanel ();
     panel.setLayout (new GridLayout (5, 2));

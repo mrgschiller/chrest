@@ -15,6 +15,15 @@ public class FileUtilities {
    * given component.
    */
   public static File getSaveFilename (Component parent) {
+    return FileUtilities.getSaveFilename (parent, "Save");
+  }
+
+  /**
+   * Request user for a filename to save to.  Argument 'parent' centres the dialog on the 
+   * given component.  Argument 'title' gives a title for the dialog.
+   */
+  public static File getSaveFilename (Component parent, String title) {
+    _fileChooser.setDialogTitle (title);
     _fileChooser.setMultiSelectionEnabled (false);
     _fileChooser.setSelectedFile (new File ("x")); // clear the previous selection
     _fileChooser.setSelectedFile (new File (""));

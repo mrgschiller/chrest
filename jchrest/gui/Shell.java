@@ -77,7 +77,7 @@ public class Shell extends JFrame {
           "<P>Released under GNU General Public License</a>, version 3.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell v.0.10", 
+          "About Chrest Shell v.0.11", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -317,6 +317,7 @@ public class Shell extends JFrame {
         _model.setVerbalStmSize (((SpinnerNumberModel)_verbalStmSize.getModel()).getNumber().intValue ());
         _model.getPerceiver().setFieldOfView (((SpinnerNumberModel)_fieldOfView.getModel()).getNumber().intValue ());
         _model.setCreateTemplates(_createTemplates.isSelected ());
+        _model.setSimilarityThreshold(((SpinnerNumberModel)_similarityThreshold.getModel()).getNumber().intValue ());
       }
     }
 
@@ -328,6 +329,7 @@ public class Shell extends JFrame {
     private JSpinner _verbalStmSize;
     private JSpinner _fieldOfView;
     private JCheckBox _createTemplates;
+    private JSpinner _similarityThreshold;
 
     private JPanel properties () {
       // -- create entry widgets
@@ -338,10 +340,11 @@ public class Shell extends JFrame {
       _visualStmSize = new JSpinner (new SpinnerNumberModel (_model.getVisualStmSize (), 1, 10, 1));
       _verbalStmSize = new JSpinner (new SpinnerNumberModel (_model.getVerbalStmSize (), 1, 10, 1));
       _fieldOfView = new JSpinner (new SpinnerNumberModel (_model.getPerceiver().getFieldOfView (), 1, 100, 1));
+      _similarityThreshold = new JSpinner (new SpinnerNumberModel (_model.getSimilarityThreshold (), 1, 100, 1));
       _createTemplates = new JCheckBox ("Use templates", _model.getCreateTemplates ());
 
       JPanel panel = new JPanel ();
-      panel.setLayout (new GridLayout (8, 2));
+      panel.setLayout (new GridLayout (9, 2));
       panel.add (new JLabel ("Add link time (ms)", SwingConstants.RIGHT));
       panel.add (_addLinkTime);
       panel.add (new JLabel ("Discrimination time (ms)", SwingConstants.RIGHT));
@@ -356,6 +359,8 @@ public class Shell extends JFrame {
       panel.add (_verbalStmSize);
       panel.add (new JLabel ("Field of view", SwingConstants.RIGHT));
       panel.add (_fieldOfView);
+      panel.add (new JLabel ("Similarity threshold", SwingConstants.RIGHT));
+      panel.add (_similarityThreshold);
       panel.add (new JLabel (""));
       panel.add (_createTemplates);
 
@@ -411,23 +416,52 @@ public class Shell extends JFrame {
   }
 
   /**
-   * Action to save data from current model.
+   * Action to save test-link data from current model in VNA format.
    */
-  class SaveModelAction extends AbstractAction implements ActionListener {
+  class SaveModelAsVnaAction extends AbstractAction implements ActionListener {
     private Shell _parent;
 
-    SaveModelAction (Shell parent) {
-      super ("Save"); 
+    SaveModelAsVnaAction (Shell parent) {
+      super ("Save visual network (.VNA)"); 
 
       _parent = parent;
     }
 
     public void actionPerformed (ActionEvent e) {
-      File file = FileUtilities.getSaveFilename (_parent);
+      File file = FileUtilities.getSaveFilename (_parent, "Save visual network");
       if (file == null) return;
       try {
         FileWriter writer = new FileWriter (file);
         _model.writeModelAsVna (writer);
+        writer.close ();
+      } catch (IOException ioe) {
+        JOptionPane.showMessageDialog (_parent,
+            "File " + file.getName () + 
+            " could not be saved due to an error.",
+            "Error: File save error",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    }
+  }
+
+  /**
+   * Action to save similarity links in current model as VNA.
+   */
+  class SaveModelSimilaritiesAsVnaAction extends AbstractAction implements ActionListener {
+    private Shell _parent;
+
+    SaveModelSimilaritiesAsVnaAction (Shell parent) {
+      super ("Save visual similarity links (.VNA)"); 
+
+      _parent = parent;
+    }
+
+    public void actionPerformed (ActionEvent e) {
+      File file = FileUtilities.getSaveFilename (_parent, "Save visual similarity links");
+      if (file == null) return;
+      try {
+        FileWriter writer = new FileWriter (file);
+        _model.writeModelSimilarityLinksAsVna (writer);
         writer.close ();
       } catch (IOException ioe) {
         JOptionPane.showMessageDialog (_parent,
@@ -459,6 +493,7 @@ public class Shell extends JFrame {
       jtb.addTab ("Info", getInfoPane ());
       jtb.addTab ("Contents", getHistogramPane (_model.getContentCounts(), "contents", "Histogram of Contents Sizes", "Contents size"));
       jtb.addTab ("Images", getHistogramPane (_model.getImageCounts(), "images", "Histogram of Image Sizes", "Image size"));
+      jtb.addTab ("Similarity", getHistogramPane (_model.getSimilarityCounts(), "similarity", "Histogram of Number of similiarity Links", "Number of similarity links"));
       base.add (jtb);
 
       JOptionPane pane = new JOptionPane (base, JOptionPane.INFORMATION_MESSAGE);
@@ -556,7 +591,13 @@ public class Shell extends JFrame {
     JMenu menu = new JMenu ("Model");
     menu.add (new ClearModelAction (this));
 //    menu.add (new LoadModelAction (this));
-    menu.add (new SaveModelAction (this));
+//    menu.add (new SaveModelAction (this));
+
+    JMenu submenu = new JMenu ("Save");
+    submenu.add (new SaveModelAsVnaAction (this));
+    submenu.add (new SaveModelSimilaritiesAsVnaAction (this));
+    menu.add (submenu);
+
     menu.add (new ModelPropertiesAction (this));
     menu.add (new JSeparator ());
     menu.add (new ModelInformationAction (this));
