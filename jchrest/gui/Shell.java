@@ -8,6 +8,7 @@ import jchrest.lib.ParsingErrorException;
 import jchrest.lib.Pattern;
 import jchrest.lib.Scenes;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.*;
 import java.io.*;
@@ -77,7 +78,7 @@ public class Shell extends JFrame {
           "<P>Released under GNU General Public License</a>, version 3.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell v.0.11", 
+          "About Chrest Shell v. 0.12", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -520,7 +521,7 @@ public class Shell extends JFrame {
         );
   }
 
-  private ChartPanel getHistogramPane (Map<Integer, Integer> contentSizes, String label, String title, String xAxis) {
+  private JPanel getHistogramPane (Map<Integer, Integer> contentSizes, String label, String title, String xAxis) {
     int largest = 0;
     for (Integer key : contentSizes.keySet ()) {
       if (key > largest) largest = key;
@@ -541,7 +542,43 @@ public class Shell extends JFrame {
     boolean urls = false; 
     JFreeChart chart = ChartFactory.createHistogram( title, xAxis, "frequency", 
         dataset, orientation, show, toolTips, urls);
-    return new ChartPanel (chart, 400, 300, 200, 100, 600, 600, true, true, true, true, true, true);
+
+    JPanel panel = new JPanel ();
+    panel.setLayout (new BorderLayout ());
+    panel.add (new ChartPanel (chart, 400, 300, 200, 100, 600, 600, true, true, true, true, true, true));
+    JButton saveButton = new JButton ("Save Data");
+    saveButton.setToolTipText ("Save the histogram data to a CSV file");
+    saveButton.addActionListener ( new SaveHistogramActionListener (this, contentSizes));
+    panel.add (saveButton, BorderLayout.SOUTH);
+    return panel;
+  }
+
+  class SaveHistogramActionListener implements ActionListener {
+    Shell _parent;
+    Map<Integer, Integer> _data;
+
+    public SaveHistogramActionListener (Shell parent, Map<Integer, Integer> data) {
+      _parent = parent;
+      _data = data;
+    }
+    
+    public void actionPerformed (ActionEvent e) {
+      File file = FileUtilities.getSaveFilename (_parent, "Save histogram data");
+      if (file == null) return;
+      try {
+        FileWriter writer = new FileWriter (file);
+        for (Integer key : _data.keySet ()) {
+          writer.write ("" + key + ", " + _data.get (key) + "\n");
+        }
+        writer.close ();
+      } catch (IOException ioe) {
+        JOptionPane.showMessageDialog (_parent,
+            "File " + file.getName () + 
+            " could not be saved due to an error.",
+            "Error: File save error",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    }
   }
 
   /** 
