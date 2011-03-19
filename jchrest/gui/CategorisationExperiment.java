@@ -115,6 +115,7 @@ public class CategorisationExperiment extends JPanel {
     }
 
     public void actionPerformed (ActionEvent e) {
+      _model.freeze (); // save all gui updates to the end
       collectResponses ();
       for (PairedPattern pair : preparePatterns ()) {
         _model.learnAndNamePatterns (pair.getFirst (), pair.getSecond ());
@@ -125,6 +126,7 @@ public class CategorisationExperiment extends JPanel {
 
   private void updateControls () {
     ((AbstractTableModel)_protocol.getModel()).fireTableStructureChanged ();
+    _model.unfreeze ();
   }
 
   private JPanel createControls () {

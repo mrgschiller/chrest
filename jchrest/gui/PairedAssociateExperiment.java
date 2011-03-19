@@ -116,6 +116,7 @@ public class PairedAssociateExperiment extends JPanel {
     }
 
     public void actionPerformed (ActionEvent e) {
+      _model.freeze (); // save all gui updates to the end
       collectResponses ();
       for (PairedPattern pair : preparePatterns ()) {
         _model.learnAndLinkPatterns (pair.getFirst (), pair.getSecond (), _exptClock);
@@ -137,6 +138,7 @@ public class PairedAssociateExperiment extends JPanel {
   private void updateControls () {
     ((AbstractTableModel)_protocol.getModel()).fireTableStructureChanged ();
     _experimentTimeLabel.setText ("" + _exptClock);
+    _model.unfreeze ();
   }
 
   private JPanel createControls () {

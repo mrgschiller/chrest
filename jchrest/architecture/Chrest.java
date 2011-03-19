@@ -207,7 +207,7 @@ public class Chrest extends Observable {
   public void setVisualStmSize (int size) {
     _visualStm.setSize (size);
     setChanged ();
-    notifyObservers ();
+    if (!_frozen) notifyObservers ();
   }
 
   /**
@@ -223,7 +223,7 @@ public class Chrest extends Observable {
   public void setVerbalStmSize (int size) {
     _verbalStm.setSize (size);
     setChanged ();
-    notifyObservers ();
+    if (!_frozen) notifyObservers ();
   }
 
   /**
@@ -368,6 +368,16 @@ public class Chrest extends Observable {
     }
   }
 
+  private boolean _frozen = false;
+  public void freeze () {
+    _frozen = true;
+  }
+  public void unfreeze () {
+    _frozen = false;
+    setChanged ();
+    notifyObservers ();
+  }
+
   public Map<Integer, Integer> getContentCounts () {
     Map<Integer, Integer> size = new HashMap<Integer, Integer> ();
 
@@ -468,7 +478,7 @@ public class Chrest extends Observable {
 
     // inform observers of a change in model's state
     setChanged ();
-    notifyObservers ();
+    if (!_frozen) notifyObservers ();
 
     // return it
     return currentNode;
@@ -494,7 +504,7 @@ public class Chrest extends Observable {
           }
           addToStm (currentNode);
           setChanged ();
-          notifyObservers ();
+          if (!_frozen) notifyObservers ();
         }
       }
     }
@@ -555,7 +565,7 @@ public class Chrest extends Observable {
         _actionStm.learnLateralLinks (this);
       }
       setChanged ();
-      notifyObservers ();
+      if (!_frozen) notifyObservers ();
     }
   }
 
@@ -579,7 +589,7 @@ public class Chrest extends Observable {
         advanceClock (getAddLinkTime ());
       }
       setChanged ();
-      notifyObservers ();
+      if (!_frozen) notifyObservers ();
     }
   }
 
@@ -643,7 +653,7 @@ public class Chrest extends Observable {
     _visualStm.clear ();
     _verbalStm.clear ();
     setChanged ();
-    notifyObservers ();
+    if (!_frozen) notifyObservers ();
   }
 
   public String getHeuristicDescription () {

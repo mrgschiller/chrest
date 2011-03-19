@@ -36,15 +36,36 @@ public class ChrestLtmView extends JPanel {
       _ltmView = null;
       add (new JLabel ("Sorry - LTM too large to display"));
     } else {
-      _ltmView = new TreeViewPane (new TreeViewNode (constructTree ()));
+      _ltmView = new TreeViewPane (new TreeViewNode (new NodeDisplay (null)));
+      _constructingTreeThread = new ConstructTreeThread ();
+      _constructingTreeThread.execute ();
       add (new JScrollPane (_ltmView));
     }
     add (createToolBar (), BorderLayout.SOUTH);
   }
 
+  private ConstructTreeThread _constructingTreeThread;
+
+  private class ConstructTreeThread extends SwingWorker<Void, Void> {
+    LtmTreeViewNode _newTree;
+    
+    @Override
+      public Void doInBackground () {
+        _newTree = constructTree ();
+        return null;
+      }
+
+    @Override
+      protected void done () {
+        _ltmView.changeRoot (new TreeViewNode (_newTree));
+        _constructingTreeThread = null;
+      }
+  }
+
   public void update () {
     if (_ltmView != null) {
-      _ltmView.changeRoot (new TreeViewNode (constructTree ()));
+      _constructingTreeThread = new ConstructTreeThread ();
+      _constructingTreeThread.execute ();
     }
   }
 
@@ -336,7 +357,7 @@ class TreeViewNode {
 		// the position and size of the node will be created during layout
 		_x = 0;
 		_y = 0;
-		_w = 0; 
+  	_w = 0; 
 		_h = 0;
 		_extentWidth = 0;
 		_extentHeight = 0;
