@@ -633,6 +633,9 @@ public class Chrest extends Observable {
    */
   public void clear () {
     _clock = 0;
+    _visualLtm.clear ();
+    _verbalLtm.clear ();
+    _actionLtm.clear ();
     _visualLtm = new Node (this, 0, Pattern.makeVisualList (new String[]{"Root"}));
     _verbalLtm = new Node (this, 0, Pattern.makeVerbalList (new String[]{"Root"}));
     _actionLtm = new Node (this, 0, Pattern.makeActionList (new String[]{"Root"}));

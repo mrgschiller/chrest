@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 
 import jchrest.lib.FileUtilities;
 import jchrest.lib.ItemSquarePattern;
@@ -19,7 +20,7 @@ import jchrest.lib.PrimitivePattern;
  *
  * @author Peter C. R. Lane
  */
-public class Node {
+public class Node extends Observable {
   private Chrest _model;
   private int _reference;
   private ListPattern _contents;
@@ -69,6 +70,14 @@ public class Node {
     _namedBy = null;
   }
 
+  void clear () {
+    setChanged ();
+    notifyObservers ("close");
+    for (Link child : _children) {
+      child.getChildNode().clear ();
+    }
+  }
+
   /**
    * Accessor to reference number of node.
    */
@@ -90,6 +99,12 @@ public class Node {
     return _image;
   }
 
+  public void setImage (ListPattern image) {
+    _image = image;
+    setChanged ();
+    notifyObservers ();
+  }
+
   /**
    * Accessor to children of node.
    */
@@ -99,6 +114,8 @@ public class Node {
 
   void addTestLink (ListPattern test, Node child) {
     _children.add (0, new Link (test, child));
+    setChanged ();
+    notifyObservers ();
   }
 
   /**
@@ -107,6 +124,8 @@ public class Node {
   void addSimilarNode (Node node) {
     if (!_similarNodes.contains (node)) {
       _similarNodes.add (node);
+      setChanged ();
+      notifyObservers ();
     }
   }
 
@@ -126,6 +145,8 @@ public class Node {
    */
   public void setFollowedBy (Node node) {
     _followedBy = node;
+    setChanged ();
+    notifyObservers ();
   }
 
   /**
@@ -140,6 +161,8 @@ public class Node {
    */
   public void setNamedBy (Node node) {
     _namedBy = node;
+    setChanged ();
+    notifyObservers ();
   }
 
   /** 
@@ -587,7 +610,7 @@ public class Node {
    * It is assumed the given pattern is non-empty and is a valid extension.
    */
   private Node extendImage (Chrest model, ListPattern newInformation) {
-    _image = _image.append (newInformation);
+    setImage (_image.append (newInformation));
     model.advanceClock (model.getFamiliarisationTime ());
 
     return this;

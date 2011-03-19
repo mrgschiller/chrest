@@ -3,6 +3,7 @@ package jchrest.gui;
 import jchrest.architecture.*;
 
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -23,6 +24,15 @@ public class ChrestStmView extends JPanel {
     _visualStmView = new DefaultListModel ();
     _visualStmList = new JList (_visualStmView);
     _visualStmList.setCellRenderer (new StmCellRendererer (_model));
+    _visualStmList.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent evt) {
+        JList list = (JList)evt.getSource();
+        if (evt.getClickCount() == 2) { 
+          int index = list.locationToIndex(evt.getPoint());
+          new NodeView ((Node)_visualStmView.getElementAt (index));
+        }
+      }
+    });
     visualPanel.add (new JScrollPane (_visualStmList));
 
     JPanel verbalPanel = new JPanel ();
@@ -31,6 +41,15 @@ public class ChrestStmView extends JPanel {
     _verbalStmView = new DefaultListModel ();
     _verbalStmList = new JList (_verbalStmView);
     _verbalStmList.setCellRenderer (new StmCellRendererer (_model));
+    _verbalStmList.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent evt) {
+        JList list = (JList)evt.getSource();
+        if (evt.getClickCount() == 2) { 
+          int index = list.locationToIndex(evt.getPoint());
+          new NodeView ((Node)_verbalStmView.getElementAt (index));
+        }
+      }
+    });
     verbalPanel.add (new JScrollPane (_verbalStmList));
   
     JSplitPane jsp = new JSplitPane (JSplitPane.VERTICAL_SPLIT, visualPanel, verbalPanel);
@@ -74,22 +93,4 @@ public class ChrestStmView extends JPanel {
 
         }
   }
-
-  class NodeIcon implements Icon {
-    private NodeDisplay _node;
-    private JList _stmList;
-
-    public NodeIcon (Node node, JList stmList) {
-      _node = new NodeDisplay (node);
-      _stmList = stmList;
-    }
-
-    public void paintIcon (Component c, Graphics g, int x, int y) {
-      _node.draw ((Graphics2D)g, x, y, getIconWidth(), getIconHeight(), Size.getValues().get (1));
-    }
-
-    public int getIconWidth  () { return _node.getWidth ( (Graphics2D)_stmList.getGraphics(), Size.getValues().get (1)); }
-    public int getIconHeight () { return _node.getHeight( (Graphics2D)_stmList.getGraphics(), Size.getValues().get (1)); }
-  }
 }
-

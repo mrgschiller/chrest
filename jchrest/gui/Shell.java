@@ -494,7 +494,7 @@ public class Shell extends JFrame {
       jtb.addTab ("Info", getInfoPane ());
       jtb.addTab ("Contents", getHistogramPane (_model.getContentCounts(), "contents", "Histogram of Contents Sizes", "Contents size"));
       jtb.addTab ("Images", getHistogramPane (_model.getImageCounts(), "images", "Histogram of Image Sizes", "Image size"));
-      jtb.addTab ("Similarity", getHistogramPane (_model.getSimilarityCounts(), "similarity", "Histogram of Number of similiarity Links", "Number of similarity links"));
+      jtb.addTab ("Similarity", getHistogramPane (_model.getSimilarityCounts(), "similarity", "Histogram of Number of Similarity Links", "Number of similarity links"));
       base.add (jtb);
 
       JOptionPane pane = new JOptionPane (base, JOptionPane.INFORMATION_MESSAGE);
