@@ -417,7 +417,8 @@ public class Chrest extends Observable {
 
     if (stm.getCount () > 0) {
       Node check = stm.getItem (0);
-      if (node.getImage().isSimilarTo (check.getImage (), _similarityThreshold)) {
+      if (check != node && 
+          node.getImage().isSimilarTo (check.getImage (), _similarityThreshold)) {
         node.addSimilarNode (check); 
       }
     }

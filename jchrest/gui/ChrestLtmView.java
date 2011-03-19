@@ -64,8 +64,13 @@ public class ChrestLtmView extends JPanel {
 
   public void update () {
     if (_ltmView != null) {
-      _constructingTreeThread = new ConstructTreeThread ();
-      _constructingTreeThread.execute ();
+      if (_model.getTotalLtmNodes () > 5000) {
+        // TODO : change display if number of nodes is too large
+//        this.add (new JLabel ("Sorry - LTM too large to display"));
+      } else {
+        _constructingTreeThread = new ConstructTreeThread ();
+        _constructingTreeThread.execute ();
+      }
     }
   }
 

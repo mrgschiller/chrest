@@ -206,6 +206,7 @@ public class VisualSearchPane extends JPanel {
     @Override
       public List<Pair> doInBackground () {
         _model.clear ();
+        _model.freeze ();
         List<Pair> results = new ArrayList<Pair> ();
         Pair result = new Pair (0, 0);
         results.add (result);
@@ -251,6 +252,7 @@ public class VisualSearchPane extends JPanel {
       _feedback.setValue (100);
       _stopAction.setEnabled (false);
       _trainAction.setEnabled (true);
+      _model.unfreeze ();
     }
   }
 
