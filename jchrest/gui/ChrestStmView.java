@@ -23,13 +23,13 @@ public class ChrestStmView extends JPanel {
     visualPanel.setBorder (new TitledBorder ("Visual STM"));
     _visualStmView = new DefaultListModel ();
     _visualStmList = new JList (_visualStmView);
-    _visualStmList.setCellRenderer (new StmCellRendererer (_model));
+    _visualStmList.setCellRenderer (new ListNodeRenderer (_model));
     _visualStmList.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent evt) {
         JList list = (JList)evt.getSource();
         if (evt.getClickCount() == 2) { 
           int index = list.locationToIndex(evt.getPoint());
-          new NodeView ((Node)_visualStmView.getElementAt (index));
+          new NodeView (_model, (Node)_visualStmView.getElementAt (index));
         }
       }
     });
@@ -40,13 +40,13 @@ public class ChrestStmView extends JPanel {
     verbalPanel.setBorder (new TitledBorder ("Verbal STM"));
     _verbalStmView = new DefaultListModel ();
     _verbalStmList = new JList (_verbalStmView);
-    _verbalStmList.setCellRenderer (new StmCellRendererer (_model));
+    _verbalStmList.setCellRenderer (new ListNodeRenderer (_model));
     _verbalStmList.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent evt) {
         JList list = (JList)evt.getSource();
         if (evt.getClickCount() == 2) { 
           int index = list.locationToIndex(evt.getPoint());
-          new NodeView ((Node)_verbalStmView.getElementAt (index));
+          new NodeView (_model, (Node)_verbalStmView.getElementAt (index));
         }
       }
     });
@@ -72,25 +72,5 @@ public class ChrestStmView extends JPanel {
     }
     _verbalStmList.setModel (_verbalStmView);
   }
-
-  class StmCellRendererer extends JLabel implements ListCellRenderer {
-    private Chrest _model;
-    StmCellRendererer (Chrest model) {
-      _model = model;
-    }
-
-    public Component getListCellRendererComponent (
-        JList list,
-        Object value,
-        int index,
-        boolean isSelected,
-        boolean cellHasFocus) {
-      JLabel cell = new JLabel ("");
-      cell.setBorder (new CompoundBorder (new EmptyBorder (3, 3, 3, 3), new EtchedBorder ()));
-      cell.setIcon (new NodeIcon ((Node)value, list));
-
-      return cell;
-
-        }
-  }
 }
+

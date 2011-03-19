@@ -129,7 +129,7 @@ public class Node extends Observable {
     }
   }
 
-  List<Node> getSimilarNodes () {
+  public List<Node> getSimilarNodes () {
     return _similarNodes;
   }
 
