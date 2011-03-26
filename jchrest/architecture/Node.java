@@ -193,7 +193,10 @@ public class Node extends Observable {
     return information;
   }
 
-  public void getContentCounts (Map<Integer, Integer> size) {
+  /**
+   * Add to a map of content sizes to node counts for this node and its children.
+   */
+  protected void getContentCounts (Map<Integer, Integer> size) {
     int csize = _contents.size ();
     if (size.containsKey (csize)) {
       size.put (csize, size.get(csize) + 1);
@@ -206,7 +209,10 @@ public class Node extends Observable {
     }
   }
 
-  public void getImageCounts (Map<Integer, Integer> size) {
+  /**
+   * Add to a map of image sizes to node counts for this node and its children.
+   */
+  protected void getImageCounts (Map<Integer, Integer> size) {
     int csize = _image.size ();
     if (size.containsKey (csize)) {
       size.put (csize, size.get(csize) + 1);
@@ -219,7 +225,10 @@ public class Node extends Observable {
     }
   }
 
-  public void getSimilarityCounts (Map<Integer, Integer> size) {
+  /**
+   * Add to a map from number of similarity nodes to frequency, for this node and its children.
+   */
+  protected void getSimilarityCounts (Map<Integer, Integer> size) {
     int csize = _similarNodes.size ();
     if (csize > 0) { // do not count nodes with no similarity links
       if (size.containsKey (csize)) {
@@ -342,13 +351,13 @@ public class Node extends Observable {
 
       // display
       for (String itemKey : countItems.keySet ()) {
-        if (countItems.get(itemKey) >= Chrest.MIN_OCCURRENCES) {
+        if (countItems.get(itemKey) >= _model.getMinTemplateOccurrences ()) {
           System.out.println ("  Piece slot: " + itemKey + 
               "  appeared " + countItems.get(itemKey) + " times");
         }
       }
       for (Integer posnKey : countPositions.keySet ()) {
-        if (countPositions.get(posnKey) >= Chrest.MIN_OCCURRENCES) {
+        if (countPositions.get(posnKey) >= _model.getMinTemplateOccurrences ()) {
           System.out.println ("  Square slot: " + 
               " (" + posnKey / 1000 + ", " + (posnKey - 1000*(posnKey/1000)) + ") " +
               "  appeared " + countPositions.get(posnKey) + " times");
@@ -503,13 +512,13 @@ public class Node extends Observable {
       // make slots
       // 1. from items which repeat more than minimumNumberOccurrences
       for (String itemKey : countItems.keySet ()) {
-        if (countItems.get(itemKey) >= Chrest.MIN_OCCURRENCES) {
+        if (countItems.get(itemKey) >= _model.getMinTemplateOccurrences ()) {
           _itemSlots.add (new ItemSquarePattern (itemKey, -1, -1));
         }
       }
       // 2. from locations which repeat more than minimumNumberOccurrences
       for (Integer posnKey : countPositions.keySet ()) {
-        if (countPositions.get(posnKey) >= Chrest.MIN_OCCURRENCES) {
+        if (countPositions.get(posnKey) >= _model.getMinTemplateOccurrences ()) {
           _positionSlots.add (new ItemSquarePattern ("slot", posnKey / 1000, posnKey - (1000 * (posnKey/1000))));
         }
       }
@@ -523,7 +532,7 @@ public class Node extends Observable {
   }
 
   /** Return true if template conditions are met:
-   * 1. contents size > Chrest.MIN_LEVEL
+   * 1. contents size > _model.getMinTemplateLevel ()
    * then one of:
    * 2. gather together current node image and images of all nodes linked by the test links
    *    remove the contents of current node from those images
@@ -531,7 +540,7 @@ public class Node extends Observable {
    */
   public boolean canFormTemplate () {
     // return false if node is too shallow in network
-    if (_contents.size () <= Chrest.MIN_LEVEL) return false;
+    if (_contents.size () <= _model.getMinTemplateLevel ()) return false;
     // gather images of current node and test links together, removing the contents from them
     List<ListPattern> patterns = new ArrayList<ListPattern> ();
     patterns.add (_image.remove (_contents));
@@ -564,13 +573,13 @@ public class Node extends Observable {
       // make slots
       // 1. from items which repeat more than minimumNumberOccurrences
       for (String itemKey : countItems.keySet ()) {
-        if (countItems.get(itemKey) >= Chrest.MIN_OCCURRENCES) {
+        if (countItems.get(itemKey) >= _model.getMinTemplateOccurrences ()) {
           return true;
         }
       }
       // 2. from locations which repeat more than minimumNumberOccurrences
       for (Integer posnKey : countPositions.keySet ()) {
-        if (countPositions.get(posnKey) >= Chrest.MIN_OCCURRENCES) {
+        if (countPositions.get(posnKey) >= _model.getMinTemplateOccurrences ()) {
           return true;
         }
       }

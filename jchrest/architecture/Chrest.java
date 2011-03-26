@@ -32,8 +32,8 @@ public class Chrest extends Observable {
   private int _similarityThreshold;
   // template construction parameters
   private boolean _createTemplates;
-  public static int MIN_LEVEL = 3;
-  public static int MIN_OCCURRENCES = 2;
+  private int _minTemplateLevel = 3;
+  private int _minTemplateOccurrences = 2;
   // long-term-memory holds information within the model permanently
   private int _totalNodes;
   private Node _visualLtm;
@@ -187,11 +187,25 @@ public class Chrest extends Observable {
   }
 
   /**
+   * Accessor to value of minimum template level.
+   */
+  protected int getMinTemplateLevel () {
+    return _minTemplateLevel;
+  }
+
+  /**
+   * Accessor to minimum require occurrences for forming template.
+   */
+  protected int getMinTemplateOccurrences () {
+    return _minTemplateOccurrences;
+  }
+
+  /**
    * Modify values for template construction.
    */
   public void setTemplateConstructionParameters (int minLevel, int minOccurrences) {
-    MIN_LEVEL = minLevel;
-    MIN_OCCURRENCES = minOccurrences;
+    _minTemplateLevel = minLevel;
+    _minTemplateOccurrences = minOccurrences;
   }
 
   /**
@@ -328,8 +342,10 @@ public class Chrest extends Observable {
   }
 
   /**
-   * Construct templates.  Note, the template construction process only 
-   * currently works for visual patterns using the ItemSquarePattern primitive.
+   * Instruct model to construct templates, if the 'constructTemplates' flag is true.  
+   * This method should be called at the end of the learning process.
+   * Note, the template construction process only currently works for visual patterns 
+   * using the ItemSquarePattern primitive.
    */
   public void constructTemplates () {
     if (_createTemplates) {
@@ -368,16 +384,30 @@ public class Chrest extends Observable {
     }
   }
 
+  // use to freeze/unfreeze updates to the model to prevent GUI
+  // seizing up during training
   private boolean _frozen = false;
+  
+  /**
+   * Instruct model not to update observers.
+   */
   public void freeze () {
     _frozen = true;
   }
+
+  /**
+   * Instruct model to now update observers for future changes.
+   * Also triggers an immediate update of current observers.
+   */
   public void unfreeze () {
     _frozen = false;
     setChanged ();
     notifyObservers ();
   }
 
+  /**
+   * Return a map from content sizes to frequencies for the model's LTM.
+   */ 
   public Map<Integer, Integer> getContentCounts () {
     Map<Integer, Integer> size = new HashMap<Integer, Integer> ();
 
@@ -388,6 +418,9 @@ public class Chrest extends Observable {
     return size;
   }
 
+  /**
+   * Return a map from image sizes to frequencies for the model's LTM.
+   */ 
   public Map<Integer, Integer> getImageCounts () {
     Map<Integer, Integer> size = new HashMap<Integer, Integer> ();
 
@@ -398,6 +431,9 @@ public class Chrest extends Observable {
     return size;
   }
 
+  /**
+   * Return a map from number of similarity nodes to frequencies for the model's LTM.
+   */ 
   public Map<Integer, Integer> getSimilarityCounts () {
     Map<Integer, Integer> size = new HashMap<Integer, Integer> ();
 
@@ -428,6 +464,10 @@ public class Chrest extends Observable {
     // are filled whilst in STM, and forgotten when it leaves.
     node.clearFilledSlots (); 
     stm.add (node);
+
+    // inform observers of a change in model's state
+    setChanged ();
+    if (!_frozen) notifyObservers ();
   }
 
   /**
@@ -452,15 +492,14 @@ public class Chrest extends Observable {
 
     while (nextLink < children.size ()) {
       Link link = children.get (nextLink);
-      if (link.passes (sortedPattern)) {
-        // update the current node and list of children
+      if (link.passes (sortedPattern)) { // descend a test link in network
+        // reset the current node, list of children and link index
         currentNode = link.getChildNode ();
         children = link.getChildNode ().getChildren ();
+        nextLink = 0;
         // remove the matched test from the sorted pattern
         sortedPattern = sortedPattern.remove (link.getTest ());
-        nextLink = 0;
-      } else { 
-        // move on to the next link
+      } else { // move on to the next link on same level
         nextLink += 1;
       }
     }
@@ -474,14 +513,10 @@ public class Chrest extends Observable {
 //      }
 //    }
 
-    // add to STM
+    // add retrieved node to STM
     addToStm (currentNode);
 
-    // inform observers of a change in model's state
-    setChanged ();
-    if (!_frozen) notifyObservers ();
-
-    // return it
+    // return retrieved node
     return currentNode;
   }
 
@@ -498,14 +533,14 @@ public class Chrest extends Observable {
       if (Math.random () < _rho) { // depending on _rho, may refuse to learn some random times
         _clock = time; // bring clock up to date
         if (!currentNode.getImage().equals (pattern)) { // only try any learning if image differs from pattern
-          if (currentNode == getLtmByModality (pattern) || !currentNode.getImage().matches (pattern) || currentNode.getImage().isFinished ()) {
-            currentNode = currentNode.discriminate (this, pattern);
-          } else if (!currentNode.getImage().equals (pattern)) {
+          if (currentNode == getLtmByModality (pattern) || // if is rootnode
+              !currentNode.getImage().matches (pattern) || // or mismatch on image
+              currentNode.getImage().isFinished ()) {      // or image finished
+            currentNode = currentNode.discriminate (this, pattern); // then discriminate
+          } else  { // else familiarise
             currentNode = currentNode.familiarise (this, pattern);
           }
-          addToStm (currentNode);
-          setChanged ();
-          if (!_frozen) notifyObservers ();
+          addToStm (currentNode); // add to stm, as node may have changed during learning
         }
       }
     }

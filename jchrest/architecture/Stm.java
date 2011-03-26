@@ -40,17 +40,21 @@ public class Stm {
    * it to the end of the list, if lost.
    */
   public void add (Node node) {
+    // find the most informative node
     Node hypothesis = node;
     for (Node check : _items) {
       if (check.information () > hypothesis.information ()) {
         hypothesis = check;
       }
     }
+    // put this node at the front of STM, and remove any duplicate
     _items.remove (node);
     _items.add (0, node);
+    // truncate STM to be of at most _size elements
     while (_items.size () > _size) {
       _items.remove (_items.size () - 1);
     }
+    // if most informative node not in STM, then add it back in to bottom
     if (!_items.contains (hypothesis)) {
       _items.remove (_items.size () - 1);
       _items.add (_items.size (), hypothesis);
@@ -67,6 +71,9 @@ public class Stm {
     _items.add (0, node);
   }
 
+  /**
+   * Remove all items from STM.
+   */
   public void clear () {
     _items.clear ();
   }
