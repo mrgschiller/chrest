@@ -40,6 +40,22 @@ public class ChessDomain implements DomainSpecifics {
   }
 
   /**
+   * Construct a chess board given a string definition.
+   */
+  public static Scene constructBoard (String definition) {
+    Scene board = new Scene ("chess-board", 8, 8);
+
+    for (int row = 0; row < 8; ++row) {
+      for (int col = 0; col < 8; ++col) {
+        String piece = definition.substring (col + 9*row, 1 + col + 9*row);
+        board.setItem (row, col, piece);
+      }
+    }
+
+    return board;
+  }
+
+  /**
    * A 'big piece' is anything other than a pawn.  
    * Used to indicate a salient piece for a novice chess player.
    */
@@ -58,10 +74,6 @@ public class ChessDomain implements DomainSpecifics {
     if (Character.isLowerCase (piece) && ios.getRow () <= 4) return true; // black piece on white side
     if (Character.isUpperCase (piece) && ios.getRow () >= 5) return true; // white piece on black side
     return false;
-  }
-
-  public static ListPattern getSalientPieces (ListPattern pattern, int isExperienced) {
-    return getSalientPieces (pattern, isExperienced == 1);
   }
 
   /**
