@@ -29,7 +29,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.ui.RectangleInsets;
 
 /**
- * This panel provides an interface for training and recall of 
+ * This panel provides an interface for building and testing  
  * models on visual search problems.
  *
  * @author Peter C. R. Lane

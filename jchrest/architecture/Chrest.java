@@ -1227,7 +1227,6 @@ public class Chrest extends Observable {
     public void moveEyeAndLearn () {
       if (ltmHeuristic ()) return;
       moveEyeUsingHeuristics ();
-//      System.out.println(_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
       recogniseAndLearn (_domainSpecifics.normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
       // NB: template construction is only assumed to occur after training, so 
       // template completion code is not included here

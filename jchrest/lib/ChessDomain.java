@@ -22,7 +22,7 @@ public class ChessDomain implements DomainSpecifics {
     pieceOrder.put("B", 4);
     pieceOrder.put("b", 5);
     pieceOrder.put("N", 6);
-    pieceOrder.put("b", 7);
+    pieceOrder.put("n", 7);
     pieceOrder.put("Q", 8);
     pieceOrder.put("q", 9);
     pieceOrder.put("R", 10);

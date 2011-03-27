@@ -42,8 +42,15 @@ public class TestChessDomain {
     })) {
       lp2.add (pat);
     }
+    assertEquals (3, lp2.size ());
+    assertEquals ("k", ((ItemSquarePattern)lp2.getItem(0)).getItem ());
+    assertEquals ("P", ((ItemSquarePattern)lp2.getItem(1)).getItem ());
+    assertEquals ("q", ((ItemSquarePattern)lp2.getItem(2)).getItem ());
     ListPattern sorted = (new ChessDomain()).normalise (lp2);
     assertEquals (3, sorted.size ());
+    assertEquals ("P", ((ItemSquarePattern)sorted.getItem(0)).getItem ());
+    assertEquals ("k", ((ItemSquarePattern)sorted.getItem(1)).getItem ());
+    assertEquals ("q", ((ItemSquarePattern)sorted.getItem(2)).getItem ());
   }
 
   @Test public void testChessBoard () {
