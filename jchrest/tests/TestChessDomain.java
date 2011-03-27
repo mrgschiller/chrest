@@ -33,6 +33,17 @@ public class TestChessDomain {
     }
     assertEquals (2, ChessDomain.getSalientPieces(lp, true).size ());
     assertEquals (4, ChessDomain.getSalientPieces(lp, false).size ());
+
+    ListPattern lp2 = new ListPattern ();
+    for (ItemSquarePattern pat : (new ItemSquarePattern[] {
+      new ItemSquarePattern("k", 2, 3),
+      new ItemSquarePattern ("P", 4, 2),
+      new ItemSquarePattern ("q", 2, 3)
+    })) {
+      lp2.add (pat);
+    }
+    ListPattern sorted = (new ChessDomain()).normalise (lp2);
+    assertEquals (3, sorted.size ());
   }
 
   @Test public void testChessBoard () {

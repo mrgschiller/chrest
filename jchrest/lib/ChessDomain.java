@@ -2,12 +2,39 @@ package jchrest.lib;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
   * The ChessDomain is used for chess modelling.
   */
 public class ChessDomain implements DomainSpecifics {
+
+  // map stores the canonical order of the chess pieces
+  private static Map<String, Integer> pieceOrder;
+  static {
+    pieceOrder = new HashMap<String, Integer> ();
+    pieceOrder.put("P", 0);
+    pieceOrder.put("p", 1);
+    pieceOrder.put("K", 2);
+    pieceOrder.put("k", 3);
+    pieceOrder.put("B", 4);
+    pieceOrder.put("b", 5);
+    pieceOrder.put("N", 6);
+    pieceOrder.put("b", 7);
+    pieceOrder.put("Q", 8);
+    pieceOrder.put("q", 9);
+    pieceOrder.put("R", 10);
+    pieceOrder.put("r", 11);
+  }
+
+  /**
+   * Sort given list pattern into a canonical order of chess pieces, as 
+   * defined in deGroot and Gobet (1996).
+   * The order is:  P p K k B b N n Q q R r 
+   * If the pieces are the same, then order is based on column, and then on row.
+   */
   public ListPattern normalise (ListPattern pattern) {
     return pattern.sort (new Comparator<PrimitivePattern> () {
       public int compare (PrimitivePattern left, PrimitivePattern right) {
@@ -16,18 +43,9 @@ public class ChessDomain implements DomainSpecifics {
         ItemSquarePattern leftIos = (ItemSquarePattern)left;
         ItemSquarePattern rightIos = (ItemSquarePattern)right;
 
-        // P p K k B b N n Q q R r - the canonical ordering of chess pieces, from deGroot and Gobet (1996)
-        List<String> pieces = new ArrayList<String> ();
-        pieces.add ("P"); pieces.add ("p");
-        pieces.add ("K"); pieces.add ("k");
-        pieces.add ("B"); pieces.add ("b");
-        pieces.add ("N"); pieces.add ("n");
-        pieces.add ("Q"); pieces.add ("q");
-        pieces.add ("R"); pieces.add ("r");
-
         // check item
-        if (pieces.indexOf (leftIos.getItem()) < pieces.indexOf (rightIos.getItem ())) return -1;
-        if (pieces.indexOf (leftIos.getItem()) > pieces.indexOf (rightIos.getItem ())) return 1;
+        if (pieceOrder.get (leftIos.getItem()) < pieceOrder.get (rightIos.getItem ())) return -1;
+        if (pieceOrder.get (leftIos.getItem()) > pieceOrder.get (rightIos.getItem ())) return 1;
         // check column
         if (leftIos.getColumn () < rightIos.getColumn ()) return -1;
         if (leftIos.getColumn () > rightIos.getColumn ()) return 1;
@@ -260,141 +278,14 @@ public class ChessDomain implements DomainSpecifics {
   private List<Square> findQueenMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
 
-    // moves upwards
-    int tryRow = square.getRow () - 1;
-    boolean metPiece = false;
-    while (!metPiece && tryRow >= 0) {
-      Square destination = new Square (tryRow, square.getColumn ());
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow -= 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves downwards
-    tryRow = square.getRow () + 1;
-    metPiece = false;
-    while (!metPiece && tryRow <= 7) {
-      Square destination = new Square (tryRow, square.getColumn ());
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow += 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves left
-    int tryCol = square.getColumn () - 1;
-    metPiece = false;
-    while (!metPiece && tryCol >= 0) {
-      Square destination = new Square (square.getRow (), tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryCol -= 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves right
-    tryCol = square.getColumn () + 1;
-    metPiece = false;
-    while (!metPiece && tryCol <= 7) {
-      Square destination = new Square (square.getRow (), tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryCol += 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        } 
-      }
-    }
-
-    // moves up and left
-    tryRow = square.getRow () - 1;
-    tryCol = square.getColumn () - 1;
-    metPiece = false;
-    while (!metPiece && tryRow >= 0 && tryCol >= 0) {
-      Square destination = new Square (tryRow, tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow -= 1;
-        tryCol -= 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves down and left
-    tryRow = square.getRow () + 1;
-    tryCol = square.getColumn () - 1;
-    metPiece = false;
-    while (!metPiece && tryRow <= 7 && tryCol >= 0) {
-      Square destination = new Square (tryRow, tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow += 1;
-        tryCol -= 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves up and right
-    tryRow = square.getRow () - 1;
-    tryCol = square.getColumn () + 1;
-    metPiece = false;
-    while (!metPiece && tryRow >= 0 && tryCol <= 7) {
-      Square destination = new Square (tryRow, tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow -= 1;
-        tryCol += 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves down and right
-    tryRow = square.getRow () + 1;
-    tryCol = square.getColumn () + 1;
-    metPiece = false;
-    while (!metPiece && tryRow <= 7 && tryCol <= 7) {
-      Square destination = new Square (tryRow, tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow += 1;
-        tryCol += 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        } 
-      }
-    }
+    lineMove (board, moves, square, -1, 0); // moves upwards
+    lineMove (board, moves, square, 1, 0); // moves down
+    lineMove (board, moves, square, 0, -1); // moves left
+    lineMove (board, moves, square, 0, +1); // moves right
+    lineMove (board, moves, square, -1, -1); // moves up and left
+    lineMove (board, moves, square, +1, -1); // moves down and left
+    lineMove (board, moves, square, -1, +1); // moves up and right
+    lineMove (board, moves, square, +1, +1); // moves down and right
 
     return moves;
   }
@@ -404,69 +295,10 @@ public class ChessDomain implements DomainSpecifics {
   private List<Square> findRookMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
 
-    // moves upwards
-    int tryRow = square.getRow () - 1;
-    boolean metPiece = false;
-    while (!metPiece && tryRow >= 0) {
-      Square destination = new Square (tryRow, square.getColumn ());
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow -= 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves downwards
-    tryRow = square.getRow () + 1;
-    metPiece = false;
-    while (!metPiece && tryRow <= 7) {
-      Square destination = new Square (tryRow, square.getColumn ());
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow += 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves left
-    int tryCol = square.getColumn () - 1;
-    metPiece = false;
-    while (!metPiece && tryCol >= 0) {
-      Square destination = new Square (square.getRow (), tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryCol -= 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves right
-    tryCol = square.getColumn () + 1;
-    metPiece = false;
-    while (!metPiece && tryCol <= 7) {
-      Square destination = new Square (square.getRow (), tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryCol += 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        } 
-      }
-    }
+    lineMove (board, moves, square, -1, 0); // moves upwards
+    lineMove (board, moves, square, 1, 0); // moves down
+    lineMove (board, moves, square, 0, -1); // moves left
+    lineMove (board, moves, square, 0, +1); // moves right
 
     return moves;
   }
@@ -476,70 +308,26 @@ public class ChessDomain implements DomainSpecifics {
   private List<Square> findBishopMoves (Scene board, Square square) {
     List<Square> moves = new ArrayList<Square> ();
     
-    // moves up and left
-    int tryRow = square.getRow () - 1;
-    int tryCol = square.getColumn () - 1;
+    lineMove (board, moves, square, -1, -1); // moves up and left
+    lineMove (board, moves, square, +1, -1); // moves down and left
+    lineMove (board, moves, square, -1, +1); // moves up and right
+    lineMove (board, moves, square, +1, +1); // moves down and right
+
+    return moves;
+  }
+
+  // move piece in direction given by deltas, until reach edge of board or a piece.
+  // in case where piece reached is of different colour, include that piece's square.
+  private void lineMove (Scene board, List<Square> moves, Square square, int rowDelta, int colDelta) {
+    int tryRow = square.getRow () + rowDelta;
+    int tryCol = square.getColumn () + colDelta;
     boolean metPiece = false;
-    while (!metPiece && tryRow >= 0 && tryCol >= 0) {
+    while (!metPiece && tryRow >=0 && tryRow <= 7 && tryCol >= 0 && tryCol <= 7) {
       Square destination = new Square (tryRow, tryCol);
       if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
         moves.add (destination);
-        tryRow -= 1;
-        tryCol -= 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves down and left
-    tryRow = square.getRow () + 1;
-    tryCol = square.getColumn () - 1;
-    metPiece = false;
-    while (!metPiece && tryRow <= 7 && tryCol >= 0) {
-      Square destination = new Square (tryRow, tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow += 1;
-        tryCol -= 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves up and right
-    tryRow = square.getRow () - 1;
-    tryCol = square.getColumn () + 1;
-    metPiece = false;
-    while (!metPiece && tryRow >= 0 && tryCol <= 7) {
-      Square destination = new Square (tryRow, tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow -= 1;
-        tryCol += 1;
-      } else {
-        metPiece = true;
-        if (differentColour (board, square, destination)) {
-          moves.add (destination);
-        }
-      }
-    }
-
-    // moves down and right
-    tryRow = square.getRow () + 1;
-    tryCol = square.getColumn () + 1;
-    metPiece = false;
-    while (!metPiece && tryRow <= 7 && tryCol <= 7) {
-      Square destination = new Square (tryRow, tryCol);
-      if (board.isEmpty (destination.getRow (), destination.getColumn ())) {
-        moves.add (destination);
-        tryRow += 1;
-        tryCol += 1;
+        tryRow += rowDelta;
+        tryCol += colDelta;
       } else {
         metPiece = true;
         if (differentColour (board, square, destination)) {
@@ -547,8 +335,6 @@ public class ChessDomain implements DomainSpecifics {
         } 
       }
     }
-
-    return moves;
   }
 
   /**
