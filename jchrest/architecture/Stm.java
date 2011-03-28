@@ -3,32 +3,56 @@ package jchrest.architecture;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class manages the short-term memory for one modality of a Chrest model.
+ * Each short-term memory has a maximum capacity, and stores a list of nodes.
+ */
 public class Stm {
   private int _size;
   private List<Node> _items;
 
+  /**
+   * Constructor requires the maximum capacity to be set.
+   */
   public Stm (int size) {
     _size = size;
     _items = new ArrayList<Node> ();
   }
 
+  /**
+   * Accessor for the list of nodes stored within the short-term memory.
+   */
   public List<Node> getContents () {
     return _items;
   }
 
+  /**
+   * Accessor for the maximum capacity.
+   */
   public int getSize () {
     return _size;
   }
 
+  /**
+   * Alter the maximum capacity.  When the size is changed, all items in the 
+   * short-term memory are cleared.
+   */
   public void setSize (int size) {
     _size = size;
     _items.clear ();
   }
 
+  /**
+   * Return a count of how many items are actually in the short-term memory.
+   */
   public int getCount () {
     return _items.size ();
   }
 
+  /**
+   * Retrieve a node within the short-term memory by its index position.
+   * There is no error checking on the retrieval.
+   */
   public Node getItem (int index) {
     return _items.get (index);
   }

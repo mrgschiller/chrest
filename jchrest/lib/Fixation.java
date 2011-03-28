@@ -20,7 +20,8 @@ public class Fixation {
       "No heuristic", 
       "LTM heuristic", 
       "Random item heuristic", 
-      "Random place heuristic"
+      "Random place heuristic",
+      "Proposed movement heuristic"
     };
 
   public String getHeuristicDescription () {

@@ -1213,7 +1213,17 @@ public class Chrest extends Observable {
      * Also, global strategies for moving to a 'new' part of the scene.
      */
     private void moveEyeUsingHeuristics () {
-      if (!randomItemHeuristic()) randomPlaceHeuristic ();
+      List<Square> pieceMoves = _domainSpecifics.proposeMovementFixations (_currentScene, 
+          new Square (_fixationY, _fixationX));
+      if (pieceMoves.size () > 0) { // && Math.random () < 0.5) { // TODO: Think about adding random miss of heuristic
+        int move = (new java.util.Random ()).nextInt (pieceMoves.size ());
+        _fixationX = pieceMoves.get(move).getColumn ();
+        _fixationY = pieceMoves.get(move).getRow ();
+        _lastHeuristic = 4;
+      } else if (!randomItemHeuristic()) {
+        randomPlaceHeuristic ();
+      }
+
       _fixationsX.add (_fixationX);
       _fixationsY.add (_fixationY);
       _fixationsType.add (_lastHeuristic);
@@ -1261,8 +1271,10 @@ public class Chrest extends Observable {
         return "LTM heuristic";
       else if (_lastHeuristic == 2)
         return "Random item heuristic";
-      else // if (_lastHeuristic == 3)
+      else if (_lastHeuristic == 3)
         return "Random place heuristic";
+      else // if (_lastHeuristic == 4)
+        return "Follow proposed move heuristic";
     }
 
     public int getNumberFixations () {

@@ -15,7 +15,7 @@ import jchrest.lib.Pattern;
 import jchrest.lib.PrimitivePattern;
 
 /**
- * Represents a node within the model's discrimination network.
+ * Represents a node within the model's long-term memory discrimination network.
  * Methods support learning and also display.
  *
  * @author Peter C. R. Lane
@@ -70,6 +70,11 @@ public class Node extends Observable {
     _namedBy = null;
   }
 
+  /**
+   * When the model is reset, all observers of individual nodes must be closed.
+   * This method notifies observers to close themselves, and then 
+   * requests child nodes to do the same.
+   */
   void clear () {
     setChanged ();
     notifyObservers ("close");
@@ -99,6 +104,9 @@ public class Node extends Observable {
     return _image;
   }
 
+  /**
+   * Change the node's image.  Also notifies any observers.
+   */
   public void setImage (ListPattern image) {
     _image = image;
     setChanged ();
@@ -112,6 +120,9 @@ public class Node extends Observable {
     return _children;
   }
 
+  /**
+   * Add a new test link with given test pattern and child node.
+   */
   void addTestLink (ListPattern test, Node child) {
     _children.add (0, new Link (test, child));
     setChanged ();
@@ -129,6 +140,9 @@ public class Node extends Observable {
     }
   }
 
+  /**
+   * Accessor to list of similar nodes.
+   */
   public List<Node> getSimilarNodes () {
     return _similarNodes;
   }
