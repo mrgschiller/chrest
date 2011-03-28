@@ -36,8 +36,11 @@ public class Fixation {
     return _y;
   }
 
+  /**
+   * Note: added 1 to x,y coordinates to match up with the display of visual scenes.
+   */
   public String toString () {
-    return "(" + _x + ", " + _y + ") " + getHeuristicDescription ();
+    return "(" + (_x+1) + ", " + (_y+1) + ") " + getHeuristicDescription ();
   }
 
 }
