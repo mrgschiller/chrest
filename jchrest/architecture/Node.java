@@ -344,8 +344,7 @@ public class Node extends Observable {
       Map<String,Integer> countItems = new HashMap<String,Integer> ();
       Map<Integer,Integer> countPositions = new HashMap<Integer,Integer> ();
       for (ListPattern pattern : patterns) {
-        for (int i = 0, n = pattern.size (); i < n; ++i) {
-          PrimitivePattern pattern_item = pattern.getItem (i);
+        for (PrimitivePattern pattern_item : pattern) {
           if (pattern_item instanceof ItemSquarePattern) {
             ItemSquarePattern item = (ItemSquarePattern)pattern_item;
             if (countItems.containsKey (item.getItem ())) {
@@ -503,8 +502,7 @@ public class Node extends Observable {
       Map<String,Integer> countItems = new HashMap<String,Integer> ();
       Map<Integer,Integer> countPositions = new HashMap<Integer,Integer> ();
       for (ListPattern pattern : patterns) {
-        for (int i = 0, n = pattern.size (); i < n; ++i) {
-          PrimitivePattern pattern_item = pattern.getItem (i);
+        for (PrimitivePattern pattern_item : pattern) {
           if (pattern_item instanceof ItemSquarePattern) {
             ItemSquarePattern item = (ItemSquarePattern)pattern_item;
             if (countItems.containsKey (item.getItem ())) {
@@ -565,8 +563,7 @@ public class Node extends Observable {
     Map<String,Integer> countItems = new HashMap<String,Integer> ();
     Map<Integer,Integer> countPositions = new HashMap<Integer,Integer> ();
     for (ListPattern pattern : patterns) {
-      for (int i = 0, n = pattern.size (); i < n; ++i) {
-        PrimitivePattern pattern_item = pattern.getItem (i);
+      for (PrimitivePattern pattern_item : pattern) {
         if (pattern_item instanceof ItemSquarePattern) {
           ItemSquarePattern item = (ItemSquarePattern)pattern_item;
           if (countItems.containsKey (item.getItem ())) {

@@ -102,9 +102,9 @@ public class ChessDomain implements DomainSpecifics {
    */
   public static ListPattern getSalientPieces (ListPattern pattern, Boolean isExperienced) {
     ListPattern result = new ListPattern (pattern.getModality ());
-    for (int i = 0, n = pattern.size (); i < n; ++i) {
-      if (pattern.getItem (i) instanceof ItemSquarePattern) {
-        ItemSquarePattern ios = (ItemSquarePattern)(pattern.getItem (i));
+    for (PrimitivePattern item : pattern) {
+      if (item instanceof ItemSquarePattern) {
+        ItemSquarePattern ios = (ItemSquarePattern)item;
         if (isExperienced && isOffensivePiece (ios)) {
           result.add (ios);
         } else if (!isExperienced && isBigPiece (ios)) {

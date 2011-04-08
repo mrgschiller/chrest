@@ -678,8 +678,7 @@ public class Chrest extends Observable {
       if (_createTemplates) { // check if templates needed
         recalledInformation = recalledInformation.append(node.getFilledSlots ());
       }
-      for (int i = 0; i < recalledInformation.size (); i++) {
-        PrimitivePattern item = recalledInformation.getItem (i);
+      for (PrimitivePattern item : recalledInformation) {
         if (item instanceof ItemSquarePattern) {
           ItemSquarePattern ios = (ItemSquarePattern)item;
           recalledScene.setItem (ios.getRow ()-1, ios.getColumn ()-1, ios.getItem ());

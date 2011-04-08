@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import jchrest.lib.FileUtilities;
@@ -20,7 +21,7 @@ import jchrest.lib.FileUtilities;
  *
  * @author Peter C. R. Lane
  */
-public class ListPattern extends Pattern {
+public class ListPattern extends Pattern implements Iterable<PrimitivePattern> {
   private List<PrimitivePattern> _list;  // items within the pattern
   private Modality _modality;   // record type of ListPattern
   private boolean _finished;    // marker to indicate if pattern complete
@@ -243,8 +244,8 @@ public class ListPattern extends Pattern {
       result.add (item);
     }
 
-    for (int i = 0, n = pattern.size (); i < n; ++i) {
-      result.add (pattern.getItem (i));
+    for (PrimitivePattern item : pattern) { 
+      result.add (item);
     }
 
     if (pattern.isFinished ()) {
@@ -402,6 +403,38 @@ public class ListPattern extends Pattern {
     if (finished) pattern.setFinished ();
 
     return pattern;
+  }
+
+  /** 
+   * Support iteration over the items of a list pattern.
+   */
+  public Iterator<PrimitivePattern> iterator () {
+    return new ListPatternIterator (_list);
+  }
+  
+  class ListPatternIterator implements Iterator<PrimitivePattern> {
+    private int _index = 0;
+    private List<PrimitivePattern> _items;
+
+    ListPatternIterator (List<PrimitivePattern> items) {
+      _items = items;
+    }
+
+    public boolean hasNext () {
+      return _index < _items.size ();
+    }
+
+    public PrimitivePattern next () {
+      if (hasNext ()) {
+        _index += 1;
+        return _items.get(_index-1);
+      }
+      throw new java.util.NoSuchElementException();
+    }
+
+    public void remove () {
+      throw new UnsupportedOperationException ();
+    }
   }
 }
 
