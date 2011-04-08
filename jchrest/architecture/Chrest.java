@@ -650,10 +650,19 @@ public class Chrest extends Observable {
 
   /** 
    * Scan given scene, then return a scene which would be recalled.
+   * Default behaviour is to clear STM before scanning a scene.
    */
-  public Scene scanScene (Scene scene, int numFixations) {
-    // scan given scene, without learning
-    _visualStm.clear ();
+  public Scene scanScene (Scene scene, int numFixations) {  
+    return scanScene (scene, numFixations, true);
+  }
+  
+  /** 
+   * Scan given scene, then return a scene which would be recalled.
+   */
+  public Scene scanScene (Scene scene, int numFixations, boolean clearStm) {
+    if (clearStm) { // only clear STM if flag is set
+      _visualStm.clear ();
+    }
     _perceiver.setScene (scene);
     _perceiver.start ();
     for (int i = 0; i < numFixations; i++) {
