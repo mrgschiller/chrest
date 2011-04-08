@@ -7,7 +7,8 @@ import jchrest.lib.ListPattern;
 
 /**
  * Represents a test link within the model's long-term memory.
- * The link has a test, which must be passed when sorting a pattern through to the child node.
+ * The link has a test, which must be passed when sorting a pattern 
+ * through to the child node.
  */
 public class Link {
   private ListPattern _test;
@@ -34,7 +35,7 @@ public class Link {
 
   /**
    * Test if the given pattern can be sorted through this test link.
-   * A test passes is the test matches the given pattern.
+   * A test passes if the test matches the given pattern.
    */
   public boolean passes (ListPattern pattern) {
     return _test.matches (pattern);

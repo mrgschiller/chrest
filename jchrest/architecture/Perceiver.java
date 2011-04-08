@@ -250,16 +250,7 @@ public class Perceiver {
   }
 
   public String getHeuristicDescription () {
-    if (_lastHeuristic == 0)
-      return "No heuristic";
-    else if (_lastHeuristic == 1)
-      return "LTM heuristic";
-    else if (_lastHeuristic == 2)
-      return "Random item heuristic";
-    else if (_lastHeuristic == 3)
-      return "Random place heuristic";
-    else // if (_lastHeuristic == 4)
-      return "Follow proposed move heuristic";
+    return Fixation.getHeuristicDescription (_lastHeuristic);
   }
 
   public int getNumberFixations () {

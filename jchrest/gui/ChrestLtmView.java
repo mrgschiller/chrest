@@ -313,8 +313,9 @@ class TreeViewPane extends JPanel {
 		repaint ();
 	}
 
-	public void paint(Graphics g) {
-		super.paint (g); // make sure the background of the JPanel is drawn
+  public void paint(Graphics g) {
+    ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    super.paint (g); // make sure the background of the JPanel is drawn
 		Graphics2D g2 = (Graphics2D)g;
 
 		g2.setBackground (Color.WHITE);

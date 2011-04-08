@@ -15,7 +15,7 @@ public class Fixation {
     return _type;
   }
 
-  private final String[] _descriptions = 
+  private final static String[] _descriptions = 
     new String[] {
       "No heuristic", 
       "LTM heuristic", 
@@ -23,6 +23,10 @@ public class Fixation {
       "Random place heuristic",
       "Proposed movement heuristic"
     };
+
+  public static String getHeuristicDescription (int type) {
+    return _descriptions[type];
+  }
 
   public String getHeuristicDescription () {
     return _descriptions[_type];

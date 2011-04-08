@@ -16,6 +16,7 @@ public class NodeIcon implements Icon {
   }
 
   public void paintIcon (Component c, Graphics g, int x, int y) {
+    ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     _node.draw ((Graphics2D)g, x, y, getIconWidth(), getIconHeight(), Size.getValues().get (1));
   }
 

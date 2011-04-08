@@ -734,6 +734,7 @@ class SceneDisplay extends JPanel {
     }
 
     public void paint (Graphics g) {
+      ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
       super.paint (g); // make sure the background of the JPanel is drawn
       Graphics2D g2 = (Graphics2D)g;
       int fov = 2; // TODO ???
@@ -756,7 +757,7 @@ class SceneDisplay extends JPanel {
       for (int i = 0; i < _scene.getWidth (); ++i) {
         g2.drawString ("" + (i+1), offsetX + scale * i + 5, offsetY + scale * (_scene.getHeight() + 1));
       }
-      
+
       // draw entries within grid
       for (int i = 0; i < _scene.getHeight (); ++i) {
         for (int j = 0; j < _scene.getWidth (); ++j) {
