@@ -673,7 +673,7 @@ public class Chrest extends Observable {
         scene.getHeight (), scene.getWidth ());
     // -- get items from image in STM, and optionally template slots
     // TODO: use frequency count in recall
-    for (Node node : _visualStm.getContents ()) {
+    for (Node node : _visualStm) {
       ListPattern recalledInformation = node.getImage();
       if (_createTemplates) { // check if templates needed
         recalledInformation = recalledInformation.append(node.getFilledSlots ());

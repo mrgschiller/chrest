@@ -492,7 +492,7 @@ public class VisualSearchPane extends JPanel {
         addLog ("   " + fixation.toString ());
       }
       addLog ("Chunks used: ");
-      for (Node node : _model.getVisualStm().getContents ()) {
+      for (Node node : _model.getVisualStm()) {
         addLog ("   " + "Node: " + node.getReference() + " " + node.getImage().toString ());
         if (_model.getCreateTemplates() && node.isTemplate ()) {
           addLog ("     Template:");

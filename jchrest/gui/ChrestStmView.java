@@ -61,13 +61,13 @@ public class ChrestStmView extends JPanel {
 
   public void update () {
     _visualStmView.clear ();
-    for (Node node : _model.getVisualStm ().getContents ()) {
+    for (Node node : _model.getVisualStm ()) {
       _visualStmView.addElement (node);
     }
     _visualStmList.setModel (_visualStmView);
 
     _verbalStmView.clear ();
-    for (Node node : _model.getVerbalStm ().getContents ()) {
+    for (Node node : _model.getVerbalStm ()) {
       _verbalStmView.addElement (node);
     }
     _verbalStmList.setModel (_verbalStmView);

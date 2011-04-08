@@ -1,13 +1,14 @@
 package jchrest.architecture;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Class manages the short-term memory for one modality of a Chrest model.
  * Each short-term memory has a maximum capacity, and stores a list of nodes.
  */
-public class Stm {
+public class Stm implements Iterable<Node> {
   private int _size;
   private List<Node> _items;
 
@@ -17,13 +18,6 @@ public class Stm {
   public Stm (int size) {
     _size = size;
     _items = new ArrayList<Node> ();
-  }
-
-  /**
-   * Accessor for the list of nodes stored within the short-term memory.
-   */
-  public List<Node> getContents () {
-    return _items;
   }
 
   /**
@@ -112,6 +106,38 @@ public class Stm {
         _items.get(1).getFollowedBy () != _items.get(0)) {
       _items.get(1).setFollowedBy (_items.get(0));
       model.advanceClock (model.getAddLinkTime ());
+    }
+  }
+
+  /** 
+   * Support iteration over the nodes in STM.
+   */
+  public Iterator<Node> iterator () {
+    return new StmIterator (_items);
+  }
+  
+  class StmIterator implements Iterator<Node> {
+    private int _index = 0;
+    private List<Node> _items;
+
+    StmIterator (List<Node> items) {
+      _items = items;
+    }
+
+    public boolean hasNext () {
+      return _index < _items.size ();
+    }
+
+    public Node next () {
+      if (hasNext ()) {
+        _index += 1;
+        return _items.get(_index-1);
+      }
+      throw new java.util.NoSuchElementException();
+    }
+
+    public void remove () {
+      throw new UnsupportedOperationException ();
     }
   }
 }

@@ -73,13 +73,21 @@ public class TestStm {
     _model.recogniseAndLearn (_patternB);
     _model.recogniseAndLearn (_patternC);
     // check that node occurs only once in the STM, and that at the fourth place down
-    assertEquals (3, _model.getVisualStm().getContents().indexOf (node));
-    assertEquals (3, _model.getVisualStm().getContents().lastIndexOf (node));
+    assertEquals (node, _model.getVisualStm().getItem (3));
+    int count = 0;
+    for (Node checkNode : _model.getVisualStm ()) {
+      if (node == checkNode) count ++;
+    }
+    assertEquals (1, count);
     // check that newly recognised node occurs only once in the STM, and 
     // that at the first place down
     _model.recognise (_patternA);
-    assertEquals (0, _model.getVisualStm().getContents().indexOf (node));
-    assertEquals (0, _model.getVisualStm().getContents().lastIndexOf (node));
+    assertEquals (node, _model.getVisualStm().getItem (0));
+    count = 0;
+    for (Node checkNode : _model.getVisualStm ()) {
+      if (node == checkNode) count ++;
+    }
+    assertEquals (1, count);
   }
 }
 
