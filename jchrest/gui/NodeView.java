@@ -10,14 +10,14 @@ import jchrest.architecture.Link;
 import jchrest.architecture.Node;
 
 public class NodeView extends JFrame implements java.util.Observer {
-  private Chrest _model;
-  private Node _node;
-  private JLabel _contentsLabel;
-  private JLabel _imageLabel;
-  private JLabel _followedBy;
-  private JLabel _namedBy;
-  private DefaultListModel _childLinksView, _similarityLinksView;
-  private JList _childLinks, _similarityLinks;
+  private final Chrest _model;
+  private final Node _node;
+  private final JLabel _contentsLabel;
+  private final JLabel _imageLabel;
+  private final JLabel _followedBy;
+  private final JLabel _namedBy;
+  private final DefaultListModel _childLinksView, _similarityLinksView;
+  private final JList _childLinks, _similarityLinks;
 
   public NodeView (Chrest model, Node node) {
     _model = model;
@@ -41,7 +41,7 @@ public class NodeView extends JFrame implements java.util.Observer {
     fields.add (new JLabel ("Image: ", SwingConstants.RIGHT));
     fields.add (_imageLabel);
     
-    JLabel _followedBy = new JLabel ("");
+    _followedBy = new JLabel ("");
     _followedBy.setBorder (new CompoundBorder (new EmptyBorder (3, 3, 3, 3), new EtchedBorder ()));
     if (_node.getFollowedBy () != null) {
       _followedBy.setIcon (new NodeIcon (_node.getFollowedBy (), _followedBy));
@@ -49,7 +49,7 @@ public class NodeView extends JFrame implements java.util.Observer {
     fields.add (new JLabel ("Followed by: ", SwingConstants.RIGHT));
     fields.add (_followedBy);
 
-    JLabel _namedBy = new JLabel ("");
+    _namedBy = new JLabel ("");
     _namedBy.setBorder (new CompoundBorder (new EmptyBorder (3, 3, 3, 3), new EtchedBorder ()));
     if (_node.getNamedBy () != null) {
       _namedBy.setIcon (new NodeIcon (_node.getNamedBy (), _namedBy));

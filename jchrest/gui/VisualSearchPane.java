@@ -35,9 +35,9 @@ import org.jfree.ui.RectangleInsets;
  * @author Peter C. R. Lane
  */
 public class VisualSearchPane extends JPanel {
-  private Chrest _model;
-  private Scenes _scenes;
-  private SceneDisplay _sceneDisplay;
+  private final Chrest _model;
+  private final Scenes _scenes;
+  private final SceneDisplay _sceneDisplay;
 
   public VisualSearchPane (Chrest model, Scenes scenes) {
     super ();

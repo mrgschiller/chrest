@@ -518,19 +518,19 @@ public class Node extends Observable {
       }
     }
 
-      // make slots
-      // 1. from items which repeat more than minimumNumberOccurrences
-      for (String itemKey : countItems.keySet ()) {
-        if (countItems.get(itemKey) >= _model.getMinTemplateOccurrences ()) {
-          return true;
-        }
+    // make slots
+    // 1. from items which repeat more than minimumNumberOccurrences
+    for (String itemKey : countItems.keySet ()) {
+      if (countItems.get(itemKey) >= _model.getMinTemplateOccurrences ()) {
+        return true;
       }
-      // 2. from locations which repeat more than minimumNumberOccurrences
-      for (Integer posnKey : countPositions.keySet ()) {
-        if (countPositions.get(posnKey) >= _model.getMinTemplateOccurrences ()) {
-          return true;
-        }
+    }
+    // 2. from locations which repeat more than minimumNumberOccurrences
+    for (Integer posnKey : countPositions.keySet ()) {
+      if (countPositions.get(posnKey) >= _model.getMinTemplateOccurrences ()) {
+        return true;
       }
+    }
     return false;
   }
 
@@ -539,13 +539,13 @@ public class Node extends Observable {
    * precisely the given pattern.  It is assumed the given pattern contains 
    * a single primitive item, and is finished.
    */
-  public Node learnPrimitive (Chrest model, ListPattern pattern) {
+  public Node learnPrimitive (ListPattern pattern) {
     assert (pattern.isFinished () && pattern.size () == 1);
     ListPattern contents = pattern.clone ();
     contents.setNotFinished ();
     Node child = new Node (_model, contents, pattern);
     addTestLink (contents, child);
-    model.advanceClock (model.getDiscriminationTime ());
+    _model.advanceClock (_model.getDiscriminationTime ());
 
     return child;
   }
@@ -555,10 +555,10 @@ public class Node extends Observable {
    * with a new empty child node.  It is assumed the given pattern is 
    * non-empty and constitutes a valid, new test for the current Node.
    */
-  private Node addTest (Chrest model, ListPattern pattern) {
+  private Node addTest (ListPattern pattern) {
     Node child = new Node (_model, _contents.append (pattern), new ListPattern (_contents.getModality ()));
     addTestLink (pattern, child);
-    model.advanceClock (model.getDiscriminationTime ());
+    _model.advanceClock (_model.getDiscriminationTime ());
     return child;
   }
 
@@ -566,9 +566,9 @@ public class Node extends Observable {
    * extendImage is used to add new information to the node's image.
    * It is assumed the given pattern is non-empty and is a valid extension.
    */
-  private Node extendImage (Chrest model, ListPattern newInformation) {
+  private Node extendImage (ListPattern newInformation) {
     setImage (_image.append (newInformation));
-    model.advanceClock (model.getFamiliarisationTime ());
+    _model.advanceClock (_model.getFamiliarisationTime ());
 
     return this;
   }
@@ -577,37 +577,37 @@ public class Node extends Observable {
    * Discrimination learning extends the LTM network by adding new 
    * nodes.
    */
-  Node discriminate (Chrest model, ListPattern pattern) {
+  Node discriminate (ListPattern pattern) {
     ListPattern newInformation = pattern.remove (_contents);
 
     // cases 1 & 2 if newInformation is empty
     if (newInformation.isEmpty ()) {
       if (newInformation.isFinished ()) { // 1. add test for < $ >
-        return addTest (model, newInformation);
+        return addTest (newInformation);
       } else { // 2. no information to make a new test with
         return this;
       }
     }
 
-    Node retrievedChunk = model.recognise (newInformation);
-    if (retrievedChunk == model.getLtmByModality (pattern)) {
+    Node retrievedChunk = _model.recognise (newInformation);
+    if (retrievedChunk == _model.getLtmByModality (pattern)) {
       // 3. if root node is retrieved, then the primitive must be learnt
-      return model.getLtmByModality(newInformation).learnPrimitive (model, newInformation.getFirstItem ());
+      return _model.getLtmByModality(newInformation).learnPrimitive (newInformation.getFirstItem ());
     } else if (retrievedChunk.getImage().isEmpty ()) {
       // 4. if the retrieved chunk has an empty image, then familiarisation must occur
       // to extend that image.
-      return retrievedChunk.familiarise (model, newInformation);
+      return retrievedChunk.familiarise (newInformation);
     } else if (retrievedChunk.getImage().matches (newInformation)) {
       // 5. retrieved chunk can be used as a test
       ListPattern testPattern = retrievedChunk.getImage().clone ();
       testPattern.setNotFinished (); // ensure test link is not finished
-      return addTest (model, testPattern);
+      return addTest (testPattern);
     } else { 
       // 6. mismatch, so use only the first item for test
       // NB: first-item must be in network as retrievedChunk was not the root node
       ListPattern firstItem = newInformation.getFirstItem ();
       firstItem.setNotFinished ();
-      return addTest (model, firstItem);
+      return addTest (firstItem);
     }
   }
 
@@ -615,41 +615,41 @@ public class Node extends Observable {
    * Familiarisation learning extends the image in a node by adding new 
    * information from the given pattern.
    */
-  Node familiarise (Chrest model, ListPattern pattern) {
+  Node familiarise (ListPattern pattern) {
     ListPattern newInformation = pattern.remove (_image);
 
     // cases 1 & 2 if newInformation is empty
     if (newInformation.isEmpty ()) {
       if (newInformation.isFinished ()) { // 1. add end marker
-        return extendImage (model, newInformation);
+        return extendImage (newInformation);
       } else {
         // 2. nothing to do
         return this;
       }
     }
 
-    Node retrievedChunk = model.recognise (newInformation);
-    if (retrievedChunk == model.getLtmByModality (pattern)) {
+    Node retrievedChunk = _model.recognise (newInformation);
+    if (retrievedChunk == _model.getLtmByModality (pattern)) {
       // 3. if root node is retrieved, first item of newInformation is an unknown primitive
-      return model.getLtmByModality(pattern).learnPrimitive (model, newInformation.getFirstItem ());
+      return _model.getLtmByModality(pattern).learnPrimitive (newInformation.getFirstItem ());
     } else if (retrievedChunk.getImage().isEmpty ()) {
       // 4. the retrieved chunk is empty, so use first item to extend image
       // note: first item is known primitive, because new-information sorted to this node
       ListPattern firstItem = newInformation.getFirstItem ();
       firstItem.setNotFinished ();
-      return extendImage (model, firstItem);
+      return extendImage (firstItem);
     } else if (retrievedChunk.getImage().matches (newInformation)) {
       // 5. retrieved chunk an be used to extend the image 
       //   -- make sure extension is not complete
       ListPattern toadd = retrievedChunk.getImage().clone ();
       toadd.setNotFinished ();
-      return extendImage (model, toadd);
+      return extendImage (toadd);
     } else { 
       // 6. mismatch, so only use first item to extend image
       // note: mismatch cannot be first item, because new-information sorted to this node
       ListPattern firstItem = retrievedChunk.getImage().getFirstItem ();
       firstItem.setNotFinished ();
-      return extendImage (model, firstItem);
+      return extendImage (firstItem);
     }
   }
 

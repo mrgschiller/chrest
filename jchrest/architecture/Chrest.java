@@ -433,10 +433,11 @@ public class Chrest extends Observable {
     Stm stm = getStmByModality (node.getImage ());
 
     if (stm.getCount () > 0) {
-      Node check = stm.getItem (0);
+      Node check = stm.getItem (0); // TODO: make this the hypothesis node
       if (check != node && 
           node.getImage().isSimilarTo (check.getImage (), _similarityThreshold)) {
         node.addSimilarNode (check); 
+        check.addSimilarNode (node); // two-way similarity link
       }
     }
 
@@ -517,9 +518,9 @@ public class Chrest extends Observable {
           if (currentNode == getLtmByModality (pattern) || // if is rootnode
               !currentNode.getImage().matches (pattern) || // or mismatch on image
               currentNode.getImage().isFinished ()) {      // or image finished
-            currentNode = currentNode.discriminate (this, pattern); // then discriminate
+            currentNode = currentNode.discriminate (pattern); // then discriminate
           } else  { // else familiarise
-            currentNode = currentNode.familiarise (this, pattern);
+            currentNode = currentNode.familiarise (pattern);
           }
           addToStm (currentNode); // add to stm, as node may have changed during learning
         }

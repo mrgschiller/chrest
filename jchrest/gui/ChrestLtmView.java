@@ -41,6 +41,7 @@ public class ChrestLtmView extends JPanel {
       _constructingTreeThread.execute ();
       add (new JScrollPane (_ltmView));
     }
+
     add (createToolBar (), BorderLayout.SOUTH);
   }
 
@@ -66,7 +67,7 @@ public class ChrestLtmView extends JPanel {
     if (_ltmView != null) {
       if (_model.getTotalLtmNodes () > 5000) {
         // TODO : change display if number of nodes is too large
-//        this.add (new JLabel ("Sorry - LTM too large to display"));
+        //        this.add (new JLabel ("Sorry - LTM too large to display"));
       } else {
         _constructingTreeThread = new ConstructTreeThread ();
         _constructingTreeThread.execute ();
@@ -170,21 +171,23 @@ public class ChrestLtmView extends JPanel {
    */
   private LtmTreeViewNode constructTree () {
     LtmTreeViewNode baseTreeViewNode = new NodeDisplay (null);
-    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeVisualList (new String[]{}))));
-    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeVerbalList (new String[]{}))));
-    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeActionList (new String[]{}))));
+    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeVisualList (new String[]{})), 3));
+    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeVerbalList (new String[]{})), 3));
+    baseTreeViewNode.add (constructTree (_model.getLtmByModality(Pattern.makeActionList (new String[]{})), 3));
     return baseTreeViewNode;
   }
 
   /** 
    * Wrap the model's LTM as a set of LtmTreeViewNode objects.
    */
-  private LtmTreeViewNode constructTree (Node baseNode) {
+  private LtmTreeViewNode constructTree (Node baseNode, int remainingDepth) {
     LtmTreeViewNode baseTreeViewNode = new NodeDisplay (baseNode);
-    for (Link link : baseNode.getChildren ()) {
-      LtmTreeViewNode linkNode = new LinkDisplay (link);
-      linkNode.add (constructTree (link.getChildNode ()));
-      baseTreeViewNode.add (linkNode);
+    if (remainingDepth >= 0) { // add children unless already at maximum depth
+      for (Link link : baseNode.getChildren ()) {
+        LtmTreeViewNode linkNode = new LinkDisplay (link);
+        linkNode.add (constructTree (link.getChildNode (), remainingDepth-1));
+        baseTreeViewNode.add (linkNode);
+      }
     }
 
     return baseTreeViewNode;
@@ -303,8 +306,10 @@ class TreeViewPane extends JPanel {
 		relayout();
 	}
 
+  private final int MAXDEPTH = 7; // maximum levels of nodes of network
+
 	public void relayout () {
-		_rootnode.layoutNode (getGraphics (), 10, 10, _orientation, _size);
+		_rootnode.layoutNode (getGraphics (), 10, 10, _orientation, _size, MAXDEPTH);
 		_maxX = 20 + _rootnode.getExtentWidth (getGraphics (), _orientation, _size);
 		_maxY = 20 + _rootnode.getExtentHeight (getGraphics (), _orientation, _size);
 		setPreferredSize (new Dimension (_maxX, _maxY));
@@ -472,7 +477,7 @@ class TreeViewNode {
 	}
 
 	// layoutNode assigns new x and y values to the node, respecting new orientation and size
-	public void layoutNode (Graphics g, int x, int y, Orientation orientation, Size size) {
+	public void layoutNode (Graphics g, int x, int y, Orientation orientation, Size size, int remainingDepth) {
 		_x = x;
 		_y = y;
 		_w = _object.getWidth((Graphics2D)g, size);
@@ -482,14 +487,15 @@ class TreeViewNode {
 		_extentWidth = 0;
 		_extentHeight = 0;
 		if (orientation == Orientation.HORIZONTAL) {
-			layoutChildrenHorizontally (g, orientation, size);
+			layoutChildrenHorizontally (g, orientation, size, remainingDepth);
 		} else {
-			layoutChildrenVertically (g, orientation, size);
+			layoutChildrenVertically (g, orientation, size, remainingDepth);
 		}
 	}
 
 	// horizontal layout means children displayed vertically
-	private void layoutChildrenHorizontally (Graphics g, Orientation orientation, Size size) {
+	private void layoutChildrenHorizontally (Graphics g, Orientation orientation, Size size, int remainingDepth) {
+    if (remainingDepth < 0) return; // reached cutoff point for depth of network, so add no more children
 		if (!hasChildren ()) return ; // nothing to do, if no children
 		int nextY = _y;
 		// each child's x position is to the right of this node
@@ -498,7 +504,7 @@ class TreeViewNode {
 		//       to get the vertical position of the next child
 		//       to get the vertical position of the next child
 		for (TreeViewNode child : _children) {
-			child.layoutNode(g, thisX, nextY, orientation, size);
+			child.layoutNode(g, thisX, nextY, orientation, size, remainingDepth-1);
 			nextY += size.getVerticalSeparator (orientation);
 			nextY += child.getExtentHeight(g, orientation, size);
 		}
@@ -507,14 +513,15 @@ class TreeViewNode {
 	}
 
 	// vertical layout means children displayed horizontally
-	private void layoutChildrenVertically (Graphics g, Orientation orientation, Size size) {
+	private void layoutChildrenVertically (Graphics g, Orientation orientation, Size size, int remainingDepth) {
+    if (remainingDepth < 0) return; // reached cutoff point for depth of network, so add no more children
 		if (!hasChildren ()) return; // nothing to do, if no children
 		int thisY = _y + size.getVerticalSeparator(orientation) + _h;
 		int nextX = _x;
 		// nextX is incremented by child's width + horizontalSeparator
 		//       to get horizontal position of the next child
 		for (TreeViewNode child : _children) {
-			child.layoutNode(g, nextX, thisY, orientation, size);
+			child.layoutNode(g, nextX, thisY, orientation, size, remainingDepth-1);
 			nextX += size.getHorizontalSeparator(orientation);
 			nextX += child.getExtentWidth(g, orientation, size);
 		}

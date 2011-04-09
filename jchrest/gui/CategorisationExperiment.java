@@ -22,8 +22,8 @@ import javax.swing.table.*;
  * @author Peter C. R. Lane
  */
 public class CategorisationExperiment extends JPanel {
-  private Chrest _model;
-  private List<PairedPattern> _patterns;
+  private final Chrest _model;
+  private final List<PairedPattern> _patterns;
 
   public CategorisationExperiment (Chrest model, List<PairedPattern> patterns) {
     super ();
@@ -229,4 +229,3 @@ public class CategorisationExperiment extends JPanel {
     return panel;
   }
 }
-
