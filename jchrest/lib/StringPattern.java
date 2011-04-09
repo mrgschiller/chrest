@@ -1,6 +1,5 @@
 package jchrest.lib;
 
-import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,13 +7,16 @@ import java.util.Map;
  * The StringPattern is a type of PrimitivePattern used to hold 
  * Strings.  The String is treated as a single object, and 
  * cannot be decomposed into smaller elements, such as letters.
+ * Instances of this class are immutable.
  *
  * @author Peter C. R. Lane
  */
 public class StringPattern extends PrimitivePattern {
-  private String _name;
-  private static final Map<String, StringPattern> _cache = new HashMap<String, StringPattern> ();
 
+  /**
+   * Static creator method tries to retrieve a cached pattern for given string,
+   * else creates and returns a new instance of StringPattern.
+   */
   public static StringPattern create (String name) {
     if (!_cache.containsKey (name)) {
       _cache.put (name, new StringPattern (name));
@@ -22,11 +24,10 @@ public class StringPattern extends PrimitivePattern {
     return _cache.get (name);
   }
 
-  /**
-   * Constructor takes a String name which is used to 
-   * denote this pattern.
+  /** 
+   * Constructor takes a String to define the contents of this pattern.
    */
-   private StringPattern (String name) {
+  private StringPattern (String name) {
     _name = name;
   }
 
@@ -60,17 +61,15 @@ public class StringPattern extends PrimitivePattern {
     }
   }
 
+  /**
+   * Return a string representation of this pattern.
+   */
   public String toString () {
     return _name;
   }
 
-  public void writePattern (Writer writer) throws IOException {
-    FileUtilities.writeTaggedString (writer, "string-pattern", _name);
-  }
-
-  public static StringPattern readPattern (BufferedReader reader) throws ParsingErrorException {
-    String name = FileUtilities.readStringInTag (reader, "string-pattern");
-    return StringPattern.create (name);
-  }
+  // private fields
+  private final String _name;
+  private static final Map<String, StringPattern> _cache = new HashMap<String, StringPattern> ();
 }
 

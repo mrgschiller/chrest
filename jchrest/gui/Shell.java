@@ -369,53 +369,6 @@ public class Shell extends JFrame {
     }
   }
 
-
-  /**
-   * Action to load data from a saved model.
-   */
-  class LoadModelAction extends AbstractAction implements ActionListener {
-    private Shell _parent;
-
-    LoadModelAction (Shell parent) {
-      super ("Load"); 
-
-      _parent = parent;
-    }
-
-    public void actionPerformed (ActionEvent e) {
-      File file = FileUtilities.getLoadFilename (_parent);
-      if (file == null) return;
-      try {
-        if (file.exists ()) {
-          BufferedReader reader = new BufferedReader (new FileReader (file));
-          _model = Chrest.readFromFile (reader);
-          reader.close ();
-        } else {
-          JOptionPane.showMessageDialog (
-              _parent, 
-              "File " + file.getName () + 
-              " could not be loaded because it does not exist.",
-              "Error: File load error", 
-              JOptionPane.ERROR_MESSAGE);
-        }
-      } catch (IOException ioe) {
-        JOptionPane.showMessageDialog (
-            _parent, 
-            "File " + file.getName () + 
-            " could not be loaded due to an error in accessing the file.",
-            "Error: File load error", 
-            JOptionPane.ERROR_MESSAGE);
-      } catch (ParsingErrorException err) {
-        JOptionPane.showMessageDialog (
-            _parent, 
-            "File " + file.getName () + 
-            " could not be loaded due to:" + err.getMessage(),
-            "Error: File load error", 
-            JOptionPane.ERROR_MESSAGE);
-      }
-    }
-  }
-
   /**
    * Action to save test-link data from current model in VNA format.
    */
@@ -627,8 +580,6 @@ public class Shell extends JFrame {
   private JMenu createModelMenu () {
     JMenu menu = new JMenu ("Model");
     menu.add (new ClearModelAction (this));
-//    menu.add (new LoadModelAction (this));
-//    menu.add (new SaveModelAction (this));
 
     JMenu submenu = new JMenu ("Save");
     submenu.add (new SaveModelAsVnaAction (this));

@@ -7,5 +7,9 @@ package jchrest.lib;
  * @author Peter C. R. Lane
  */
 public abstract class PrimitivePattern extends Pattern {
+
+  /**
+   * Provide a method to test for equality between PrimitivePattern instances.
+   */
   abstract public boolean equalPrimitive (PrimitivePattern pattern);
 }

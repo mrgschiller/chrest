@@ -12,6 +12,6 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author Peter C. R. Lane
  */
 @RunWith(Suite.class)
-@SuiteClasses({TestChrest.class, TestPatterns.class, TestReadModel.class, TestStm.class, TestChessDomain.class})
+@SuiteClasses({TestChrest.class, TestPatterns.class, TestStm.class, TestChessDomain.class})
 public class TestRunner {
 }

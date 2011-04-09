@@ -1,17 +1,23 @@
 package jchrest.architecture;
 
-import jchrest.lib.*;
+import jchrest.lib.Fixation;
+import jchrest.lib.ItemSquarePattern;
+import jchrest.lib.ListPattern;
+import jchrest.lib.Pattern;
+import jchrest.lib.Scene;
+import jchrest.lib.Square;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Perceiver 
+ * Perceiver class manages the model's interaction with an external, two-dimensional 
+ * scene.
  */
 public class Perceiver {
   private final static java.util.Random _random = new java.util.Random ();
 
-  private Chrest _model;
+  private final Chrest _model;
   private int _fixationX, _fixationY, _fieldOfView;
   int _lastHeuristic;
   private Scene _currentScene;

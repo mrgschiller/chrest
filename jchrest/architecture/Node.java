@@ -1,6 +1,7 @@
 package jchrest.architecture;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,21 +22,12 @@ import jchrest.lib.PrimitivePattern;
  * @author Peter C. R. Lane
  */
 public class Node extends Observable {
-  private Chrest _model;
-  private int _reference;
-  private ListPattern _contents;
-  private ListPattern _image;
-  private List<Link> _children;
-  private List<Node> _similarNodes;
-  private Node _followedBy;
-  private Node _namedBy;
 
   /**
    * Constructor to construct a new root node for the model.  
    */
   public Node (Chrest model, int reference, ListPattern type) {
-    this (model, type, type);
-    _reference = reference;
+    this (model, reference, type, type);
   }
  
   /**
@@ -43,16 +35,7 @@ public class Node extends Observable {
    * must be defined.  Assume that the image always starts empty.
    */
   public Node (Chrest model, ListPattern contents, ListPattern image) {
-    _model = model;
-    _reference = _model.getNextNodeNumber ();
-
-    _contents = contents.clone ();
-    _contents.setNotFinished (); // do not allow contents to be finished
-    _image = image;
-    _children = new ArrayList<Link> ();
-    _similarNodes = new ArrayList<Node> ();
-    _followedBy = null;
-    _namedBy = null;
+    this (model, model.getNextNodeNumber (), contents, image);
   }
 
   /**
@@ -256,6 +239,16 @@ public class Node extends Observable {
       child.getChildNode().getSimilarityCounts (size);
     }
   }
+  
+  // private fields
+  private final Chrest _model;
+  private final int _reference;
+  private final ListPattern _contents;
+  private ListPattern _image;
+  private List<Link> _children;
+  private List<Node> _similarNodes;
+  private Node _followedBy;
+  private Node _namedBy;
 
   /**
    * Compute the total size of images below the current node.
@@ -326,63 +319,6 @@ public class Node extends Observable {
     return count;
   }
 
-  /**
-  public void showPotentialTemplates () {
-    if (canFormTemplate ()) {
-      System.out.println("\n--------------------\nNode: " + _reference);
-      System.out.println("Contents: " + _contents.toString ());
-      // gather images of current node and test links together, removing the contents from them
-      List<ListPattern> patterns = new ArrayList<ListPattern> ();
-      patterns.add (_image.remove (_contents));
-      for (Link link : _children) {
-        patterns.add (link.getChildNode().getImage().remove (_contents));
-      }
-      for (Node node : _similarNodes) {
-        patterns.add (node.getImage().remove (_contents));
-      }
-      // create a hashmap of counts of occurrences of items and of squares
-      Map<String,Integer> countItems = new HashMap<String,Integer> ();
-      Map<Integer,Integer> countPositions = new HashMap<Integer,Integer> ();
-      for (ListPattern pattern : patterns) {
-        for (PrimitivePattern pattern_item : pattern) {
-          if (pattern_item instanceof ItemSquarePattern) {
-            ItemSquarePattern item = (ItemSquarePattern)pattern_item;
-            if (countItems.containsKey (item.getItem ())) {
-              countItems.put (item.getItem (), countItems.get(item.getItem ()) + 1);
-            } else {
-              countItems.put (item.getItem (), 1);
-            }
-            Integer posn_key = item.getRow () + 1000 * item.getColumn ();
-            if (countPositions.containsKey (posn_key)) {
-              countPositions.put (posn_key, countPositions.get(posn_key) + 1);
-            } else {
-              countPositions.put (posn_key, 1);
-            }
-          }
-        }
-      }
-
-      // display
-      for (String itemKey : countItems.keySet ()) {
-        if (countItems.get(itemKey) >= _model.getMinTemplateOccurrences ()) {
-          System.out.println ("  Piece slot: " + itemKey + 
-              "  appeared " + countItems.get(itemKey) + " times");
-        }
-      }
-      for (Integer posnKey : countPositions.keySet ()) {
-        if (countPositions.get(posnKey) >= _model.getMinTemplateOccurrences ()) {
-          System.out.println ("  Square slot: " + 
-              " (" + posnKey / 1000 + ", " + (posnKey - 1000*(posnKey/1000)) + ") " +
-              "  appeared " + countPositions.get(posnKey) + " times");
-        }
-      }
-    }
-
-    for (Link link : _children) {
-      link.getChildNode().showPotentialTemplates ();
-    }
-  }
-*/
   private List<ItemSquarePattern> _itemSlots;
   private List<ItemSquarePattern> _positionSlots;
   private List<ItemSquarePattern> _filledItemSlots;
@@ -745,48 +681,6 @@ public class Node extends Observable {
     // repeat for children
     for (Link link : _children) {
       link.getChildNode().writeSimilarityLinksAsVna (writer);
-    }
-  }
-
-  /**
-   * Write a description of the node to the given Writer object.
-   */
-  public void writeNode (Writer writer) throws IOException {
-    FileUtilities.writeOpenTag (writer, "node");
-    FileUtilities.writeTaggedInt (writer, "reference", _reference);
-
-    FileUtilities.writeOpenTag (writer, "contents");
-    _contents.writePattern (writer);
-    FileUtilities.writeCloseTag (writer, "contents");
-    FileUtilities.writeOpenTag (writer, "image");
-    _image.writePattern (writer);
-    FileUtilities.writeCloseTag (writer, "image");
-
-    if (_children.isEmpty ()) {
-      ; // write nothing if no children
-    } else {
-      FileUtilities.writeOpenTag (writer, "children");
-      for (Link link : _children) {
-        link.writeLink (writer);
-      }
-      FileUtilities.writeCloseTag (writer, "children");
-    }
-    if (_followedBy != null) {
-      FileUtilities.writeOpenTag (writer, "followed-by");
-      FileUtilities.writeTaggedInt (writer, "reference", _followedBy.getReference ());
-      FileUtilities.writeCloseTag (writer, "followed-by");
-    }
-    if (_namedBy != null) {
-      FileUtilities.writeOpenTag (writer, "named-by");
-      FileUtilities.writeTaggedInt (writer, "reference", _namedBy.getReference ());
-      FileUtilities.writeCloseTag (writer, "named-by");
-    }
-    FileUtilities.writeCloseTag (writer, "node");
-    FileUtilities.writeNewLine (writer);
-
-    // recurse, by writing the node descriptions for any child nodes
-    for (Link link : _children) {
-      link.getChildNode().writeNode (writer);
     }
   }
 }

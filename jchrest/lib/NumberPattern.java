@@ -1,19 +1,21 @@
 package jchrest.lib;
 
-import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * The NumberPattern is a type of PrimitivePattern used to hold 
- * numbers.  The number is treated as a single object.
+ * numbers.  The number is treated as a single object.  Instances 
+ * of this class are immutable.
  *
  * @author Peter C. R. Lane
  */
 public class NumberPattern extends PrimitivePattern {
-  private int _number;
-  private static final Map<Integer, NumberPattern> _cache = new HashMap<Integer, NumberPattern> ();
 
+  /**
+   * Static creator method attempts to retrieve a cached instance for given 
+   * number, else creates and returns a new NumberPattern instance.
+   */
   public static NumberPattern create (int num) {
     Integer number = new Integer (num);
     if (!_cache.containsKey (number)) {
@@ -58,17 +60,15 @@ public class NumberPattern extends PrimitivePattern {
     }
   }
 
+  /**
+   * Return a string representation of this pattern.
+   */
   public String toString () {
     return "" + _number;
   }
 
-  public void writePattern (Writer writer) throws IOException {
-    FileUtilities.writeTaggedInt (writer, "number-pattern", _number);
-  }
-
-  public static NumberPattern readPattern (BufferedReader reader) throws ParsingErrorException {
-    int number = FileUtilities.readIntInTag (reader, "number-pattern");
-    return NumberPattern.create (number);
-  }
+  // private fields
+  private final int _number;
+  private static final Map<Integer, NumberPattern> _cache = new HashMap<Integer, NumberPattern> ();
 }
 

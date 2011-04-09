@@ -1,7 +1,5 @@
 package jchrest.architecture;
 
-import java.io.*;
-
 import jchrest.lib.FileUtilities;
 import jchrest.lib.ListPattern;
 
@@ -11,9 +9,10 @@ import jchrest.lib.ListPattern;
  * through to the child node.
  */
 public class Link {
-  private ListPattern _test;
-  private Node _child;
 
+  /**
+   * Constructor sets the link's test and child node.
+   */
   public Link (ListPattern test, Node child) {
     _test = test;
     _child = child;
@@ -41,18 +40,8 @@ public class Link {
     return _test.matches (pattern);
   }
 
-  /**
-   * Write a description of the link to the given Writer object.
-   */
-  public void writeLink (Writer writer) throws IOException {
-    FileUtilities.writeOpenTag (writer, "link");
-    FileUtilities.writeOpenTag (writer, "test");
-    _test.writePattern (writer);
-    FileUtilities.writeCloseTag (writer, "test");
-
-    FileUtilities.writeTaggedInt (writer, "child", _child.getReference ());
-
-    FileUtilities.writeCloseTag (writer, "link");
-  }
+  // private fields
+  private final ListPattern _test;
+  private final Node _child;
 }
 
