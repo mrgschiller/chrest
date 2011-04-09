@@ -1,6 +1,7 @@
 package jchrest.architecture;
 
 import jchrest.lib.Fixation;
+import jchrest.lib.FixationType;
 import jchrest.lib.ItemSquarePattern;
 import jchrest.lib.ListPattern;
 import jchrest.lib.Pattern;
@@ -19,9 +20,10 @@ public class Perceiver {
 
   private final Chrest _model;
   private int _fixationX, _fixationY, _fieldOfView;
-  int _lastHeuristic;
+  FixationType _lastHeuristic;
   private Scene _currentScene;
-  private List<Integer> _fixationsX, _fixationsY, _fixationsType;
+  private List<Integer> _fixationsX, _fixationsY;
+  private List<FixationType> _fixationsType;
   private List<Node> _recognisedNodes;
 
   protected Perceiver (Chrest model) {
@@ -29,10 +31,10 @@ public class Perceiver {
     _fixationX = 0;
     _fixationY = 0;
     _fieldOfView = 2;
-    _lastHeuristic = 0;
+    _lastHeuristic = FixationType.none;
     _fixationsX = new ArrayList<Integer> ();
     _fixationsY = new ArrayList<Integer> ();
-    _fixationsType = new ArrayList<Integer> ();
+    _fixationsType = new ArrayList<FixationType> ();
     _fixations = new ArrayList<Fixation> ();
     _recognisedNodes = new ArrayList<Node> ();
   }
@@ -115,7 +117,7 @@ public class Perceiver {
             // all ok, so we make the fixation
             _fixationX = ios.getColumn ()-1; // because ios start from 1
             _fixationY = ios.getRow ()-1; 
-            _lastHeuristic = 1;
+            _lastHeuristic = FixationType.ltm;
             _fixationsX.add (_fixationX);
             _fixationsY.add (_fixationY);
             _fixationsType.add (_lastHeuristic);
@@ -159,7 +161,7 @@ public class Perceiver {
           && _fixationY < _currentScene.getHeight ()) {
         _fixationX += xDisplacement;
         _fixationY += yDisplacement;
-        _lastHeuristic = 2;
+        _lastHeuristic = FixationType.randomItem;
 
         return true;
           }
@@ -174,7 +176,7 @@ public class Perceiver {
     int xDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
     int yDisplacement = _random.nextInt (_fieldOfView * 2 + 1) - _fieldOfView;
 
-    _lastHeuristic = 3;
+    _lastHeuristic = FixationType.randomPlace;
 
     if ((xDisplacement == 0 && yDisplacement == 0) || 
         (_fixationX + xDisplacement < 0) ||
@@ -210,7 +212,7 @@ public class Perceiver {
       int move = (new java.util.Random ()).nextInt (pieceMoves.size ());
       _fixationX = pieceMoves.get(move).getColumn ();
       _fixationY = pieceMoves.get(move).getRow ();
-      _lastHeuristic = 4;
+      _lastHeuristic = FixationType.proposedMove;
     } else if (!randomItemHeuristic()) {
       randomPlaceHeuristic ();
     }
@@ -256,7 +258,7 @@ public class Perceiver {
   }
 
   public String getHeuristicDescription () {
-    return Fixation.getHeuristicDescription (_lastHeuristic);
+    return _lastHeuristic.toString ();
   }
 
   public int getNumberFixations () {
@@ -271,7 +273,7 @@ public class Perceiver {
     return _fixationsY.get (fixation);
   }
 
-  public int getFixationsType (int fixation) {
+  public FixationType getFixationsType (int fixation) {
     return _fixationsType.get (fixation);
   }
 

@@ -49,6 +49,7 @@ public class Node extends Observable {
     _contents.setNotFinished (); // do not allow contents to be finished
     _image = image;
     _children = new ArrayList<Link> ();
+    _similarNodes = new ArrayList<Node> ();
     _followedBy = null;
     _namedBy = null;
   }

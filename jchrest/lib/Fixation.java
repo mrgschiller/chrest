@@ -9,7 +9,7 @@ public class Fixation {
   /**
    * Constructor for fixation.
    */
-  public Fixation (int type, int x, int y) {
+  public Fixation (FixationType type, int x, int y) {
     _type = type;
     _x = x;
     _y = y;
@@ -18,31 +18,15 @@ public class Fixation {
   /**
    * Retrieve the type of fixation.
    */
-  public int getType () {
+  public FixationType getType () {
     return _type;
-  }
-
-  private final static String[] _descriptions = 
-    new String[] {
-      "No heuristic", 
-      "LTM heuristic", 
-      "Random item heuristic", 
-      "Random place heuristic",
-      "Proposed movement heuristic"
-    };
-
-  /**
-   * Static method to retrieve description of a given heuristic type.
-   */
-  public static String getHeuristicDescription (int type) {
-    return _descriptions[type];
   }
 
   /**
    * Retrieve a string describing this fixation.
    */
   public String getHeuristicDescription () {
-    return _descriptions[_type];
+    return _type.toString ();
   }
  
   /**
@@ -63,11 +47,11 @@ public class Fixation {
    * Note: added 1 to x,y coordinates to match up with the display of visual scenes.
    */
   public String toString () {
-    return "(" + (_x+1) + ", " + (_y+1) + ") " + getHeuristicDescription ();
+    return "(" + (_x+1) + ", " + (_y+1) + ") " + _type;
   }
 
   // private fields
-  private final int _type;
+  private final FixationType _type;
   private final int _x;
   private final int _y;
 }
