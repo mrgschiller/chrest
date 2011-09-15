@@ -306,7 +306,7 @@ class TreeViewPane extends JPanel {
 		relayout();
 	}
 
-  private final int MAXDEPTH = 7; // maximum levels of nodes of network
+  private final int MAXDEPTH = 20; // maximum levels of nodes of network
 
 	public void relayout () {
 		_rootnode.layoutNode (getGraphics (), 10, 10, _orientation, _size, MAXDEPTH);
@@ -495,7 +495,10 @@ class TreeViewNode {
 
 	// horizontal layout means children displayed vertically
 	private void layoutChildrenHorizontally (Graphics g, Orientation orientation, Size size, int remainingDepth) {
-    if (remainingDepth < 0) return; // reached cutoff point for depth of network, so add no more children
+    if (remainingDepth < 0) {
+      _children.clear ();
+      return; // reached cutoff point for depth of network, so add no more children
+    }
 		if (!hasChildren ()) return ; // nothing to do, if no children
 		int nextY = _y;
 		// each child's x position is to the right of this node
@@ -514,7 +517,10 @@ class TreeViewNode {
 
 	// vertical layout means children displayed horizontally
 	private void layoutChildrenVertically (Graphics g, Orientation orientation, Size size, int remainingDepth) {
-    if (remainingDepth < 0) return; // reached cutoff point for depth of network, so add no more children
+    if (remainingDepth < 0) {
+      _children.clear ();
+      return; // reached cutoff point for depth of network, so add no more children
+    }
 		if (!hasChildren ()) return; // nothing to do, if no children
 		int thisY = _y + size.getVerticalSeparator(orientation) + _h;
 		int nextX = _x;
