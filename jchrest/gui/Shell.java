@@ -167,7 +167,7 @@ public class Shell extends JFrame {
             String line = input.readLine ();
             if (line != null) {
               _task = line.trim ();
-            }              
+            }
 
             if (_task.equals ("recognise-and-learn")) {
               _items = readItems (input, false);
@@ -179,7 +179,9 @@ public class Shell extends JFrame {
               _pairs = readPairedItems (input, true);
             } else if (_task.equals ("visual-search")) {
               _scenes = Scenes.read (input); // throws IOException if any problem
-            } 
+            } else if (_task.equals ("visual-search-with-move")){
+              _scenes = Scenes.readWithMove (input); // throws IOException if any problem
+            }
           } catch (InterruptedIOException ioe) {
             _status = 2; // flag cancelled error
           } catch (IOException ioe) {

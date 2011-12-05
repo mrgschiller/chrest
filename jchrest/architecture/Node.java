@@ -52,6 +52,7 @@ public class Node extends Observable {
     _similarNodes = new ArrayList<Node> ();
     _followedBy = null;
     _namedBy = null;
+    _actionLinks = new ArrayList<Node> ();
   }
 
   /**
@@ -163,6 +164,22 @@ public class Node extends Observable {
     notifyObservers ();
   }
 
+  /**
+   * Add a node to the list of action links for this node.
+   * Do not add the node if already present.
+   */
+  public void addActionLink (Node node) {
+    if (_actionLinks.contains (node)) { 
+      ;
+    } else {
+      _actionLinks.add (node);
+    }
+  }
+
+  public List<Node> getActionLinks () {
+    return _actionLinks;
+  }
+
   /** 
    * Compute the size of the network below the current node.
    */
@@ -250,6 +267,7 @@ public class Node extends Observable {
   private List<Node> _similarNodes;
   private Node _followedBy;
   private Node _namedBy;
+  private List<Node> _actionLinks;
 
   /**
    * Compute the total size of images below the current node.

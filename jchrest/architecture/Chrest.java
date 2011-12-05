@@ -623,6 +623,67 @@ public class Chrest extends Observable {
     }
   }
 
+  /**
+   * Learn a scene with an attached next move.  The move is linked to any chunks 
+   * in visual STM.
+   * TODO: think about if there should be limitations on this.
+   */
+  public void learnSceneAndMove (Scene scene, Move move, int numFixations) {
+    learnScene (scene, numFixations);
+    recogniseAndLearn (move.asListPattern ());
+    // attempt to link action with each perceived chunk
+    if (_visualStm.getCount () > 0 && _actionStm.getCount () > 0) {
+      for (Node node : _visualStm) {
+        node.addActionLink (_actionStm.getItem (0));
+      }
+    }
+    setChanged ();
+    if (!_frozen) notifyObservers ();
+  }
+
+  /**
+   * Predict a move using a CHUMP-like mechanism.
+   * TODO: Improve the heuristics here.
+   */
+  public Move predictMove (Scene scene, int numFixations) {
+    scanScene (scene, numFixations);
+    // create a map of moves to their frequency of occurrence in nodes of STM
+    Map<ListPattern, Integer> moveFrequencies = new HashMap<ListPattern, Integer> ();
+    for (Node node : _visualStm) {
+      for (Node action : node.getActionLinks ()) {
+        if (moveFrequencies.containsKey(action.getImage ())) {
+          moveFrequencies.put (
+              action.getImage (), 
+              moveFrequencies.get(action.getImage ()) + 1
+              );
+        } else {
+          moveFrequencies.put (action.getImage (), 1);
+        }
+      }
+    }
+    // find the most frequent pattern
+    ListPattern best = null;
+    int bestFrequency = 0;
+    for (ListPattern key : moveFrequencies.keySet ()) {
+      if (moveFrequencies.get (key) > bestFrequency) {
+        best = key;
+        bestFrequency = moveFrequencies.get (key);
+      }
+    }
+    // create a move to return
+    if (best == null) {
+      return new Move ("UNKNOWN", 0, 0);
+    } else {
+      // list pattern should be one item long, with the first item being an ItemSquarePattern
+      if ((best.size () == 1) && (best.getItem(0) instanceof ItemSquarePattern)) {
+        ItemSquarePattern move = (ItemSquarePattern)best.getItem (0);
+        return new Move (move.getItem (), move.getRow (), move.getColumn ());
+      } else {
+        return new Move ("UNKNOWN", 0, 0);
+      }
+    }
+  }
+
   /** 
    * Scan given scene, then return a scene which would be recalled.
    * Default behaviour is to clear STM before scanning a scene.
