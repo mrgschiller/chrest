@@ -131,6 +131,8 @@ public class Shell extends JFrame {
     }
   }
 
+  enum Status {CANCELLED_SELECTION, CANCELLED_RUNNING, ERROR, OK};
+
   /**
    * Worker thread to handle loading the data.
    */
@@ -140,7 +142,7 @@ public class Shell extends JFrame {
     private List<ListPattern> _items;
     private List<PairedPattern> _pairs;
     private Scenes _scenes;
-    private int _status;
+    private Status _status = Status.OK;
 
     LoadDataThread (Shell parent) {
       _parent = parent;
@@ -154,10 +156,10 @@ public class Shell extends JFrame {
       public Void doInBackground () {
         File file = FileUtilities.getLoadFilename (_parent);
         if (file == null) {
-          _status = 3;
+          _status = Status.CANCELLED_SELECTION;
         } else {
           try {
-            _status = 0; // assume all will be fine
+            _status = Status.OK; // assume all will be fine
             _task = "";
             // add a monitor to the input stream, to show a message if input is taking a while
             InputStream inputStream = new ProgressMonitorInputStream(
@@ -185,9 +187,9 @@ public class Shell extends JFrame {
               _scenes = Scenes.readWithMove (input); // throws IOException if any problem
             }
           } catch (InterruptedIOException ioe) {
-            _status = 2; // flag cancelled error
+            _status = Status.CANCELLED_RUNNING; // flag cancelled error
           } catch (IOException ioe) {
-            _status = 1; // flag an IO error
+            _status = Status.ERROR; // flag an IO error
           }
         }
         return null;
@@ -195,36 +197,40 @@ public class Shell extends JFrame {
 
     @Override
       protected void done () {
-        if (_status == 3) {
-          ; // do nothing
-        } else if (_status == 1) {
-          JOptionPane.showMessageDialog (_parent, 
-              "There was an error in processing your file", 
-              "File error",
-              JOptionPane.ERROR_MESSAGE);
-        } else if (_status == 2) {
-          JOptionPane.showMessageDialog (_parent, 
-              "You cancelled the operation : no change", 
-              "File Load Cancelled",
-              JOptionPane.WARNING_MESSAGE);
-        } else { // (_status == 0)
-          if (_task.equals ("recognise-and-learn") && _items != null) {
-            _parent.setContentPane (new RecogniseAndLearnDemo (_model, _items));
-          } else if (_task.equals ("serial-anticipation") && _items != null) {
-            _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(_items)));
-          } else if (_task.equals ("paired-associate") && _pairs != null) {
-            _parent.setContentPane (new PairedAssociateExperiment (_model, _pairs));
-          } else if (_task.equals ("categorisation") && _pairs != null) {
-            _parent.setContentPane (new CategorisationExperiment (_model, _pairs));
-          } else if (_task.equals ("visual-search") && _scenes != null) {
-            _parent.setContentPane (new VisualSearchPane (_model, _scenes));
-          } else {
-            JOptionPane.showMessageDialog (_parent,
-                "Invalid task on first line of file",
+        switch (_status) {
+          case CANCELLED_SELECTION:
+            break;
+          case ERROR:
+            JOptionPane.showMessageDialog (_parent, 
+                "There was an error in processing your file", 
                 "File error",
                 JOptionPane.ERROR_MESSAGE);
-          }
-          _parent.validate ();
+            break;
+          case CANCELLED_RUNNING:
+            JOptionPane.showMessageDialog (_parent, 
+                "You cancelled the operation : no change", 
+                "File Load Cancelled",
+                JOptionPane.WARNING_MESSAGE);
+            break;
+          case OK:
+            if (_task.equals ("recognise-and-learn") && _items != null) {
+              _parent.setContentPane (new RecogniseAndLearnDemo (_model, _items));
+            } else if (_task.equals ("serial-anticipation") && _items != null) {
+              _parent.setContentPane (new PairedAssociateExperiment (_model, PairedAssociateExperiment.makePairs(_items)));
+            } else if (_task.equals ("paired-associate") && _pairs != null) {
+              _parent.setContentPane (new PairedAssociateExperiment (_model, _pairs));
+            } else if (_task.equals ("categorisation") && _pairs != null) {
+              _parent.setContentPane (new CategorisationExperiment (_model, _pairs));
+            } else if (_task.equals ("visual-search") && _scenes != null) {
+              _parent.setContentPane (new VisualSearchPane (_model, _scenes));
+            } else {
+              JOptionPane.showMessageDialog (_parent,
+                  "Invalid task on first line of file",
+                  "File error",
+                  JOptionPane.ERROR_MESSAGE);
+            }
+            _parent.validate ();
+            break;
         }
       }
 
