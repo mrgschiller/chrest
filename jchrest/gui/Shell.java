@@ -153,7 +153,9 @@ public class Shell extends JFrame {
     @Override
       public Void doInBackground () {
         File file = FileUtilities.getLoadFilename (_parent);
-        if (file != null) {
+        if (file == null) {
+          _status = 3;
+        } else {
           try {
             _status = 0; // assume all will be fine
             _task = "";
@@ -193,7 +195,9 @@ public class Shell extends JFrame {
 
     @Override
       protected void done () {
-        if (_status == 1) {
+        if (_status == 3) {
+          ; // do nothing
+        } else if (_status == 1) {
           JOptionPane.showMessageDialog (_parent, 
               "There was an error in processing your file", 
               "File error",

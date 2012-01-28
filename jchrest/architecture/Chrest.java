@@ -641,26 +641,75 @@ public class Chrest extends Observable {
     if (!_frozen) notifyObservers ();
   }
 
+  private boolean sameColour (ListPattern move, String colour) {
+    if (colour == null) return true;
+    if ((move.size () == 1) && (move.getItem(0) instanceof ItemSquarePattern)) {
+        ItemSquarePattern m = (ItemSquarePattern)move.getItem (0);
+        return m.getItem() == colour;
+    } else {
+      return false;
+    }
+  }
+
   /**
-   * Predict a move using a CHUMP-like mechanism.
-   * TODO: Improve the heuristics here.
+   * Return a map of moves vs frequencies.
    */
-  public Move predictMove (Scene scene, int numFixations) {
+  public Map<ListPattern, Integer> getMovePredictions (Scene scene, int numFixations, String colour) {
     scanScene (scene, numFixations);
     // create a map of moves to their frequency of occurrence in nodes of STM
     Map<ListPattern, Integer> moveFrequencies = new HashMap<ListPattern, Integer> ();
     for (Node node : _visualStm) {
       for (Node action : node.getActionLinks ()) {
-        if (moveFrequencies.containsKey(action.getImage ())) {
-          moveFrequencies.put (
-              action.getImage (), 
-              moveFrequencies.get(action.getImage ()) + 1
-              );
-        } else {
-          moveFrequencies.put (action.getImage (), 1);
+        if (sameColour(action.getImage(), colour)) {
+          if (moveFrequencies.containsKey(action.getImage ())) {
+            moveFrequencies.put (
+                action.getImage (), 
+                moveFrequencies.get(action.getImage ()) + 1
+                );
+          } else {
+            moveFrequencies.put (action.getImage (), 1);
+          }
         }
       }
     }
+    return moveFrequencies;
+  }
+
+  /**
+   * Predict a move using a CHUMP-like mechanism.
+   * TODO: Improve the heuristics here.
+   */
+  public Move predictMove (Scene scene, int numFixations) {
+    Map<ListPattern, Integer> moveFrequencies = getMovePredictions (scene, numFixations, null);
+    // find the most frequent pattern
+    ListPattern best = null;
+    int bestFrequency = 0;
+    for (ListPattern key : moveFrequencies.keySet ()) {
+      if (moveFrequencies.get (key) > bestFrequency) {
+        best = key;
+        bestFrequency = moveFrequencies.get (key);
+      }
+    }
+    // create a move to return
+    if (best == null) {
+      return new Move ("UNKNOWN", 0, 0);
+    } else {
+      // list pattern should be one item long, with the first item being an ItemSquarePattern
+      if ((best.size () == 1) && (best.getItem(0) instanceof ItemSquarePattern)) {
+        ItemSquarePattern move = (ItemSquarePattern)best.getItem (0);
+        return new Move (move.getItem (), move.getRow (), move.getColumn ());
+      } else {
+        return new Move ("UNKNOWN", 0, 0);
+      }
+    }
+  }
+
+  /**
+   * Predict a move using a CHUMP-like mechanism.
+   * TODO: Improve the heuristics here.
+   */
+  public Move predictMove (Scene scene, int numFixations, String colour) {
+    Map<ListPattern, Integer> moveFrequencies = getMovePredictions (scene, numFixations, colour);
     // find the most frequent pattern
     ListPattern best = null;
     int bestFrequency = 0;

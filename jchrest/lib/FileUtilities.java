@@ -8,7 +8,7 @@ import javax.swing.*;
 /** A collection of static methods used when handling files */
 public class FileUtilities {
   // -- fields and methods to handle a file dialog
-	private final static JFileChooser _fileChooser = new JFileChooser ();
+	private final static JFileChooser _fileChooser = new JFileChooser (System.getProperty("user.dir"));
 
   /**
    * Request user for a filename to save to.  Argument 'parent' centres the dialog on the 
