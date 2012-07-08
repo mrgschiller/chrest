@@ -1,0 +1,13 @@
+recognise-and-learn
+a b c
+a b
+d e a b
+d e f 
+a b d
+a d e
+a b e
+d f e
+d g h
+dd ff gg
+a c r
+a j k

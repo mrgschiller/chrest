@@ -1,0 +1,10 @@
+serial-anticipation
+G X J
+Z X K
+G X K
+L Q F
+G X F
+L X J
+Z H J
+M B W
+G Q K

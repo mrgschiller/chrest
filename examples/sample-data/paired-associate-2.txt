@@ -1,0 +1,10 @@
+paired-associate
+G X J : W A P
+Z X K : S O K
+G X K : Q I L
+L Q F : D A G
+G X F : B I F
+L X J : R O V
+Z H J : S A J
+M B W : B I P
+G Q K : W E K

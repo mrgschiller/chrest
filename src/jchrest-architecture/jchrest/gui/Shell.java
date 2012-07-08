@@ -74,11 +74,11 @@ public class Shell extends JFrame {
           "Chrest cognitive architecture.  You can load <BR>" +
           "data, train models, and visualise results in a <BR>" +
           "range of typical modelling problems for Chrest.</P>" +
-          "<P><P>Copyright (c) 2010-11, Peter C. R. Lane.</P></P>" +
-          "<P>Released under GNU General Public License</a>, version 3.</P>" + 
+          "<P><P>Copyright (c) 2010-12, Peter C. R. Lane.</P></P>" +
+          "<P>Released under Open Works License</a>, version 0.9.2.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell v. 0.15", 
+          "About Chrest Shell v. ALPHA", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }

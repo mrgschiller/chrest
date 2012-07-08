@@ -1,0 +1,25 @@
+categorisation
+1 2 1 1 1 1 1 : Harry
+1 1 2 1 1 1 1 : Harry
+1 1 1 2 1 1 1 : Harry
+1 2 2 2 1 1 1 : Harry
+1 1 2 2 1 1 1 : Harry
+1 1 2 2 1 1 2 : Harry
+1 2 1 1 1 2 1 : Harry
+1 1 1 2 1 2 1 : Harry
+1 2 1 2 1 2 1 : Harry
+1 1 1 1 1 2 1 : Harry
+1 2 1 2 1 2 2 : Harry
+1 1 1 2 1 2 2 : Harry
+2 2 2 2 1 2 2 : Charlie
+2 1 2 2 1 2 2 : Charlie
+2 2 2 1 1 2 1 : Charlie
+2 1 2 1 1 2 2 : Charlie
+2 2 2 1 2 2 2 : Charlie
+1 2 2 2 2 2 2 : Charlie
+2 1 2 1 2 2 2 : Charlie
+1 2 2 1 2 2 2 : Charlie
+2 2 2 2 2 2 2 : Charlie
+1 1 2 1 2 2 2 : Charlie
+2 2 2 1 2 2 1 : Charlie
+1 1 2 1 2 2 1 : Charlie

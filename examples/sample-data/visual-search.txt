@@ -1,0 +1,14 @@
+visual-search
+5 7
+--
+.AABBC.
+...ABBB
+.B.A.C.
+..A.B.C
+.AAABBB
+--
+AAAAAAA
+BBBBBBB
+CCCCCCC
+.......
+.ABCABC

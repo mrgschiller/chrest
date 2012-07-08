@@ -1,0 +1,13 @@
+serial-anticipation
+* * *
+a b c
+d e f 
+a b d
+a d e
+a b e
+d f e
+d g h
+dd ff gg
+a c r
+a j k
+* * *

@@ -1,0 +1,9 @@
+recognise-and-learn
+A
+A B
+A B C
+B
+C B
+B C
+D E F
+A B C D E F
