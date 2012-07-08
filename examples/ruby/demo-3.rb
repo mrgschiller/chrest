@@ -1,10 +1,10 @@
 # Construct a large tree
 #
-# java -server -Xmx2500M -jar jruby.jar training-large.rb 100000 50
+# java -server -Xmx2500M -jar jruby.jar demo-3.rb 100000 50
 # produces a 91917 node network in 127 seconds.
 # Without the '-server' option, it takes 210 seconds.
 
-# java -server -Xmx2500M -jar jruby.jar training-large.rb 500000 50
+# java -server -Xmx2500M -jar jruby.jar demo-3.rb 500000 50
 # produces a 455601 node network in 8 minutes 31 seconds.
 
 require "java"
@@ -58,8 +58,8 @@ for pattern in Patterns
   end
 end
 
-if @@model.ltmSize < 50000 # TODO try to resolve this limit on display size
+if @@model.ltmVisualSize < 50000 # TODO try to resolve this limit on display size
   @@view = ChrestView.new(nil, @@model)
 end
 
-puts "Network contains #{@@model.ltmSize} nodes"
+puts "Network contains #{@@model.ltmVisualSize} nodes"

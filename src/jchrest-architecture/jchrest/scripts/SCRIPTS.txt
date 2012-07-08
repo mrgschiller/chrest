@@ -1,3 +1,0 @@
-This scripts folder contains files defining wrapper and helper 
-functions to support the main scripting languages used with 
-Chrest.  These are: lisp and ruby.
