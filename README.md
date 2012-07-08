@@ -4,6 +4,7 @@ CHREST
 This software project contains materials relating to the CHREST cognitive 
 architecture.  
 
+
 Copyright and License
 ---------------------
 

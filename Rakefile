@@ -34,3 +34,34 @@ task :clean do
   sh 'rm -rf bin'
   sh 'rm -rf tmp'
 end
+
+desc 'build the user guide'
+task :guide do
+  Dir.chdir('doc/user-guide') do
+    sh 'latex user-guide'
+    sh 'latex user-guide'
+    sh 'latex user-guide'
+    sh 'dvipdf user-guide.dvi'
+  end
+end
+
+desc 'show the user guide'
+task :show_guide => :guide do
+  Dir.chdir('doc/user-guide') do
+    sh 'evince user-guide.pdf'
+  end
+end
+
+directory 'release/chrest'
+desc 'bundle for release'
+task :bundle => [:guide, :make_jar, 'release/chrest'] do
+  Dir.chdir('release/chrest') do
+    sh 'cp ../../chrest.jar .'
+    sh 'cp -r ../../examples .'
+    sh 'cp ../../doc/user-guide/user-guide.pdf .'
+  end
+  Dir.chdir('release') do
+    sh 'zip -r chrest-1.0.0.zip chrest'
+  end
+end
+
