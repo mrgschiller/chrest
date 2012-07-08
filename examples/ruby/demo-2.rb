@@ -10,7 +10,7 @@
 # java -jar jruby.jar demo-2.rb
 
 require "java"
-require "jchrest"
+require "chrest"
 
 import "jchrest.architecture.Chrest"
 import "jchrest.gui.ChrestView"

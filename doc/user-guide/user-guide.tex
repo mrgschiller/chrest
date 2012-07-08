@@ -10,7 +10,7 @@
 \tableofcontents
 
 \newpage
-\section{Introduction}
+\section{Getting Started}
 
 CHREST is a cognitive architecture covering processes of visual attention,
 memory, categorisation and simple problem solving.  The CHREST software
@@ -21,10 +21,7 @@ CHREST-based agents.
 This document introduces the CHREST software, its capabilities and typical 
 uses. 
 
-\section{Getting CHREST}
-
-CHREST runs on the Java Virtual Machine, and requires version 6 or later of the 
-Java Runtime Environment to run.
+\subsection{Download}
 
 CHREST can be downloaded from one of:
 
@@ -36,17 +33,24 @@ CHREST can be downloaded from one of:
 \noindent After downloading {\tt chrest-NNN.zip} (where NNN refers to the
 latest version number), unpack the file to obtain the {\tt chrest} folder.
 
-\subsection{Running CHREST}
+The folder contains a copy of this user guide, the {\tt chrest.jar} software, 
+and a folder of examples, including models written in different programming 
+languages and some sample datasets.
+
+\subsection{Run}
+
+CHREST runs on the Java Virtual Machine, and requires version 6 or later of the 
+Java Runtime Environment to run.
 
 In most cases, CHREST can be run by double-clicking on the file {\tt chrest.jar}, 
-which will launch the graphical shell described from the next section.
+which will launch the graphical shell described in the next section.
 
 In some cases you will need to use {\tt start-chrest.bat} (on Windows) or 
 {\tt start-chrest.sh} (on Linux or Apple) to ensure the Java run-time is correctly 
 called.
 
 If you have special memory requirements, you will also need to edit the number 
-after the flag {\tt -Mx} in the {\tt start-chrest} script. (INCLUDE EXAMPLE HERE)
+after the flag {\tt -Mmx} in the {\tt start-chrest} script. (INCLUDE EXAMPLE HERE)
 
 \subsection{Technical Details}
 
@@ -72,7 +76,7 @@ for the short-term memories show the contents of the nodes referred to; and the
 right-hand side shows the long-term memory network.  Various parts of the
 display may be modified: the long-term memory's orientation and size, and
 resizable bars let you alter the amount of each window that is occupied.  The
-'View' menu provides an option to save the long-term memory image to a file.
+`View' menu provides an option to save the long-term memory image to a file.
 You may open several view windows onto the same model, and they will all update
 as the model changes.  This enables you to look at different parts of the
 long-term memory or details of the short-term memory separately.
@@ -96,15 +100,20 @@ main types are described below.
 \label{properties}
 \end{figure}
 
-\section{Learn and recognise}
+\section{Supported Domains}
+
+The graphical environment provides direct support for a number of typical 
+domains and demonstrations.
+
+\subsection{Learn and recognise}
 
 The basic operations within CHREST are to learn about a new pattern and to
 retrieve a familiar pattern when given a stimulus.  The learn-and-recognise
 display allows the user to explore the basic learning mechanisms of the model.
 The display is shown in Figure~\ref{learn-and-recognise}.  The list of patterns
 is read from a data file.  The user highlights a pattern, and then uses one of
-the buttons on the right either to 'Learn' that pattern, or to 'Recognise' that
-pattern.  On clicking 'Recognise' the display will show the image of the node
+the buttons on the right either to `Learn' that pattern, or to `Recognise' that
+pattern.  On clicking `Recognise' the display will show the image of the node
 retrieved when the highlighted pattern is sorted through the network.  In this
 case, the pattern {\tt $<$a b$>$} has been retrieved.  To speed up learning,
 the user can use the `Learn all' button to learn each pattern once.  
@@ -126,20 +135,20 @@ a b
 d e a b
 \end{verbatim}
 
-The file starts with the keyword 'recognise-and-learn'.  Each pattern is on its
+The file starts with the keyword `recognise-and-learn'.  Each pattern is on its
 own line.  The atoms are separated by spaces.  The end marker is automatically
 added to each pattern as it is defined, and so should not be part of the data
 file.
 
-\section{Paired associate learning}
+\subsection{Paired associate learning}
 
 This form of learning is about learning that one pattern is typically
-associated with a second pattern: for example, seeing the word 'dog' and
-associating it with the word 'cat'.  The verbal-learning paradigm was important
+associated with a second pattern: for example, seeing the word `dog' and
+associating it with the word `cat'.  The verbal-learning paradigm was important
 in psychological research when EPAM was being developed, and the core learning
 mechanisms of EPAM and subsequently CHREST are based on the empirical support
 from that time.  The experimental format supported in the interface is the
-construction of a 'subject protocol', which is a trial-by-trial list of all the
+construction of a `subject protocol', which is a trial-by-trial list of all the
 responses made by the human participant in the experiment.  For this kind of
 task, the CHREST model forms sequence links between nodes of the same type in
 its long-term memory; these links are shown in the model view as a blue number
@@ -157,7 +166,7 @@ type of experiment.  The controls on the left display the list of
 stimulus-response pairs forming one set of data.  The times for which each item
 in the list is presented, and also the time before the next trial is made, may
 be altered.  The order of presentation may be as written or random, if the
-checkbox is ticked.  The  'Run Trial' button will respect the given timings and
+checkbox is ticked.  The  `Run Trial' button will respect the given timings and
 present each pattern in the list exactly once to the CHREST model.  The model's
 response to each stimulus is provided in a new column in the protocol display
 to the right of the display.  A count of the number of errors, responses that
@@ -167,7 +176,7 @@ There are two forms of the verbal-learning experiment.  The first is the
 paired-associate experiment, where each pair is independent of the other pairs
 in the list.  The second is the serial-anticipation task, where the idea is to
 learn the sequence of patterns.  Both tasks can be controlled through the above
-dialog (although for the second the 'random order' option should not be used).
+dialog (although for the second the `random order' option should not be used).
 They have different definition files.  The serial-anticipation experiment is
 simply a list of patterns, with each item in each pattern separated by a space.
 The paired-associate experiment uses a list of pairs of patterns.  Each pair is
@@ -198,8 +207,7 @@ M B W : B I P
 G Q K : W E K
 \end{verbatim}
 
-\newpage
-\section{Categorisation}
+\subsection{Categorisation}
 
 Categorisation is the process of assign labels to patterns.  We typically
 handle categorisation in CHREST by providing the patterns to be named as visual
@@ -244,10 +252,11 @@ categorisation
 0 0 1 0 : X 
 \end{verbatim}
 
-\newpage
-\section{Visual Attention and Recall}
+\subsection{Visual attention and recall}
 
-CHREST has been used to model the visual attention processes and memory of experts in domains such as chess.  The CHREST shell supports experiments in chess and related domains. 
+CHREST has been used to model the visual attention processes and memory of
+experts in domains such as chess.  The CHREST shell supports experiments in
+chess and related domains. 
 
 Figure~\ref{visual-search} shows the controls for training a model on a set of
 scenes.  The drop-down box at the top allows selection of the domain: specific
@@ -255,9 +264,9 @@ domains tailor internal processes within CHREST and add heuristics, such as
 following lines of attack/defence.  The aim of training is to create a CHREST
 model of a given size.  The choice of maximum number of training cycles is to
 place an upper limit on training times.  When the parameters are chosen, the
-'train' button should be clicked, and the model will be created.  The graph and
+`train' button should be clicked, and the model will be created.  The graph and
 progress bar will show progress towards the target number of chunks; the
-process may be stopped by clicking the 'stop' button.
+process may be stopped by clicking the `stop' button.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{images/visual-search.eps}
@@ -268,7 +277,7 @@ process may be stopped by clicking the 'stop' button.
 Once trained, the model's recall performance can be tested.  It is possible to
 use a separate set of files for recall by opening a new data file with the test
 files; the model will not be changed.  Figure~\ref{recall} shows the screen on
-the 'recall' tab.  At the top, a drop-down list can be used to select the
+the `recall' tab.  At the top, a drop-down list can be used to select the
 target scene.  The button on the right will cause the model to scan the target
 scene, and the recalled scene will be shown in the lower image.  Some
 statistics on performance are also shown.
@@ -280,7 +289,7 @@ statistics on performance are also shown.
 \end{figure}
 
 The data definition file for visual stimuli starts with the label
-'visual-search', then the height and width of the patterns separated by a
+`visual-search', then the height and width of the patterns separated by a
 space.  A blank line precedes the definition of the stimuli.  A full stop
 indicates an empty space.  The following example defines two chess positions:
 
@@ -311,20 +320,23 @@ R....R.K
 \section{Scripting}
 
 More complex models require more control over the experimental setup, the
-number of models to train, etc.  For this, control is needed from a program.
-As the CHREST shell is implemented in Java, you can use any language which the
-java virtual machine supports to develop models with CHREST.  The downloadable
-version has sample scripts for Lisp, Ruby, Groovy (which is based on Java) and
-Clojure (which looks rather like Lisp).  You can also use Java itself.  The
-javadoc documentation is provided for all classes provided within the jchrest
-library.  
+number of models to train, etc than can be provided in a graphical environment.
+For more complex models, control is needed from a program.  As the CHREST shell
+is implemented in Java, you can use any language which the Java virtual machine
+supports to develop models with CHREST.  The folder of examples includes
+scripts for a variety of languages including Lisp, Ruby, Groovy (which is based
+on Java) and Clojure (which looks rather like Lisp).  You can also use Java
+itself.\footnote{If you wish to learn a language to begin writing models with
+CHREST, then Ruby is recommended, as more examples are currently available and
+under active development.}
+
+%The javadoc documentation is provided for all classes provided within the jchrest library.  
 
 For most small projects, it is easy to create scripts using a reasonable editor
 and running from the command line.  However, it is also possible to use a
 development environment such as NetBeans or, for Lisp users, an appropriate
-editor such as Emacs+SLIME.  For illustration, we show how to set up such an
-environment for Lisp and Ruby.
-
+editor such as Emacs+SLIME.  For illustration, below are described some
+environments for working with CHREST using Lisp, Ruby and Groovy.
 
 \subsection{Development environment for Lisp}
 
@@ -338,18 +350,27 @@ Chrest models.
 The following steps will let you develop models with jruby:
 
 \begin{enumerate}
-\item Download and install NetBeans, including support for ruby, from http://netbeans.org/  (INSTALL PLUGIN)
-\item Create a new Ruby Project, using 'File/New/Project'.  You will get a dialog box similar to the one below.
-\item After clicking 'next' we need to tell NetBeans which ruby platform to use.  You need to select a jruby platform, which should already be installed.
+\item Download and install NetBeans, including support for ruby, from
+http://netbeans.org/  (INSTALL PLUGIN)
+\item Create a new Ruby Project, using `File/New/Project'.  You will get a
+dialog box similar to the one below.
+\item After clicking `next' we need to tell NetBeans which ruby platform to
+use.  You need to select a jruby platform, which should already be installed.
 \item The final step in setting up the environment is to include the Chrest
-library within the project. To do this , go to the 'Java' option in the
-Properties dialog box shown below. Select 'Add JAR/Folder' and add the
-chrest.jar file to the classpath for this project. 
+library within the project. To do this , go to the `Java' option in the
+Properties dialog box shown below. Select `Add JAR/Folder' and add the
+{\tt chrest.jar} file to the classpath for this project. 
 \item The only change you need to make to the ruby scripts is to remove the
-line 'require "chrest"'; this is taken care of by adding the jar file to the
+line `require "chrest"'; this is taken care of by adding the jar file to the
 project.
 \end{enumerate}
 
+\subsection{Development environment with Groovy}
+
+The Groovy console provides an easy-to-use scripting environment for those
+familiar with Groovy or the Java language.  Start the Groovy console, 
+add the jar {\tt chrest.jar} to the classpath using the option under the `Scripts' 
+menu, and then write code or run the provided examples.
 
 \end{document}
 

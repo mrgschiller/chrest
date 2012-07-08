@@ -5,12 +5,12 @@
 // and display what Chrest has learnt.
 //
 // To run this script, you must have installed groovy, 
-// and have jchrest.jar and example1.groovy together in 
+// and have chrest.jar and example1.groovy together in 
 // the same directory.  Then type: 
 // groovy -classpath jchrest.jar example1.groovy
 //
 // or start 'groovyConsole', open up this file within it,
-// and add jchrest.jar to the Classpath (under the 'Script' menu)
+// and add chrest.jar to the Classpath (under the 'Script' menu)
 // Finally, 'run script' (under the 'Script' menu).
 
 import jchrest.architecture.Chrest
@@ -21,9 +21,9 @@ import jchrest.lib.Pattern
 def model = new Chrest ();
 
 // Create three pattern instances
-def pattern1 = Pattern.makeList([1, 2, 3] as int[]);
-def pattern2 = Pattern.makeList([1, 3, 2] as int[]);
-def pattern3 = Pattern.makeList([2, 1, 3] as int[]);
+def pattern1 = Pattern.makeVisualList([1, 2, 3] as int[]);
+def pattern2 = Pattern.makeVisualList([1, 3, 2] as int[]);
+def pattern3 = Pattern.makeVisualList([2, 1, 3] as int[]);
 
 // Store them in an array
 def patterns = [pattern1, pattern2, pattern3]
@@ -43,4 +43,4 @@ for (pat in patterns) {
 }
 
 // And display the Model in a graphical view
-new ChrestView (model);
+new ChrestView (null, model);

@@ -1,7 +1,7 @@
 # Written by Peter Lane, 2010.
 
 require "java"
-require "jchrest"
+require "chrest"
 
 import "jchrest.architecture.Chrest"
 import "jchrest.gui.ChrestView"

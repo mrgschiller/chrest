@@ -4,7 +4,7 @@
 # See chapter 8 of 'In Order to Learn' (edited by F. Ritter et al), 2007.
 
 require "java"
-require "jchrest"
+require "chrest"
 
 import "jchrest.architecture.Chrest"
 import "jchrest.gui.ChrestView"

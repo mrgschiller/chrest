@@ -5,7 +5,7 @@
 # presentation time.
 
 require "java"
-require "jchrest"
+require "chrest"
 
 include_class "jchrest.architecture.Chrest"
 include_class "jchrest.gui.ChrestView"

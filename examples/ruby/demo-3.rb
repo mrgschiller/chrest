@@ -8,7 +8,7 @@
 # produces a 455601 node network in 8 minutes 31 seconds.
 
 require "java"
-require "jchrest"
+require "chrest"
 
 include_class "jchrest.architecture.Chrest"
 include_class "jchrest.gui.ChrestView"

@@ -1,7 +1,7 @@
 # Simple test that the model can handle a classification problem
 
 require "java"
-require "jchrest"
+require "chrest"
 
 include_class "jchrest.architecture.Chrest"
 include_class "jchrest.gui.ChrestView"
