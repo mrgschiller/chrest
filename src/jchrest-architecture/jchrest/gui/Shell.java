@@ -78,7 +78,7 @@ public class Shell extends JFrame {
           "<P>Released under Open Works License</a>, version 0.9.2.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell v. ALPHA", 
+          "About Chrest Shell v. 4.0.0-ALPHA", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }

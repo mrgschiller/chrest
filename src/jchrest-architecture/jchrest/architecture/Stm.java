@@ -100,12 +100,16 @@ public class Stm implements Iterable<Node> {
    * Add a lateral link indicating that the second node in this STM 
    * is followed by the top node.  The link is only added if not already 
    * present, and the model's clock is advanced by the time to add a link.
+   * Returns boolean to indicate if learning occurred or not.
    */
-  public void learnLateralLinks (Chrest model) {
+  public boolean learnLateralLinks (Chrest model) {
     if (_items.size () >= 2 && 
         _items.get(1).getFollowedBy () != _items.get(0)) {
       _items.get(1).setFollowedBy (_items.get(0));
       model.advanceClock (model.getAddLinkTime ());
+      return true;
+    } else {
+      return false;
     }
   }
 

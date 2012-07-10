@@ -179,7 +179,7 @@ public class ListPattern extends Pattern implements Iterable<PrimitivePattern> {
 
   /** 
    * Two patterns match if they are both ListPatterns and this ListPattern
-   * contains a subset of the given pattern. 
+   * contains given pattern as a presequence. 
    */
   public boolean matches (Pattern givenPattern) {
     if (!(givenPattern instanceof ListPattern)) return false;
