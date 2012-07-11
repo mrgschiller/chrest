@@ -5,9 +5,9 @@ This software project contains materials relating to the CHREST cognitive
 architecture.  
 
 
-Copyright and License
----------------------
+License
+-------
 
-The Chrest software is copyright Peter Lane 2009-2012, and released under 
-an Open Works License.  http://owl.apotheon.org/
+Chrest project files may be redistributed under the terms of the [Open Works
+License](http://owl.apotheon.org/).
 
