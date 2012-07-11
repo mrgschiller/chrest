@@ -1,3 +1,6 @@
+// Copyright (c) 2012, Peter C. R. Lane
+// Released under Open Works License, http://owl.apotheon.org/
+
 package jchrest.lib;
 
 import java.io.*;
@@ -179,7 +182,7 @@ public class ListPattern extends Pattern implements Iterable<PrimitivePattern> {
 
   /** 
    * Two patterns match if they are both ListPatterns and this ListPattern
-   * contains given pattern as a presequence. 
+   * is a presequence of given pattern. 
    */
   public boolean matches (Pattern givenPattern) {
     if (!(givenPattern instanceof ListPattern)) return false;

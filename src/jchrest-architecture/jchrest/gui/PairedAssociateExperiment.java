@@ -1,3 +1,6 @@
+// Copyright (c) 2012, Peter C. R. Lane
+// Released under Open Works License, http://owl.apotheon.org/
+
 package jchrest.gui;
 
 import jchrest.architecture.Chrest;
@@ -119,7 +122,7 @@ public class PairedAssociateExperiment extends JPanel {
       _model.freeze (); // save all gui updates to the end
       collectResponses ();
       for (PairedPattern pair : preparePatterns ()) {
-        _model.learnAndLinkPatterns (pair.getFirst (), pair.getSecond (), _exptClock);
+        _model.associateAndLearn (pair.getFirst (), pair.getSecond (), _exptClock);
         _exptClock += ((SpinnerNumberModel)_interItemTime.getModel()).getNumber().intValue ();
       }
       _exptClock += ((SpinnerNumberModel)_endTrialTime.getModel()).getNumber().intValue ();

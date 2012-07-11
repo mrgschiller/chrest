@@ -1,5 +1,7 @@
 # Rake file for managing the Chrest project
 
+JCOMMON = 'lib/jcommon-1.0.17.jar'
+JFREECHART = 'lib/jfreechart-1.0.14.jar'
 JRUBY = 'jruby-1.6.7.2' # name of jruby executable
 
 directory 'bin'
@@ -7,13 +9,13 @@ directory 'bin'
 desc 'compile Chrest classes into bin folder'
 task :compile => 'bin' do
   Dir.chdir ('src/jchrest-architecture') do
-    sh 'javac -cp ../../lib/jcommon-1.0.16.jar:../../lib/jfreechart-1.0.13.jar -d ../../bin `find -name "*.java"`'
+    sh "javac -cp ../../#{JCOMMON}:../../#{JFREECHART} -d ../../bin `find -name \"*.java\"`"
   end
 end
 
 desc 'run Chrest, from compiled code'
 task :run => :compile do
-  sh 'java -cp bin:lib/jcommon-1.0.16.jar:lib/jfreechart-1.0.13.jar jchrest/gui/Shell'
+  sh "java -cp bin:#{JCOMMON}:#{JFREECHART} jchrest/gui/Shell"
 end
 
 directory 'tmp'
@@ -21,8 +23,8 @@ directory 'tmp'
 desc 'extract java libs into tmp directory'
 task :extract_libs => 'tmp' do
   Dir.chdir('tmp') do
-    sh 'jar -xf ../lib/jcommon-1.0.16.jar'
-    sh 'jar -xf ../lib/jfreechart-1.0.13.jar'
+    sh "jar -xf ../#{JCOMMON}"
+    sh "jar -xf ../#{JFREECHART}"
   end
 end
 
@@ -59,7 +61,7 @@ directory 'doc/api'
 desc 'create API documentation'
 task :api_doc => 'doc/api' do
   Dir.chdir('src/jchrest-architecture') do
-    sh 'javadoc -classpath ../../lib/jcommon-1.0.16.jar:../../lib/jfreechart-1.0.13.jar -d ../../doc/api `find -name "*.java"`'
+    sh "javadoc -classpath ../../#{JCOMMON}:../../#{JFREECHART} -d ../../doc/api `find -name \"*.java\"`"
   end
 end
 
@@ -68,10 +70,20 @@ desc 'bundle for release'
 task :bundle => [:guide, :make_jar, :api_doc, 'release/chrest'] do
   Dir.chdir('release/chrest') do
     sh 'cp ../../chrest.jar .'
+    sh 'cp ../../lib/license.txt .'
     sh 'cp -r ../../examples .'
     sh 'cp ../../doc/user-guide/user-guide.pdf .'
     sh 'cp -r ../../doc/api ./javadoc'
-    sh 'rm examples/ruby/chrest.jar'
+    File.open("start-chrest.sh", "w") do |file|
+      file.puts <<END
+java -Xmx100M -jar chrest.jar
+END
+    end
+    File.open("start-chrest.bat", "w") do |file|
+      file.puts <<END
+start javaw -Xmx100M -jar chrest.jar
+END
+    end
   end
   Dir.chdir('release') do
     sh 'zip -r chrest-1.0.0.zip chrest'

@@ -1,3 +1,6 @@
+// Copyright (c) 2012, Peter C. R. Lane
+// Released under Open Works License, http://owl.apotheon.org/
+
 package jchrest.gui;
 
 import jchrest.architecture.Chrest;
@@ -18,7 +21,7 @@ public class ChrestView extends JFrame implements Observer {
   private ChrestTimeView _timeView;
 
   public ChrestView (Chrest model) {
-    this (null, model);
+    this (new Shell (), model);
   }
 
   public ChrestView (Shell shell, Chrest model) {

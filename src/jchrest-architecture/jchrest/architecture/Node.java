@@ -1,3 +1,6 @@
+// Copyright (c) 2012, Peter C. R. Lane
+// Released under Open Works License, http://owl.apotheon.org/
+
 package jchrest.architecture;
 
 import java.io.IOException;
@@ -574,7 +577,10 @@ public class Node extends Observable {
    * non-empty and constitutes a valid, new test for the current Node.
    */
   private Node addTest (ListPattern pattern) {
-    Node child = new Node (_model, _contents.append (pattern), new ListPattern (_contents.getModality ()));
+    Node child = new Node (_model, 
+        ( (_reference == 0) ? pattern : _contents.append(pattern)), // don't append to 'Root'
+        new ListPattern (_contents.getModality ())
+        );
     addTestLink (pattern, child);
     _model.advanceClock (_model.getDiscriminationTime ());
     return child;
@@ -609,8 +615,13 @@ public class Node extends Observable {
 
     Node retrievedChunk = _model.recognise (newInformation);
     if (retrievedChunk == _model.getLtmByModality (pattern)) {
+      // 3. if root node is retrieved, use primitive as test
+      // REMOVE PRIMITIVE LEARNING
+      ListPattern testPattern = newInformation.getFirstItem ();
+      testPattern.setNotFinished (); // ensure test link is not finished
+      return addTest (testPattern);
       // 3. if root node is retrieved, then the primitive must be learnt
-      return _model.getLtmByModality(newInformation).learnPrimitive (newInformation.getFirstItem ());
+      // return _model.getLtmByModality(newInformation).learnPrimitive (newInformation.getFirstItem ());
     } else if (retrievedChunk.getImage().isEmpty ()) {
       // 4. if the retrieved chunk has an empty image, then familiarisation must occur
       // to extend that image.
@@ -648,8 +659,13 @@ public class Node extends Observable {
 
     Node retrievedChunk = _model.recognise (newInformation);
     if (retrievedChunk == _model.getLtmByModality (pattern)) {
+      // 3. if root node is retrieved, familiarise with next primitive
+      // REMOVE PRIMITIVE LEARNING
+      ListPattern toadd = newInformation.getFirstItem ();
+      toadd.setNotFinished ();
+      return extendImage (toadd);
       // 3. if root node is retrieved, first item of newInformation is an unknown primitive
-      return _model.getLtmByModality(pattern).learnPrimitive (newInformation.getFirstItem ());
+      // return _model.getLtmByModality(pattern).learnPrimitive (newInformation.getFirstItem ());
     } else if (retrievedChunk.getImage().isEmpty ()) {
       // 4. the retrieved chunk is empty, so use first item to extend image
       // note: first item is known primitive, because new-information sorted to this node

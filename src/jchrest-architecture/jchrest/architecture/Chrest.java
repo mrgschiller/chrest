@@ -1,3 +1,6 @@
+// Copyright (c) 2012, Peter C. R. Lane
+// Released under Open Works License, http://owl.apotheon.org/
+
 package jchrest.architecture;
 
 import jchrest.lib.*;
@@ -529,8 +532,28 @@ public class Chrest extends Observable {
     return currentNode;
   }
 
+  /**
+   * Used to learn about a new pattern.  Returns the node learnt.
+   */
   public Node recogniseAndLearn (ListPattern pattern) {
     return recogniseAndLearn (pattern, _clock);
+  }
+
+  /**
+   * Used to learn an association between two patterns.  The two patterns may be 
+   * of the same or different modality.  Returns the node learnt for the first pattern.
+   */
+  public Node associateAndLearn (ListPattern pattern1, ListPattern pattern2, int time) {
+    if (ListPattern.isSameModality (pattern1, pattern2)) {
+      return learnAndLinkPatterns(pattern1, pattern2, time);
+    } else {
+      // TODO: Handle differing modalities.
+      return null;
+    }
+  }
+
+  public Node associateAndLearn (ListPattern pattern1, ListPattern pattern2) {
+    return associateAndLearn (pattern1, pattern2, _clock);
   }
 
   /**
@@ -569,29 +592,73 @@ public class Chrest extends Observable {
 
   /**
    * Presents Chrest with a pair of patterns, which it should learn and 
-   * then attempt to learn a link.
+   * then attempt to learn a link.  Assumes the two patterns are of the same modality.
    */
-  public void learnAndLinkPatterns (ListPattern pattern1, ListPattern pattern2, int time) {
-    recogniseAndLearn (pattern1, time);
-    recogniseAndLearn (pattern2, time);
-    if (_clock <= time) {
-      if (pattern1.isVisual ()) {
-        _visualStm.learnLateralLinks (this);
-      } else if (pattern1.isVerbal ()) {
-        _verbalStm.learnLateralLinks (this);
-      } else { // if (pattern1.isAction ())
-        _actionStm.learnLateralLinks (this);
+  private Node learnAndLinkPatterns (ListPattern pattern1, ListPattern pattern2, int time) {
+    Node pat1Retrieved = recognise (pattern1);
+    // 1. is retrieved node image a match for pattern1?
+    if (pat1Retrieved.getImage().matches (pattern1)) {
+      // 2. does retrieved node have a lateral link?
+      if (pat1Retrieved.getFollowedBy() != null) {
+        // if yes
+        //   3. is linked node image match pattern2? if not, learn pattern2
+        if (pat1Retrieved.getFollowedBy().getImage().matches (pattern2)) {
+          //   if yes
+          //   4. if linked node image == pattern2, learn pattern1, else learn pattern2
+          if (pat1Retrieved.getFollowedBy().getImage().equals (pattern2)) {
+            recogniseAndLearn (pattern1, time); // TODO: this is overlearning?
+          } else {
+            recogniseAndLearn (pattern2, time);
+          }
+        } else {
+          recogniseAndLearn (pattern2, time);
+          // force it to correct a mistake
+          recogniseAndLearn (pattern1, time);
+          if (_clock <= time) {
+            Node pat2Retrieved = recognise (pattern2);
+            // 6. if pattern2 retrieved node image match for pattern2, learn link, else learn pattern2
+            if (pat2Retrieved.getImage().matches (pattern2)) {
+              pat1Retrieved.setFollowedBy (pat2Retrieved);
+              advanceClock (getAddLinkTime ());
+              setChanged ();
+              if (!_frozen) notifyObservers ();
+            }
+          }
+        } 
+      } else {
+        // if not
+        // 5. sort pattern2
+        Node pat2Retrieved = recognise (pattern2);
+        // 6. if pattern2 retrieved node image match for pattern2, learn link, else learn pattern2
+        if (pat2Retrieved.getImage().matches (pattern2)) {
+          pat1Retrieved.setFollowedBy (pat2Retrieved);
+          advanceClock (getAddLinkTime ());
+          setChanged ();
+          if (!_frozen) notifyObservers ();
+        } else { // image not a match, so we need to learn pattern 2
+          recogniseAndLearn (pattern2, time);
+          // 5. sort pattern2
+          pat2Retrieved = recognise (pattern2);
+          // 6. if pattern2 retrieved node image match for pattern2, learn link, else learn pattern2
+          if (pat2Retrieved.getImage().matches (pattern2)) {
+            pat1Retrieved.setFollowedBy (pat2Retrieved);
+            advanceClock (getAddLinkTime ());
+            setChanged ();
+            if (!_frozen) notifyObservers ();
+          }
+        }
       }
-      setChanged ();
-      if (!_frozen) notifyObservers ();
+    } else { // image not a match, so we need to learn pattern 1
+      recogniseAndLearn (pattern1, time);
     }
+    return pat1Retrieved;
   }
 
   /**
    * Learns the two patterns assuming the time of presentation is the current 
    * Chrest clock time.
    */
-  public void learnAndLinkPatterns (ListPattern pattern1, ListPattern pattern2) {
+  private void learnAndLinkPatterns (ListPattern pattern1, ListPattern pattern2) {
     learnAndLinkPatterns (pattern1, pattern2, _clock);
   }
 

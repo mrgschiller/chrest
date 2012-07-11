@@ -1,3 +1,6 @@
+// Copyright (c) 2012, Peter C. R. Lane
+// Released under Open Works License, http://owl.apotheon.org/
+
 package jchrest.gui;
 
 import jchrest.architecture.Chrest;
@@ -32,7 +35,7 @@ import org.jfree.data.statistics.*;
 public class Shell extends JFrame {
   private Chrest _model;
 
-  private Shell () {
+  public Shell () {
     super ("CHREST");
 
     _model = new Chrest ();
@@ -45,7 +48,6 @@ public class Shell extends JFrame {
     setSize(600, 400);
     setLocationRelativeTo (null);
     setTheme ("Nimbus");
-    setVisible (true);
   }
 
   private void createMenuBar () {
@@ -632,7 +634,10 @@ public class Shell extends JFrame {
    */
   public static void main (String[] args) {
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
-      public void run() { new Shell (); }
+      public void run() { 
+        Shell shell = new Shell (); 
+        shell.setVisible (true);
+      }
     });
   }
 }
