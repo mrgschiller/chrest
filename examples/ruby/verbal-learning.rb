@@ -134,7 +134,7 @@ puts "   F-U      1.6     1.8       2.8      #{fu.to_f/ff}"
 puts "   U-U      1.8     2.5       3.7      #{uu.to_f/ff}"
 puts
 
-# Experiment 2 : Constant Learning Time"
+# Experiment 2 : Constant Learning Time
 #
 # Aim:
 # Simulate result of Bugelski (1962) that total time to learn a 
@@ -252,7 +252,7 @@ NumTrials = 10
   ResultsTimes[time] = ResultsTimes[time]/NumTrials.to_f
 end
 
-puts "Experiment 2:"
+puts "Experiment 2:  *** IN PROGRESS *** "
 puts "Constant Learning Time"
 puts
 puts "Table of Mean trials and total times to learn lists"
@@ -276,6 +276,30 @@ puts "   12 sec       4.7        56.1       5.0        59.5     \
 puts "   19 sec       3.3        62.2       3.5        65.9     \
 #{"%4.1f" % ResultsTrials[19000]}     #{"%4.1f" % ResultsTimes[19000]}"
 puts
+
+
+# Experiment 3 : Effect of Intra-List Similarity of Stimuli and Responses
+#
+# Aim: 
+# Simulate result of Underwood (1953) that intralist similarity of stimuli 
+# effects learning rate, but not intralist similarity of responses.
+
+
+puts "Experiment 3:  *** IN PROGRESS *** "
+puts "Effect of Intra-List Similarity of Stimuli and Responses"
+puts
+puts "Table of Mean trials to learn as a function of stimulus and response similarity"
+puts
+puts "                         EPAM III              EPAM VI         CHREST"
+puts "                      ---------------  ----------------------        "
+puts "Condition    People   Normal CV-Group    Quick      With-STM         " 
+puts "---------- ---------- ---------------  ----------- ----------  ------"
+puts "Low-Low    100 (23.2)   100     100    100 (13.0)  100 (13.4) "
+puts "Low-Medium  96 (22.4)    88     100     98 (12.8)   97 (13.0) "
+puts "Low-High   105 (24.4)    91     100     97 (12.6)   97 (13.0) " 
+puts "Medium-Low 110 (25.5)   140     100    118 (15.3)  114 (15.3) "
+puts "High-Low   132 (30.7)   146     114    124 (16.2)  120 (16.0)"
+puts 
 
 # ==========================================================================
 # Simple graphical demonstration of networks

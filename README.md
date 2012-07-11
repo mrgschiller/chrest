@@ -4,6 +4,11 @@ CHREST
 This software project contains materials relating to the CHREST cognitive 
 architecture.  
 
+Using Chrest
+------------
+
+Details on using Chrest will be made available on the
+[wiki](https://github.com/petercrlane/chrest/wiki).
 
 License
 -------
