@@ -208,7 +208,7 @@ end
 # -- start of experiment
 
 def not_fully_learnt?(model, experiment) 
-  1.upto(experiment.num_items-2) do |index|
+  0.upto(experiment.num_items-2) do |index|
     retrieved_pattern = model.follow_pattern(experiment[index])
     return true if retrieved_pattern.nil? 
     return true unless retrieved_pattern.java_send(:equals, [Java::jchrest.lib.ListPattern], (experiment[index+1]))
@@ -284,8 +284,108 @@ puts
 # Simulate result of Underwood (1953) that intralist similarity of stimuli 
 # effects learning rate, but not intralist similarity of responses.
 
+PairsLowLow = ChrestPattern.makeSRPairs [
+  ["xin", "vod"],
+  ["toq", "hax"], 
+  ["wep", "cem"], 
+  ["duf", "jyl"], 
+  ["myd", "siq"], 
+  ["ruk", "fec"], 
+  ["nas", "baj"], 
+  ["pov", "loz"], 
+  ["kir", "zub"],
+  ["gac", "yug"]
+]
+PairsLowMedium = ChrestPattern.makeSRPairs [
+  ["xin", "hiz"], 
+  ["toq", "vec"], 
+  ["wep", "vir"], 
+  ["duf", "juw"], 
+  ["myd", "hul"], 
+  ["ruk", "fec"], 
+  ["nas", "yor"], 
+  ["pov", "jal"], 
+  ["kir", "foz"],
+  ["gac", "yaw"]
+]
+PairsLowHigh = ChrestPattern.makeSRPairs [
+  ["xin", "hux"], 
+  ["toq", "hex"], 
+  ["wep", "yal"], 
+  ["duf", "yor"], 
+  ["myd", "jir"], 
+  ["ruk", "yol"], 
+  ["nas", "jax"], 
+  ["pov", "jix"], 
+  ["kir", "jer"],
+  ["gac", "hul"]
+]
+PairsMediumLow = ChrestPattern.makeSRPairs [
+  ["hiz", "xin"], 
+  ["vec", "toq"], 
+  ["vir", "wep"], 
+  ["juw", "duf"], 
+  ["hul", "myd"],
+  ["fec", "ruk"],
+  ["yor", "nas"], 
+  ["jal", "pov"], 
+  ["foz", "kir"], 
+  ["yaw", "gac"]
+]
+PairsHighLow = ChrestPattern.makeSRPairs [
+  ["hux", "xin"],
+  ["hex", "toq"], 
+  ["yal", "wep"], 
+  ["yor", "duf"], 
+  ["jir", "myd"],
+  ["yol", "ruk"], 
+  ["jax", "nas"], 
+  ["jix", "pov"], 
+  ["jer", "kir"], 
+  ["hul", "gac"]
+]
 
-puts "Experiment 3:  *** IN PROGRESS *** "
+def run_expt_3 pairs 
+  total = 0
+  10.times do
+    total += run_expt_3_single pairs
+  end
+  return total.to_f/10
+end
+
+def run_expt_3_single(pairs, presentation_time = 19000, timeout = 100)
+  model = Chrest.new
+  model.discrimination_time = 8000
+  model.familiarisation_time = 2000
+  model.add_link_time = 8000
+  model.rho = 0.7
+  errors = 0
+  cycle = 0
+  clock = 0
+  begin
+    some_unknown = false
+    cycle += 1
+    clock += presentation_time
+    pairs.each do |stimulus, response|
+      if model.follow_pattern(stimulus).nil? or 
+        !(model.follow_pattern(stimulus).java_send(:equals, [Java::jchrest.lib.ListPattern], response))
+        some_unknown = true
+        errors += 1
+        model.associate_and_learn(stimulus, response, clock)
+      end
+    end
+  end while some_unknown and cycle <= timeout
+  return cycle
+end
+
+Expt3Results = {}
+Expt3Results["low-low"] = run_expt_3 PairsLowLow
+Expt3Results["low-medium"] = run_expt_3 PairsLowMedium
+Expt3Results["low-high"] = run_expt_3 PairsLowHigh
+Expt3Results["medium-low"] = run_expt_3 PairsMediumLow
+Expt3Results["high-low"] = run_expt_3 PairsHighLow
+
+puts "Experiment 3:"
 puts "Effect of Intra-List Similarity of Stimuli and Responses"
 puts
 puts "Table of Mean trials to learn as a function of stimulus and response similarity"
@@ -293,12 +393,17 @@ puts
 puts "                         EPAM III              EPAM VI         CHREST"
 puts "                      ---------------  ----------------------        "
 puts "Condition    People   Normal CV-Group    Quick      With-STM         " 
-puts "---------- ---------- ---------------  ----------- ----------  ------"
-puts "Low-Low    100 (23.2)   100     100    100 (13.0)  100 (13.4) "
-puts "Low-Medium  96 (22.4)    88     100     98 (12.8)   97 (13.0) "
-puts "Low-High   105 (24.4)    91     100     97 (12.6)   97 (13.0) " 
-puts "Medium-Low 110 (25.5)   140     100    118 (15.3)  114 (15.3) "
-puts "High-Low   132 (30.7)   146     114    124 (16.2)  120 (16.0)"
+puts "---------- ---------- ------ --------  ----------- ----------  -------------"
+puts "Low-Low    100 (23.2)   100     100    100 (13.0)  100 (13.4)   \
+#{"%5.1f" % (Expt3Results['low-low']*100.0/Expt3Results['low-low'])} (#{Expt3Results['low-low']})"
+puts "Low-Medium  96 (22.4)    88     100     98 (12.8)   97 (13.0)   \
+#{"%5.1f" % (Expt3Results['low-medium']*100.0/Expt3Results['low-low'])} (#{Expt3Results['low-medium']})"
+puts "Low-High   105 (24.4)    91     100     97 (12.6)   97 (13.0)   \
+#{"%5.1f" % (Expt3Results['low-high']*100.0/Expt3Results['low-low'])} (#{Expt3Results['low-high']})" 
+puts "Medium-Low 110 (25.5)   140     100    118 (15.3)  114 (15.3)   \
+#{"%5.1f" % (Expt3Results['medium-low']*100.0/Expt3Results['low-low'])} (#{Expt3Results['medium-low']})"
+puts "High-Low   132 (30.7)   146     114    124 (16.2)  120 (16.0)   \
+#{"%5.1f" % (Expt3Results['high-low']*100.0/Expt3Results['low-low'])} (#{Expt3Results['high-low']})"
 puts 
 
 # ==========================================================================
