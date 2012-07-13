@@ -49,7 +49,7 @@ public class Node extends Observable {
     _model = model;
     _reference = reference;
     _contents = contents.clone ();
-    _contents.setNotFinished (); // do not allow contents to be finished
+//    _contents.setNotFinished (); // do not allow contents to be finished // WHY NOT? 13/7/12
     _image = image;
     _children = new ArrayList<Link> ();
     _similarNodes = new ArrayList<Node> ();
@@ -559,12 +559,13 @@ public class Node extends Observable {
    * LearnPrimitive is used to construct a test link and node containing 
    * precisely the given pattern.  It is assumed the given pattern contains 
    * a single primitive item, and is finished.
+   * TODO: CLEAN UP CODE AND DESCRIPTION
    */
   public Node learnPrimitive (ListPattern pattern) {
     assert (pattern.isFinished () && pattern.size () == 1);
     ListPattern contents = pattern.clone ();
     contents.setNotFinished ();
-    Node child = new Node (_model, contents, pattern);
+    Node child = new Node (_model, contents, new ListPattern (pattern.getModality ()));
     addTestLink (contents, child);
     _model.advanceClock (_model.getDiscriminationTime ());
 
@@ -606,22 +607,49 @@ public class Node extends Observable {
 
     // cases 1 & 2 if newInformation is empty
     if (newInformation.isEmpty ()) {
-      if (newInformation.isFinished ()) { // 1. add test for < $ >
-        return addTest (newInformation);
-      } else { // 2. no information to make a new test with
-        return this;
+      // change for conformance
+      newInformation.setFinished ();
+      // 1. is < $ > known?
+      if (_model.recognise (newInformation).getContents ().equals (newInformation) ) {
+      // 2. if so, use as test
+      // ignore if already a test
+      for (Link child : _children) {
+        if (child.getTest().equals (newInformation)) {
+          return this;
+        }
       }
+    Node child = new Node (_model, 
+        ( (_reference == 0) ? pattern : _contents.append(newInformation)), // don't append to 'Root'
+        ( (_reference == 0) ? pattern : _contents.append(newInformation)) // same image
+        );
+    addTestLink (newInformation, child);
+    _model.advanceClock (_model.getDiscriminationTime ());
+    return child;
+//        return addTest (newInformation.clone ());
+      } else {
+      // 3. if not, then learn it
+        Node child = new Node (_model, newInformation, newInformation);
+        _model.getVisualLtm().addTestLink (newInformation, child);
+        return child;
+      }
+
+      // OLD VERSION - only use < $ > if given in input
+//      if (newInformation.isFinished ()) { // 1. add test for < $ >
+//        return addTest (newInformation);
+//      } else { // 2. no information to make a new test with
+//        return this;
+//      }
     }
 
     Node retrievedChunk = _model.recognise (newInformation);
     if (retrievedChunk == _model.getLtmByModality (pattern)) {
       // 3. if root node is retrieved, use primitive as test
       // REMOVE PRIMITIVE LEARNING
-      ListPattern testPattern = newInformation.getFirstItem ();
-      testPattern.setNotFinished (); // ensure test link is not finished
-      return addTest (testPattern);
+//      ListPattern testPattern = newInformation.getFirstItem ();
+//      testPattern.setNotFinished (); // ensure test link is not finished
+//      return addTest (testPattern);
       // 3. if root node is retrieved, then the primitive must be learnt
-      // return _model.getLtmByModality(newInformation).learnPrimitive (newInformation.getFirstItem ());
+       return _model.getLtmByModality(newInformation).learnPrimitive (newInformation.getFirstItem ());
     } else if (retrievedChunk.getImage().isEmpty ()) {
       // 4. if the retrieved chunk has an empty image, then familiarisation must occur
       // to extend that image.
@@ -661,11 +689,11 @@ public class Node extends Observable {
     if (retrievedChunk == _model.getLtmByModality (pattern)) {
       // 3. if root node is retrieved, familiarise with next primitive
       // REMOVE PRIMITIVE LEARNING
-      ListPattern toadd = newInformation.getFirstItem ();
-      toadd.setNotFinished ();
-      return extendImage (toadd);
+//      ListPattern toadd = newInformation.getFirstItem ();
+//      toadd.setNotFinished ();
+//      return extendImage (toadd);
       // 3. if root node is retrieved, first item of newInformation is an unknown primitive
-      // return _model.getLtmByModality(pattern).learnPrimitive (newInformation.getFirstItem ());
+      return _model.getLtmByModality(pattern).learnPrimitive (newInformation.getFirstItem ());
     } else if (retrievedChunk.getImage().isEmpty ()) {
       // 4. the retrieved chunk is empty, so use first item to extend image
       // note: first item is known primitive, because new-information sorted to this node

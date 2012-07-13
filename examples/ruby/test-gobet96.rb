@@ -6,7 +6,9 @@
 #   4. recall performance
 # Data is held in chess-training-gobet96.dat and chess-test-gobet96.dat
 
-# Written by Peter Lane, 2010.
+# Written by Peter Lane, 2010-12.
+
+# TODO: Average results over several models
 
 require "java"
 require "chrest"
@@ -181,6 +183,10 @@ def avg_recall results
   100*average(results.collect {|res| res.recall})
 end
 
+# TODO:
+# to compute bc/pc, look at squares/pieces in periphery
+# i.e. expand fixated_N to include all N in periphery of given item
+
 def avg_fbc results
   100*average(results.collect {|res| res.fixated_squares.quo(64)})
 end
@@ -197,7 +203,7 @@ TrainingData = read_data "../sample-data/chess-positions.dat"
 TestData = read_data "chess-test-gobet96.dat"
 
 @@novice_model = create_model(TrainingData, 2, 20, 200)
-@@expert_model = create_model(TrainingData, 2) #, 20, 1000)
+@@expert_model = create_model(TrainingData, 2, 20, 25000)
 
 @@novice_results = []
 TestData.get_scene_names.length.times do |i|
