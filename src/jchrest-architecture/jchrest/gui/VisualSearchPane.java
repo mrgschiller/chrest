@@ -774,9 +774,9 @@ class SceneDisplay extends JPanel {
       int prevX = -1;
       int prevY = -1;
       if (_showFixations) {
+        g2.setColor (Color.RED); // first fixation in red
+        g2.setStroke (new BasicStroke (6)); // with thick border
         for (Fixation fixation : _fixations) {
-          g2.setColor (Color.BLUE);
-          g2.setStroke (new BasicStroke (2));
           int nextX = offsetX + scale * fixation.getX () + 5;
           int nextY = offsetY + scale * fixation.getY () + 5;
           if (prevX == -1 && prevY == -1) {
@@ -787,6 +787,8 @@ class SceneDisplay extends JPanel {
           g2.drawOval (nextX, nextY, scale-10, scale-10); 
           prevX = nextX+5; 
           prevY = nextY+5;
+          g2.setColor (Color.BLUE); // remaining fixations in blue
+          g2.setStroke (new BasicStroke (2)); // and narrower
         }
       }
     }

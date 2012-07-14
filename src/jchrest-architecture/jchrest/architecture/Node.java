@@ -49,10 +49,9 @@ public class Node extends Observable {
     _model = model;
     _reference = reference;
     _contents = contents.clone ();
-//    _contents.setNotFinished (); // do not allow contents to be finished // WHY NOT? 13/7/12
     _image = image;
     _children = new ArrayList<Link> ();
-    _similarNodes = new ArrayList<Node> ();
+    _semanticLinks = new ArrayList<Node> ();
     _followedBy = null;
     _namedBy = null;
     _actionLinks = new ArrayList<Node> ();
@@ -118,21 +117,21 @@ public class Node extends Observable {
   }
 
   /**
-   * Add a node to the list of similar nodes.  Do not add duplicates.
+   * Make a semantic link between this node and given node.  Do not add duplicates.
    */
-  void addSimilarNode (Node node) {
-    if (!_similarNodes.contains (node)) {
-      _similarNodes.add (node);
+  void addSemanticLink (Node node) {
+    if (!_semanticLinks.contains (node)) {
+      _semanticLinks.add (node);
       setChanged ();
       notifyObservers ();
     }
   }
 
   /**
-   * Accessor to list of similar nodes.
+   * Accessor to list of semantic links.
    */
-  public List<Node> getSimilarNodes () {
-    return _similarNodes;
+  public List<Node> getSemanticLinks () {
+    return _semanticLinks;
   }
 
   /**
@@ -244,11 +243,11 @@ public class Node extends Observable {
   }
 
   /**
-   * Add to a map from number of similarity nodes to frequency, for this node and its children.
+   * Add to a map from number of semantic links to frequency, for this node and its children.
    */
-  protected void getSimilarityCounts (Map<Integer, Integer> size) {
-    int csize = _similarNodes.size ();
-    if (csize > 0) { // do not count nodes with no similarity links
+  protected void getSemanticLinkCounts (Map<Integer, Integer> size) {
+    int csize = _semanticLinks.size ();
+    if (csize > 0) { // do not count nodes with no semantic links
       if (size.containsKey (csize)) {
         size.put (csize, size.get(csize) + 1);
       } else {
@@ -257,7 +256,7 @@ public class Node extends Observable {
     }
 
     for (Link child : _children) {
-      child.getChildNode().getSimilarityCounts (size);
+      child.getChildNode().getSemanticLinkCounts (size);
     }
   }
   
@@ -267,7 +266,7 @@ public class Node extends Observable {
   private final ListPattern _contents;
   private ListPattern _image;
   private List<Link> _children;
-  private List<Node> _similarNodes;
+  private List<Node> _semanticLinks;
   private Node _followedBy;
   private Node _namedBy;
   private List<Node> _actionLinks;
@@ -453,7 +452,7 @@ public class Node extends Observable {
       for (Link link : _children) {
         patterns.add (link.getChildNode().getImage().remove (_contents));
       }
-      for (Node node : _similarNodes) {
+      for (Node node : _semanticLinks) {
         patterns.add (node.getImage().remove (_contents));
       }
       // create a hashmap of counts of occurrences of items and of squares
@@ -503,7 +502,7 @@ public class Node extends Observable {
 
   /** Return true if template conditions are met:
    * 1. contents size > _model.getMinTemplateLevel ()
-   * then one of:
+   * then:
    * 2. gather together current node image and images of all nodes linked by the test links
    *    remove the contents of current node from those images
    *    see if any piece or square repeats more than once
@@ -516,6 +515,9 @@ public class Node extends Observable {
     patterns.add (_image.remove (_contents));
     for (Link link : _children) {
       patterns.add (link.getChildNode().getImage().remove (_contents));
+    }
+    for (Node node : _semanticLinks) {
+      patterns.add (node.getImage().remove (_contents));
     }
     // create a hashmap of counts of occurrences of items and of squares
     Map<String,Integer> countItems = new HashMap<String,Integer> ();
@@ -580,7 +582,8 @@ public class Node extends Observable {
   private Node addTest (ListPattern pattern) {
     Node child = new Node (_model, 
         ( (_reference == 0) ? pattern : _contents.append(pattern)), // don't append to 'Root'
-        new ListPattern (_contents.getModality ())
+        ( (_reference == 0) ? pattern : _contents.append(pattern)) // make same as contents vs Chrest 2
+        //new ListPattern (_contents.getModality ())
         );
     addTestLink (pattern, child);
     _model.advanceClock (_model.getDiscriminationTime ());
@@ -601,6 +604,10 @@ public class Node extends Observable {
   /**
    * Discrimination learning extends the LTM network by adding new 
    * nodes.
+   * Note: in CHREST 2 tests are pointers to nodes.  This can be 
+   * implemented using a Link interface, and having a LinkNode class, 
+   * so that checking if test passed is done through the interface.
+   * This may be needed later for semantic/template learning.
    */
   Node discriminate (ListPattern pattern) {
     ListPattern newInformation = pattern.remove (_contents);
@@ -611,34 +618,34 @@ public class Node extends Observable {
       newInformation.setFinished ();
       // 1. is < $ > known?
       if (_model.recognise (newInformation).getContents ().equals (newInformation) ) {
-      // 2. if so, use as test
-      // ignore if already a test
-      for (Link child : _children) {
-        if (child.getTest().equals (newInformation)) {
-          return this;
+        // 2. if so, use as test
+        // ignore if already a test
+        for (Link child : _children) {
+          if (child.getTest().equals (newInformation)) {
+            return this;
+          }
         }
-      }
-    Node child = new Node (_model, 
-        ( (_reference == 0) ? pattern : _contents.append(newInformation)), // don't append to 'Root'
-        ( (_reference == 0) ? pattern : _contents.append(newInformation)) // same image
-        );
-    addTestLink (newInformation, child);
-    _model.advanceClock (_model.getDiscriminationTime ());
-    return child;
-//        return addTest (newInformation.clone ());
+        Node child = new Node (_model, 
+            ( (_reference == 0) ? pattern : _contents.append(newInformation)), // don't append to 'Root'
+            ( (_reference == 0) ? pattern : _contents.append(newInformation)) // same image
+            );
+        addTestLink (newInformation, child);
+        _model.advanceClock (_model.getDiscriminationTime ());
+        return child;
+        //        return addTest (newInformation.clone ());
       } else {
-      // 3. if not, then learn it
+        // 3. if not, then learn it
         Node child = new Node (_model, newInformation, newInformation);
         _model.getVisualLtm().addTestLink (newInformation, child);
         return child;
       }
 
       // OLD VERSION - only use < $ > if given in input
-//      if (newInformation.isFinished ()) { // 1. add test for < $ >
-//        return addTest (newInformation);
-//      } else { // 2. no information to make a new test with
-//        return this;
-//      }
+      //      if (newInformation.isFinished ()) { // 1. add test for < $ >
+      //        return addTest (newInformation);
+      //      } else { // 2. no information to make a new test with
+      //        return this;
+      //      }
     }
 
     Node retrievedChunk = _model.recognise (newInformation);
@@ -650,14 +657,14 @@ public class Node extends Observable {
 //      return addTest (testPattern);
       // 3. if root node is retrieved, then the primitive must be learnt
        return _model.getLtmByModality(newInformation).learnPrimitive (newInformation.getFirstItem ());
-    } else if (retrievedChunk.getImage().isEmpty ()) {
+//    } else if (retrievedChunk.getImage().isEmpty ()) {
       // 4. if the retrieved chunk has an empty image, then familiarisation must occur
       // to extend that image.
-      return retrievedChunk.familiarise (newInformation);
-    } else if (retrievedChunk.getImage().matches (newInformation)) {
+//      return retrievedChunk.familiarise (newInformation);
+    } else if (retrievedChunk.getContents().matches (newInformation)) {
       // 5. retrieved chunk can be used as a test
-      ListPattern testPattern = retrievedChunk.getImage().clone ();
-      testPattern.setNotFinished (); // ensure test link is not finished
+      ListPattern testPattern = retrievedChunk.getContents().clone ();
+//      testPattern.setNotFinished (); // ensure test link is not finished
       return addTest (testPattern);
     } else { 
       // 6. mismatch, so use only the first item for test
@@ -673,46 +680,42 @@ public class Node extends Observable {
    * information from the given pattern.
    */
   Node familiarise (ListPattern pattern) {
-    ListPattern newInformation = pattern.remove (_image);
+    ListPattern newInformation = pattern.remove (_image).getFirstItem ();
+    newInformation.setNotFinished ();
+    // EXIT if nothing to learn
+    if (newInformation.isEmpty ()) { 
+      return this;
+    }
+    //
+    // Note: CHREST 2 had the idea of not familiarising if image size exceeds 
+    // the max of 5 and 2*contents-size.  This avoids overly large images.
+    // This idea is not implemented here.
+    //
+    Node retrievedChunk = _model.recognise (newInformation);
+    if (retrievedChunk == _model.getLtmByModality (pattern)) {
+      // primitive not known, so learn it
+      return _model.getLtmByModality(newInformation).learnPrimitive (newInformation);
+    } else {
+      // extend image with new item
+      return extendImage (newInformation);
+    }
+  }
 
-    // cases 1 & 2 if newInformation is empty
-    if (newInformation.isEmpty ()) {
-      if (newInformation.isFinished ()) { // 1. add end marker
-        return extendImage (newInformation);
-      } else {
-        // 2. nothing to do
-        return this;
+  /**
+   * Search this node's semantic links for a more informative node, and return one if 
+   * found.
+   */
+  public Node searchSemanticLinks (int maximumSemanticDistance) {
+    if (maximumSemanticDistance <= 0) return this; // reached limit of search
+    Node bestNode = this;
+    for (Node compare : _semanticLinks) {
+      Node bestChild = compare.searchSemanticLinks (maximumSemanticDistance - 1);
+      if (bestChild.information () > bestNode.information ()) {
+        bestNode = bestChild;
       }
     }
 
-    Node retrievedChunk = _model.recognise (newInformation);
-    if (retrievedChunk == _model.getLtmByModality (pattern)) {
-      // 3. if root node is retrieved, familiarise with next primitive
-      // REMOVE PRIMITIVE LEARNING
-//      ListPattern toadd = newInformation.getFirstItem ();
-//      toadd.setNotFinished ();
-//      return extendImage (toadd);
-      // 3. if root node is retrieved, first item of newInformation is an unknown primitive
-      return _model.getLtmByModality(pattern).learnPrimitive (newInformation.getFirstItem ());
-    } else if (retrievedChunk.getImage().isEmpty ()) {
-      // 4. the retrieved chunk is empty, so use first item to extend image
-      // note: first item is known primitive, because new-information sorted to this node
-      ListPattern firstItem = newInformation.getFirstItem ();
-      firstItem.setNotFinished ();
-      return extendImage (firstItem);
-    } else if (retrievedChunk.getImage().matches (newInformation)) {
-      // 5. retrieved chunk an be used to extend the image 
-      //   -- make sure extension is not complete
-      ListPattern toadd = retrievedChunk.getImage().clone ();
-      toadd.setNotFinished ();
-      return extendImage (toadd);
-    } else { 
-      // 6. mismatch, so only use first item to extend image
-      // note: mismatch cannot be first item, because new-information sorted to this node
-      ListPattern firstItem = retrievedChunk.getImage().getFirstItem ();
-      firstItem.setNotFinished ();
-      return extendImage (firstItem);
-    }
+    return bestNode;
   }
 
   /**
@@ -736,14 +739,14 @@ public class Node extends Observable {
     }
   }
 
-  public void writeSimilarityLinksAsVna (Writer writer) throws IOException {
+  public void writeSemanticLinksAsVna (Writer writer) throws IOException {
     // write my links
-    for (Node node : _similarNodes) {
+    for (Node node : _semanticLinks) {
       writer.write ("" + _reference + " " + node.getReference () + "\n");
     }
     // repeat for children
     for (Link link : _children) {
-      link.getChildNode().writeSimilarityLinksAsVna (writer);
+      link.getChildNode().writeSemanticLinksAsVna (writer);
     }
   }
 }

@@ -112,7 +112,7 @@ public class NodeView extends JFrame implements java.util.Observer {
     for (Link link : _node.getChildren ()) {
       link.getChildNode().deleteObserver (this);
     }
-    for (Node node : _node.getSimilarNodes ()) {
+    for (Node node : _node.getSemanticLinks ()) {
       node.deleteObserver (this);
     }
     setVisible (false);
@@ -138,7 +138,7 @@ public class NodeView extends JFrame implements java.util.Observer {
     _childLinks.setModel (_childLinksView);
 
     _similarityLinksView.clear ();
-    for (Node node : _node.getSimilarNodes ()) {
+    for (Node node : _node.getSemanticLinks ()) {
       _similarityLinksView.addElement (node);
       node.addObserver (this);
     }

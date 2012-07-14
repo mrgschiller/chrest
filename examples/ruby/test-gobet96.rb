@@ -203,7 +203,7 @@ TrainingData = read_data "../sample-data/chess-positions.dat"
 TestData = read_data "chess-test-gobet96.dat"
 
 @@novice_model = create_model(TrainingData, 2, 20, 200)
-@@expert_model = create_model(TrainingData, 2, 20, 25000)
+@@expert_model = create_model(TrainingData, 2) # , 20, 25000)
 
 @@novice_results = []
 TestData.get_scene_names.length.times do |i|

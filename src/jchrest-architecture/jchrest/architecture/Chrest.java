@@ -30,9 +30,11 @@ public class Chrest extends Observable {
   private int _familiarisationTime;
   // rho is the probability that a given learning operation will occur
   private float _rho;
-  // parameter for construction of similarity link
+  // parameter for construction of semantic link
   // - determines number of overlapping items in node images
   private int _similarityThreshold;
+  // - determines maximum distance to search semantic links
+  private int _maximumSemanticDistance = 1;
   // template construction parameters
   private boolean _createTemplates;
   private int _minTemplateLevel = 3;
@@ -55,7 +57,7 @@ public class Chrest extends Observable {
     _discriminationTime = 10000;
     _familiarisationTime = 2000;
     _rho = 1.0f;
-    _similarityThreshold = 3;
+    _similarityThreshold = 4;
 
     _clock = 0;
     _totalNodes = 0;
@@ -143,7 +145,7 @@ public class Chrest extends Observable {
 
   /**
    * Accessor to retrieve value of similarity threshold, the number of items 
-   * which must be shared between two images for a similarity link to be formed.
+   * which must be shared between two images for a semantic link to be formed.
    */
   public float getSimilarityThreshold () {
     return _similarityThreshold;
@@ -416,20 +418,20 @@ public class Chrest extends Observable {
   }
 
   /**
-   * Return a map from number of similarity nodes to frequencies for the model's LTM.
+   * Return a map from number of semantic links to frequencies for the model's LTM.
    */ 
-  public Map<Integer, Integer> getSimilarityCounts () {
+  public Map<Integer, Integer> getSemanticLinkCounts () {
     Map<Integer, Integer> size = new HashMap<Integer, Integer> ();
 
-    _visualLtm.getSimilarityCounts (size);
-    _verbalLtm.getSimilarityCounts (size);
-    _actionLtm.getSimilarityCounts (size);
+    _visualLtm.getSemanticLinkCounts (size);
+    _verbalLtm.getSemanticLinkCounts (size);
+    _actionLtm.getSemanticLinkCounts (size);
 
     return size;
   }
 
   /**
-   * Add given node to STM.  Check for formation of similarity links by
+   * Add given node to STM.  Check for formation of semantic links by
    * comparing incoming node with the hypothesis, or 'largest', node.
    */
   private void addToStm (Node node) {
@@ -439,8 +441,8 @@ public class Chrest extends Observable {
       Node check = stm.getItem (0); // TODO: make this the hypothesis node
       if (check != node && 
           node.getImage().isSimilarTo (check.getImage (), _similarityThreshold)) {
-        node.addSimilarNode (check); 
-        check.addSimilarNode (node); // two-way similarity link
+        node.addSemanticLink (check); 
+        check.addSemanticLink (node); // two-way semantic link
       }
     }
 
@@ -489,14 +491,8 @@ public class Chrest extends Observable {
       }
     }
 
-    // see if more informative node in similarity links
-    // TODO: Explore if this should be used during training
-    //       leads to small image size, but quickly produces big networks
-//    for (Node similar : currentNode.getSimilarNodes ()) {
-//      if (similar.information () > currentNode.information ()) {
-//        currentNode = similar;
-//      }
-//    }
+    // try to retrieve a more informative node in semantic links
+    currentNode = currentNode.searchSemanticLinks (_maximumSemanticDistance);
 
     // add retrieved node to STM
     addToStm (currentNode);
@@ -874,12 +870,12 @@ public class Chrest extends Observable {
   }
 
   /** 
-   * Write model similarity links to given Writer object in VNA format
+   * Write model semantic links to given Writer object in VNA format
    */
-  public void writeModelSimilarityLinksAsVna (Writer writer) throws IOException {
+  public void writeModelSemanticLinksAsVna (Writer writer) throws IOException {
     writer.write ("*Node data\n\"ID\", \"contents\"\n");
     _visualLtm.writeNodeAsVna (writer);
     writer.write ("*Tie data\nFROM TO\n");
-    _visualLtm.writeSimilarityLinksAsVna (writer);
+    _visualLtm.writeSemanticLinksAsVna (writer);
   }
 }

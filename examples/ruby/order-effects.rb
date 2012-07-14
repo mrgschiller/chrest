@@ -1,7 +1,8 @@
 # Order Effects experiment
-# copyright (c) Peter C. R. Lane, 2010.
 #
 # See chapter 8 of 'In Order to Learn' (edited by F. Ritter et al), 2007.
+# (Note that the results are not identical to those in the book because 
+#  of differences between CHREST and the model of EPAM used there.)
 
 require "chrest"
 

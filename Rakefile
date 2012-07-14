@@ -44,17 +44,39 @@ end
 desc 'build the user guide'
 task :guide do
   Dir.chdir('doc/user-guide') do
-    sh 'latex user-guide'
-    sh 'latex user-guide'
-    sh 'latex user-guide'
-    sh 'dvipdf user-guide.dvi'
+    if File.stat('user-guide.tex').mtime > File.stat('user-guide.pdf').mtime
+      sh 'latex user-guide'
+      sh 'latex user-guide'
+      sh 'latex user-guide'
+      sh 'dvipdf user-guide.dvi'
+    end
   end
 end
 
 desc 'show the user guide'
 task :show_guide => :guide do
   Dir.chdir('doc/user-guide') do
-    sh 'evince user-guide.pdf'
+    sh 'evince user-guide.pdf &'
+  end
+end
+
+desc 'build the manual'
+task :manual do
+  Dir.chdir('doc/manual') do
+    if File.stat('manual.tex').mtime > File.stat('manual.pdf').mtime
+      sh 'latex manual'
+      sh 'bibtex manual'
+      sh 'latex manual'
+      sh 'latex manual'
+      sh 'dvipdf manual.dvi'
+    end
+  end
+end
+
+desc 'show the manual'
+task :show_manual => :manual do
+  Dir.chdir('doc/manual') do
+    sh 'evince manual.pdf &'
   end
 end
 
@@ -68,12 +90,13 @@ end
 
 directory 'release/chrest'
 desc 'bundle for release'
-task :bundle => [:guide, :make_jar, :api_doc, 'release/chrest'] do
+task :bundle => [:guide, :manual, :make_jar, :api_doc, 'release/chrest'] do
   Dir.chdir('release/chrest') do
     sh 'cp ../../chrest.jar .'
     sh 'cp ../../lib/license.txt .'
     sh 'cp -r ../../examples .'
     sh 'cp ../../doc/user-guide/user-guide.pdf .'
+    sh 'cp ../../doc/manual/manual.pdf .'
     sh 'cp -r ../../doc/api ./javadoc'
     File.open("start-chrest.sh", "w") do |file|
       file.puts <<END

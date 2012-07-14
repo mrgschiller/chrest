@@ -36,7 +36,7 @@ public class Shell extends JFrame {
   private Chrest _model;
 
   public Shell () {
-    super ("CHREST");
+    super ("CHREST 4");
 
     _model = new Chrest ();
 
@@ -80,7 +80,7 @@ public class Shell extends JFrame {
           "<P>Released under Open Works License</a>, version 0.9.2.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell v. 4.0.0-ALPHA", 
+          "About Chrest Shell v. 4.0.0-ALPHA-1", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -413,23 +413,23 @@ public class Shell extends JFrame {
   }
 
   /**
-   * Action to save similarity links in current model as VNA.
+   * Action to save semantic links in current model as VNA.
    */
-  class SaveModelSimilaritiesAsVnaAction extends AbstractAction implements ActionListener {
+  class SaveModelSemanticLinksAsVnaAction extends AbstractAction implements ActionListener {
     private Shell _parent;
 
-    SaveModelSimilaritiesAsVnaAction (Shell parent) {
-      super ("Save visual similarity links (.VNA)"); 
+    SaveModelSemanticLinksAsVnaAction (Shell parent) {
+      super ("Save visual semantic links (.VNA)"); 
 
       _parent = parent;
     }
 
     public void actionPerformed (ActionEvent e) {
-      File file = FileUtilities.getSaveFilename (_parent, "Save visual similarity links");
+      File file = FileUtilities.getSaveFilename (_parent, "Save visual semantic links");
       if (file == null) return;
       try {
         FileWriter writer = new FileWriter (file);
-        _model.writeModelSimilarityLinksAsVna (writer);
+        _model.writeModelSemanticLinksAsVna (writer);
         writer.close ();
       } catch (IOException ioe) {
         JOptionPane.showMessageDialog (_parent,
@@ -461,7 +461,7 @@ public class Shell extends JFrame {
       jtb.addTab ("Info", getInfoPane ());
       jtb.addTab ("Contents", getHistogramPane (_model.getContentCounts(), "contents", "Histogram of Contents Sizes", "Contents size"));
       jtb.addTab ("Images", getHistogramPane (_model.getImageCounts(), "images", "Histogram of Image Sizes", "Image size"));
-      jtb.addTab ("Similarity", getHistogramPane (_model.getSimilarityCounts(), "similarity", "Histogram of Number of Similarity Links", "Number of similarity links"));
+      jtb.addTab ("Semantic links", getHistogramPane (_model.getSemanticLinkCounts(), "semantic", "Histogram of Number of Semantic Links", "Number of semantic links"));
       base.add (jtb);
 
       JOptionPane pane = new JOptionPane (base, JOptionPane.INFORMATION_MESSAGE);
@@ -597,7 +597,7 @@ public class Shell extends JFrame {
 
     JMenu submenu = new JMenu ("Save");
     submenu.add (new SaveModelAsVnaAction (this));
-    submenu.add (new SaveModelSimilaritiesAsVnaAction (this));
+    submenu.add (new SaveModelSemanticLinksAsVnaAction (this));
     menu.add (submenu);
 
     menu.add (new ModelPropertiesAction (this));
