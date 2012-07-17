@@ -108,7 +108,7 @@ public class PairedAssociateExperiment extends JPanel {
     private void collectResponses () {
       List<ListPattern> responses = new ArrayList<ListPattern> ();
       for (PairedPattern pair : _patterns) {
-        ListPattern response = _model.followPattern (pair.getFirst ());
+        ListPattern response = _model.associatePattern (pair.getFirst ());
         if (response != null) {
           responses.add (response);
         } else {

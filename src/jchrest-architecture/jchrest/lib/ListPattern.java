@@ -172,7 +172,7 @@ public class ListPattern extends Pattern implements Iterable<PrimitivePattern> {
     if (size () != pattern.size ()) return false;
 
     for (int i = 0, n = size (); i < n; ++i) {
-      if (!pattern.getItem(i).equalPrimitive(getItem(i))) {
+      if (!pattern.getItem(i).equals(getItem(i))) {
         return false; // false if any item not the same
       }
     }
@@ -201,7 +201,7 @@ public class ListPattern extends Pattern implements Iterable<PrimitivePattern> {
     }
     // now just check that the items in this pattern match up with the given pattern
     for (int i = 0, n = size (); i < n; ++i) {
-      if (!pattern.getItem(i).equalPrimitive(getItem (i))) {
+      if (!pattern.getItem(i).equals(getItem (i))) {
         return false; // false if any item not the same
       }
     }
@@ -221,7 +221,7 @@ public class ListPattern extends Pattern implements Iterable<PrimitivePattern> {
     while (i < size ()) {
       if (takingItems) {
         result.add (getItem (i));
-      } else if (i < pattern.size () && pattern.getItem(i).equalPrimitive(getItem (i))) {
+      } else if (i < pattern.size () && pattern.getItem(i).equals(getItem (i))) {
         ;
       } else {
         takingItems = true;
@@ -300,7 +300,7 @@ public class ListPattern extends Pattern implements Iterable<PrimitivePattern> {
 
   public boolean contains (PrimitivePattern given) {
     for (PrimitivePattern item : _list) {
-      if (item.equalPrimitive (given)) return true;
+      if (item.equals (given)) return true;
     }
     return false;
   }

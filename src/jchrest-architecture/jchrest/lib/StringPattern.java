@@ -45,7 +45,7 @@ public class StringPattern extends PrimitivePattern {
    * Two StringPatterns are only equal if their stored names 
    * are the same.
    */
-  public boolean equalPrimitive (PrimitivePattern pattern) {
+  public boolean equals (Object pattern) {
     if (pattern instanceof StringPattern) {
       return _name.equals (((StringPattern)pattern).getString ());
     } else {

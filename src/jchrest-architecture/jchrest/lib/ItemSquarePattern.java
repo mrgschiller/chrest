@@ -46,9 +46,9 @@ public class ItemSquarePattern extends PrimitivePattern {
   /**
    * Two ItemSquarePatterns are only equal if all their parts are the same.
    */
-  public boolean equalPrimitive (PrimitivePattern pattern) {
-    if (pattern instanceof ItemSquarePattern) {
-      ItemSquarePattern ios = (ItemSquarePattern)pattern;
+  public boolean equals (Object object) {
+    if (object instanceof ItemSquarePattern) {
+      ItemSquarePattern ios = (ItemSquarePattern)object;
       return (_item.equals (ios.getItem ()) &&
           _column == ios.getColumn () &&
           _row == ios.getRow ());
@@ -62,7 +62,7 @@ public class ItemSquarePattern extends PrimitivePattern {
    */
   public boolean matches (Pattern givenPattern) {
     if (!(givenPattern instanceof ItemSquarePattern)) return false;
-    return this.equalPrimitive ((ItemSquarePattern)givenPattern);
+    return this.equals ((ItemSquarePattern)givenPattern);
   }
 
   /**

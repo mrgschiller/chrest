@@ -57,7 +57,7 @@ public class Stm implements Iterable<Node> {
   /**
    * When adding a new node to STM, the new node is added to the top of STM 
    * with the queue cut at the bottom to keep STM to the fixed size constraints.
-   * However, the most informative node is maintained in the list, by readding 
+   * However, the most informative node is maintained in the list, by re-adding 
    * it to the end of the list, if lost.
    */
   public void add (Node node) {
@@ -71,14 +71,24 @@ public class Stm implements Iterable<Node> {
     // put this node at the front of STM, and remove any duplicate
     _items.remove (node);
     _items.add (0, node);
+    // sort STM so most informative node at top
+    for (int i = 0; i < _items.size (); ++i) {
+      for (int j = i+1; j < _items.size (); ++j) {
+        if (_items.get(i).information () < _items.get(j).information ()) {
+          Node tmp = _items.get(i);
+          _items.set(i, _items.get(j));
+          _items.set(j, tmp);
+        }
+      }
+    }
     // truncate STM to be of at most _size elements
     while (_items.size () > _size) {
       _items.remove (_items.size () - 1);
     }
-    // if most informative node not in STM, then add it back in to bottom
+    // if most informative node not in STM, then add it back in to top
     if (!_items.contains (hypothesis)) {
       _items.remove (_items.size () - 1);
-      _items.add (_items.size (), hypothesis);
+      _items.add (0, hypothesis);
     }
   }
 
@@ -89,6 +99,11 @@ public class Stm implements Iterable<Node> {
     if (_items.size () > 0) {
       _items.remove (0);
     }
+    // make sure there are no duplicates
+    if (_items.contains (node)) {
+      _items.remove (node);
+    }
+    // add to top of STM
     _items.add (0, node);
   }
 
@@ -101,14 +116,14 @@ public class Stm implements Iterable<Node> {
 
   /**
    * Add a lateral link indicating that the second node in this STM 
-   * is followed by the top node.  The link is only added if not already 
+   * is associated with the top node.  The link is only added if not already 
    * present, and the model's clock is advanced by the time to add a link.
    * Returns boolean to indicate if learning occurred or not.
    */
   public boolean learnLateralLinks (Chrest model) {
     if (_items.size () >= 2 && 
-        _items.get(1).getFollowedBy () != _items.get(0)) {
-      _items.get(1).setFollowedBy (_items.get(0));
+        _items.get(1).getAssociatedNode () != _items.get(0)) {
+      _items.get(1).setAssociatedNode (_items.get(0));
       model.advanceClock (model.getAddLinkTime ());
       return true;
     } else {

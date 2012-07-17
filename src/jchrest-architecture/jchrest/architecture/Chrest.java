@@ -576,13 +576,13 @@ public class Chrest extends Observable {
   }
 
   /** 
-   * Asks Chrest to return the image of the node which follows the node 
-   * obtained by sorting given pattern through the network.
+   * Asks Chrest to return the image of the node which is associated 
+   * with the node obtained by sorting given pattern through the network.
    */
-  public ListPattern followPattern (ListPattern pattern) {
+  public ListPattern associatePattern (ListPattern pattern) {
     Node retrievedNode = recognise (pattern);
-    if (retrievedNode.getFollowedBy () != null) {
-      return retrievedNode.getFollowedBy().getImage ();
+    if (retrievedNode.getAssociatedNode () != null) {
+      return retrievedNode.getAssociatedNode().getImage ();
     } else {
       return null;
     }
@@ -610,13 +610,13 @@ public class Chrest extends Observable {
     // 1. is retrieved node image a match for pattern1?
     if (pat1Retrieved.getImage().matches (pattern1)) {
       // 2. does retrieved node have a lateral link?
-      if (pat1Retrieved.getFollowedBy() != null) {
+      if (pat1Retrieved.getAssociatedNode() != null) {
         // if yes
         //   3. is linked node image match pattern2? if not, learn pattern2
-        if (pat1Retrieved.getFollowedBy().getImage().matches (pattern2)) {
+        if (pat1Retrieved.getAssociatedNode().getImage().matches (pattern2)) {
           //   if yes
           //   4. if linked node image == pattern2, learn pattern1, else learn pattern2
-          if (pat1Retrieved.getFollowedBy().getImage().equals (pattern2)) {
+          if (pat1Retrieved.getAssociatedNode().getImage().equals (pattern2)) {
             recogniseAndLearn (pattern1, time); // TODO: this is overlearning?
           } else {
             recogniseAndLearn (pattern2, time);
@@ -629,7 +629,7 @@ public class Chrest extends Observable {
             Node pat2Retrieved = recognise (pattern2);
             // 6. if pattern2 retrieved node image match for pattern2, learn link, else learn pattern2
             if (pat2Retrieved.getImage().matches (pattern2)) {
-              pat1Retrieved.setFollowedBy (pat2Retrieved);
+              pat1Retrieved.setAssociatedNode (pat2Retrieved);
               advanceClock (getAddLinkTime ());
               setChanged ();
               if (!_frozen) notifyObservers ();
@@ -642,7 +642,7 @@ public class Chrest extends Observable {
         Node pat2Retrieved = recognise (pattern2);
         // 6. if pattern2 retrieved node image match for pattern2, learn link, else learn pattern2
         if (pat2Retrieved.getImage().matches (pattern2)) {
-          pat1Retrieved.setFollowedBy (pat2Retrieved);
+          pat1Retrieved.setAssociatedNode (pat2Retrieved);
           advanceClock (getAddLinkTime ());
           setChanged ();
           if (!_frozen) notifyObservers ();
@@ -652,7 +652,7 @@ public class Chrest extends Observable {
           pat2Retrieved = recognise (pattern2);
           // 6. if pattern2 retrieved node image match for pattern2, learn link, else learn pattern2
           if (pat2Retrieved.getImage().matches (pattern2)) {
-            pat1Retrieved.setFollowedBy (pat2Retrieved);
+            pat1Retrieved.setAssociatedNode (pat2Retrieved);
             advanceClock (getAddLinkTime ());
             setChanged ();
             if (!_frozen) notifyObservers ();

@@ -48,9 +48,9 @@ class NodeDisplay implements LtmTreeViewNode {
     } else {
       int fixedItemsWidth = Math.max (getNodeNumberWidth (g, size), 
           size.getWidth (toDisplay (), g));
-      if (_node.getFollowedBy () != null) {
+      if (_node.getAssociatedNode () != null) {
         fixedItemsWidth = Math.max (fixedItemsWidth, 
-            size.getWidth (_node.getFollowedBy().getReference() + "", g));
+            size.getWidth (_node.getAssociatedNode().getReference() + "", g));
       }
       if (_node.getNamedBy () != null) {
         fixedItemsWidth = Math.max (fixedItemsWidth, 
@@ -73,9 +73,9 @@ class NodeDisplay implements LtmTreeViewNode {
       height += getNodeNumberHeight (g, size);
       height += size.getMargin (); // gap between the two
       height += size.getHeight (toDisplay ().toString (), g);
-      if (_node.getFollowedBy() != null) {
+      if (_node.getAssociatedNode() != null) {
         height += size.getMargin ();
-        height += size.getHeight (_node.getFollowedBy().getReference() + "", g);
+        height += size.getHeight (_node.getAssociatedNode().getReference() + "", g);
       }
       if (_node.getNamedBy() != null) {
         height += size.getMargin ();
@@ -123,10 +123,10 @@ class NodeDisplay implements LtmTreeViewNode {
 
     int textHeight = size.getHeight (getNodeNumberString (), g);
     size.drawText (g, x, y + textHeight + size.getMargin (), toDisplay ().toString ());
-    if (_node.getFollowedBy () != null) {
-      textHeight += size.getMargin () + size.getHeight ((_node.getFollowedBy().getReference() + ""), g);
+    if (_node.getAssociatedNode () != null) {
+      textHeight += size.getMargin () + size.getHeight ((_node.getAssociatedNode().getReference() + ""), g);
       g.setColor (Color.BLUE);
-      size.drawText (g, x, y + textHeight + size.getMargin (), _node.getFollowedBy().getReference() + "");
+      size.drawText (g, x, y + textHeight + size.getMargin (), _node.getAssociatedNode().getReference() + "");
     }
     if (_node.getNamedBy () != null) {
       textHeight += size.getMargin () + size.getHeight ((_node.getNamedBy().getReference() + ""), g);

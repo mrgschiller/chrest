@@ -52,7 +52,7 @@ public class Node extends Observable {
     _image = image;
     _children = new ArrayList<Link> ();
     _semanticLinks = new ArrayList<Node> ();
-    _followedBy = null;
+    _associatedNode = null;
     _namedBy = null;
     _actionLinks = new ArrayList<Node> ();
   }
@@ -135,17 +135,17 @@ public class Node extends Observable {
   }
 
   /**
-   * Accessor to node that follows this node.
+   * Accessor to node that is associated with this node.
    */
-  public Node getFollowedBy () {
-    return _followedBy;
+  public Node getAssociatedNode () {
+    return _associatedNode;
   }
 
   /**
-   * Modify node that follows this node.
+   * Modify node that is associated with this node.
    */
-  public void setFollowedBy (Node node) {
-    _followedBy = node;
+  public void setAssociatedNode (Node node) {
+    _associatedNode = node;
     setChanged ();
     notifyObservers ();
   }
@@ -267,7 +267,7 @@ public class Node extends Observable {
   private ListPattern _image;
   private List<Link> _children;
   private List<Node> _semanticLinks;
-  private Node _followedBy;
+  private Node _associatedNode;
   private Node _namedBy;
   private List<Node> _actionLinks;
 
@@ -355,7 +355,7 @@ public class Node extends Observable {
 
   /**
    * Returns true if this node is a template.  To be a template, the node 
-   * must be at least one slot of any kind.
+   * must have at least one slot of any kind.
    */
   public boolean isTemplate () {
     if (_itemSlots == null || _positionSlots == null) {
@@ -381,29 +381,47 @@ public class Node extends Observable {
    * Attempt to fill some of the slots using the items in the given pattern.
    */
   public void fillSlots (ListPattern pattern) {
-    if (_itemSlots == null) _itemSlots = new ArrayList<ItemSquarePattern> ();
-    if (_positionSlots == null) _positionSlots = new ArrayList<ItemSquarePattern> ();
-    if (_filledItemSlots == null) _filledItemSlots = new ArrayList<ItemSquarePattern> ();
-    if (_filledPositionSlots == null) _filledPositionSlots = new ArrayList<ItemSquarePattern> ();
-
+    // create arraylists only when required, as most nodes do not need to 
+    // waste the storage space.
+    if (_itemSlots == null) {
+      _itemSlots = new ArrayList<ItemSquarePattern> ();
+    }
+    if (_positionSlots == null) {
+      _positionSlots = new ArrayList<ItemSquarePattern> ();
+    }
+    if (_filledItemSlots == null) {
+      _filledItemSlots = new ArrayList<ItemSquarePattern> ();
+    }
+    if (_filledPositionSlots == null) {
+      _filledPositionSlots = new ArrayList<ItemSquarePattern> ();
+    }
     for (int index = 0; index < pattern.size (); index++) {
+      boolean slotFilled = false;
       if (pattern.getItem(index) instanceof ItemSquarePattern) {
         ItemSquarePattern item = (ItemSquarePattern)(pattern.getItem (index));
-        // only try to fill a slot if item is not already in image
-        if (!_image.contains (item)) { 
+        // only try to fill a slot if item is not already in image or slot
+        if (!_image.contains (item) && 
+            !_filledItemSlots.contains (item) && 
+            !_filledPositionSlots.contains (item)) { 
           // 1. check the item slots
           for (ItemSquarePattern slot : _itemSlots) {
-            if (slot.getItem().equals(item.getItem ())) {
-              _filledItemSlots.add (item);
+            if (!slotFilled) {
+              if (slot.getItem().equals(item.getItem ())) {
+                _filledItemSlots.add (item);
+                slotFilled = true;
+              }
             }
           }
 
           // 2. check the position slots
           for (ItemSquarePattern slot : _positionSlots) {
-            if (slot.getRow () == item.getRow () &&
-                slot.getColumn () == item.getColumn ()) {
-              _filledPositionSlots.add (item);
-                }
+            if (!slotFilled) {
+              if (slot.getRow () == item.getRow () &&
+                  slot.getColumn () == item.getColumn ()) {
+                _filledPositionSlots.add (item);
+                slotFilled = true;
+                  }
+            }
           }
         }
       }
@@ -503,7 +521,8 @@ public class Node extends Observable {
   /** Return true if template conditions are met:
    * 1. contents size > _model.getMinTemplateLevel ()
    * then:
-   * 2. gather together current node image and images of all nodes linked by the test links
+   * 2. gather together current node image and images of all nodes 
+   * linked by the test and semantic links
    *    remove the contents of current node from those images
    *    see if any piece or square repeats more than once
    */

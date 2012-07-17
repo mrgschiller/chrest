@@ -17,7 +17,7 @@ public class NodeView extends JFrame implements java.util.Observer {
   private final Node _node;
   private final JLabel _contentsLabel;
   private final JLabel _imageLabel;
-  private final JLabel _followedBy;
+  private final JLabel _associatedNode;
   private final JLabel _namedBy;
   private final DefaultListModel _childLinksView, _similarityLinksView;
   private final JList _childLinks, _similarityLinks;
@@ -44,13 +44,13 @@ public class NodeView extends JFrame implements java.util.Observer {
     fields.add (new JLabel ("Image: ", SwingConstants.RIGHT));
     fields.add (_imageLabel);
     
-    _followedBy = new JLabel ("");
-    _followedBy.setBorder (new CompoundBorder (new EmptyBorder (3, 3, 3, 3), new EtchedBorder ()));
-    if (_node.getFollowedBy () != null) {
-      _followedBy.setIcon (new NodeIcon (_node.getFollowedBy (), _followedBy));
+    _associatedNode = new JLabel ("");
+    _associatedNode.setBorder (new CompoundBorder (new EmptyBorder (3, 3, 3, 3), new EtchedBorder ()));
+    if (_node.getAssociatedNode () != null) {
+      _associatedNode.setIcon (new NodeIcon (_node.getAssociatedNode (), _associatedNode));
     }
-    fields.add (new JLabel ("Followed by: ", SwingConstants.RIGHT));
-    fields.add (_followedBy);
+    fields.add (new JLabel ("Assocated node: ", SwingConstants.RIGHT));
+    fields.add (_associatedNode);
 
     _namedBy = new JLabel ("");
     _namedBy.setBorder (new CompoundBorder (new EmptyBorder (3, 3, 3, 3), new EtchedBorder ()));
@@ -103,8 +103,8 @@ public class NodeView extends JFrame implements java.util.Observer {
 
   void close () {
     _node.deleteObserver (this);
-    if (_node.getFollowedBy () != null) {
-      _node.getFollowedBy().deleteObserver (this);
+    if (_node.getAssociatedNode () != null) {
+      _node.getAssociatedNode ().deleteObserver (this);
     }
     if (_node.getNamedBy () != null) {
       _node.getNamedBy().deleteObserver (this);
@@ -121,9 +121,9 @@ public class NodeView extends JFrame implements java.util.Observer {
 
   private void updateDisplays () {
     _imageLabel.setText (_node.getImage().toString ());
-    if (_node.getFollowedBy () != null) {
-      _followedBy.setIcon (new NodeIcon (_node.getFollowedBy (), _followedBy));
-      _node.getFollowedBy().addObserver (this);
+    if (_node.getAssociatedNode () != null) {
+      _associatedNode.setIcon (new NodeIcon (_node.getAssociatedNode (), _associatedNode));
+      _node.getAssociatedNode().addObserver (this);
     }
     if (_node.getNamedBy () != null) {
       _namedBy.setIcon (new NodeIcon (_node.getNamedBy (), _namedBy));
