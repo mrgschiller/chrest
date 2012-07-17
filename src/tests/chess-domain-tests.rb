@@ -1,30 +1,23 @@
 # Ruby test suite for Chrest: Chess Domain Tests
 
 unit_test "piece types" do 
-  ios1 = ItemSquarePattern.new("P", 1, 1)
-  ios2 = ItemSquarePattern.new("Q", 2, 2)
-  ios3 = ItemSquarePattern.new("q", 2, 2)
-  ios4 = ItemSquarePattern.new("Q", 2, 7)
-  ios5 = ItemSquarePattern.new("q", 2, 7)
+  domain = ChessDomain.new 
+  board = ChessDomain.constructBoard("......../......../....N.../......../.......R/R...k.../....P.../N...R.p.")
 
-  assert_false ChessDomain.isBigPiece(ios1)
-  assert_true ChessDomain.isBigPiece(ios2)
+  big_pieces = domain.getBigPieces(board)
+  assert_equal(6, big_pieces.size)
+  assert_true(big_pieces.any?{|s| s.row == 7 and s.column == 0})
+  assert_true(big_pieces.any?{|s| s.row == 7 and s.column == 4})
+  assert_true(big_pieces.any?{|s| s.row == 5 and s.column == 0})
+  assert_true(big_pieces.any?{|s| s.row == 5 and s.column == 4})
+  assert_true(big_pieces.any?{|s| s.row == 4 and s.column == 7})
+  assert_true(big_pieces.any?{|s| s.row == 2 and s.column == 4})
 
-  assert_false ChessDomain.isOffensivePiece(ios1)
-  assert_false ChessDomain.isOffensivePiece(ios2)
-  assert_true ChessDomain.isOffensivePiece(ios3)
-  assert_true ChessDomain.isOffensivePiece(ios4)
-  assert_false ChessDomain.isOffensivePiece(ios5)
-
-  lp = ListPattern.new
-  lp.add ios1
-  lp.add ios2
-  lp.add ios3
-  lp.add ios4
-  lp.add ios5
-
-  assert_equal(2, ChessDomain.getSalientPieces(lp, true).size, "salient test")
-  assert_equal(4, ChessDomain.getSalientPieces(lp, false).size)
+  offensive_pieces = domain.getOffensivePieces(board)
+  assert_equal(3, offensive_pieces.size)
+  assert_true(offensive_pieces.any?{|s| s.row == 7 and s.column == 6})
+  assert_true(offensive_pieces.any?{|s| s.row == 2 and s.column == 4})
+  assert_true(offensive_pieces.any?{|s| s.row == 2 and s.column == 4})
 end
 
 unit_test "normalisation of item-square-pattern lists" do

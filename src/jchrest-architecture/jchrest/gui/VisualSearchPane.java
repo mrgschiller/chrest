@@ -88,26 +88,31 @@ public class VisualSearchPane extends JPanel {
   private JSpinner _maxTrainingCycles;
   private JSpinner _numFixations;
   private JSpinner _maxNetworkSize;
+  private JCheckBox _useTestSet;
 
   private JPanel constructTrainingOptions () {
     _maxTrainingCycles = new JSpinner (new SpinnerNumberModel (5, 1, 1000, 1));
     _numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 100, 1));
     _maxNetworkSize = new JSpinner (new SpinnerNumberModel (100000, 1, 10000000, 1));
+    _useTestSet = new JCheckBox ();
 
     JPanel panel = new JPanel ();
-    panel.setLayout (new GridLayout (5, 2));
-    panel.add (new JLabel ("Domain of scenes: ", SwingConstants.RIGHT));
-    panel.add (_domainSelector);
-    panel.add (new JLabel ("Number of scenes: ", SwingConstants.RIGHT));
-    panel.add (new JLabel ("" + _scenes.size ()));
-    panel.add (new JLabel ("Maximum training cycles: ", SwingConstants.RIGHT));
-    panel.add (_maxTrainingCycles);
-    panel.add (new JLabel ("Number of fixations per scene: ", SwingConstants.RIGHT));
-    panel.add (_numFixations);
-    panel.add (new JLabel ("Maximum network size: ", SwingConstants.RIGHT));
-    panel.add (_maxNetworkSize);
+    panel.setLayout (new SpringLayout ());
+    Utilities.addLabel (panel, "Domain of scenes:", _domainSelector);
+    Utilities.addLabel (panel, "Number of scenes:", new JLabel ("" + _scenes.size ()));
+    Utilities.addLabel (panel, "Maximum training cycles:", _maxTrainingCycles);
+    Utilities.addLabel (panel, "Number of fixations per scene:", _numFixations);
+    Utilities.addLabel (panel, "Maximum network size:", _maxNetworkSize);
+    Utilities.addLabel (panel, "Use 10% for test:", _useTestSet);
 
-    return panel;
+    Utilities.makeCompactGrid (panel, 6, 2, 3, 3, 10, 5);
+    panel.setMaximumSize (panel.getPreferredSize ());
+
+    JPanel ePanel = new JPanel ();
+    ePanel.setLayout (new GridLayout (1, 1));
+    ePanel.add (panel);
+
+    return ePanel;
   }
 
   // confirm if FreeChart has been included in classpath
@@ -197,13 +202,16 @@ public class VisualSearchPane extends JPanel {
     private Chrest _model;
     private Scenes _scenes;
     private int _maxCycles, _maxSize, _numFixations;
+    private boolean _useTestSet;
 
-    TrainingThread (Chrest model, Scenes scenes, int maxCycles, int maxSize, int numFixations) {
+    TrainingThread (Chrest model, Scenes scenes, int maxCycles, int maxSize, int numFixations, 
+        boolean useTestSet) {
       _model = model;
       _scenes = scenes;
       _maxCycles = maxCycles;
       _maxSize = maxSize;
       _numFixations = numFixations;
+      _useTestSet = useTestSet;
     }
 
     @Override
@@ -223,7 +231,9 @@ public class VisualSearchPane extends JPanel {
             (cycle < _maxCycles) && 
             (_model.getTotalLtmNodes () < _maxSize) &&
             !isCancelled ()) {
-          for (int i = 0; i < _scenes.size () && (_model.getTotalLtmNodes () < _maxSize) && !isCancelled (); i++) {
+          for (int i = 0, lastSceneIndex = (_useTestSet ? (int)Math.floor(_scenes.size () * 0.9) : _scenes.size ()); 
+              i < lastSceneIndex && (_model.getTotalLtmNodes () < _maxSize) && !isCancelled (); 
+              i++) {
             _model.learnScene (_scenes.get (i), _numFixations);
             positionsSeen += 1;
             if (positionsSeen % stepSize == 0) {
@@ -234,7 +244,7 @@ public class VisualSearchPane extends JPanel {
             }
           }
           cycle += 1;
-        }
+            }
         _model.constructTemplates ();
         
         result = new Pair (positionsSeen, _model.getTotalLtmNodes ());
@@ -278,7 +288,7 @@ public class VisualSearchPane extends JPanel {
     }
 
     public void actionPerformed (ActionEvent e) {
-      _task = new TrainingThread (_model, _scenes, getMaxCycles (), getMaxNetworkSize (), getNumFixations ());
+      _task = new TrainingThread (_model, _scenes, getMaxCycles (), getMaxNetworkSize (), getNumFixations (), _useTestSet.isSelected ());
       _task.addPropertyChangeListener(
           new java.beans.PropertyChangeListener() {
             public  void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -539,11 +549,25 @@ public class VisualSearchPane extends JPanel {
       }
     });
 
+    // TODO: Include action listeners for these selections
+    JRadioButton allScenes = new JRadioButton ("Show all scenes", true);
+    JRadioButton trainScenes = new JRadioButton ("Show training scenes", false);
+    JRadioButton testScenes = new JRadioButton ("Show test scenes", false);
+    final ButtonGroup group = new ButtonGroup ();
+    group.add (allScenes);
+    group.add (trainScenes);
+    group.add (testScenes);
+
     buttons.add (Box.createRigidArea (new Dimension (0, 20)));
     buttons.add (labelledSpinner);
     buttons.add (recallButton);
     buttons.add (Box.createRigidArea (new Dimension (0, 20)));
     buttons.add (showFixations);
+    buttons.add (Box.createRigidArea (new Dimension (0, 20)));
+    buttons.add (new JLabel ("Scenes to show in list:"));
+    buttons.add (allScenes);
+    buttons.add (trainScenes);
+    buttons.add (testScenes);
 
     // TODO: There must be a better solution to this problem!
     JPanel panel = new JPanel ();

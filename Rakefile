@@ -92,12 +92,14 @@ directory 'release/chrest'
 desc 'bundle for release'
 task :bundle => [:guide, :manual, :make_jar, :api_doc, 'release/chrest'] do
   Dir.chdir('release/chrest') do
+    sh 'mkdir documentation'
+    sh 'cp ../../lib/license.txt documentation'
+    sh 'cp ../../doc/user-guide/user-guide.pdf documentation'
+    sh 'cp ../../doc/manual/manual.pdf documentation'
+
     sh 'cp ../../chrest.jar .'
-    sh 'cp ../../lib/license.txt .'
     sh 'cp -r ../../examples .'
-    sh 'cp ../../doc/user-guide/user-guide.pdf .'
-    sh 'cp ../../doc/manual/manual.pdf .'
-    sh 'cp -r ../../doc/api ./javadoc'
+    sh 'cp -r ../../doc/api documentation/javadoc'
     File.open("start-chrest.sh", "w") do |file|
       file.puts <<END
 java -Xmx100M -jar chrest.jar

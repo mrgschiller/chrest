@@ -581,8 +581,8 @@ public class Node extends Observable {
    */
   private Node addTest (ListPattern pattern) {
     Node child = new Node (_model, 
-        ( (_reference == 0) ? pattern : _contents.append(pattern)), // don't append to 'Root'
-        ( (_reference == 0) ? pattern : _contents.append(pattern)) // make same as contents vs Chrest 2
+        ( (_reference == 0) ? pattern : _model.getDomainSpecifics().normalise (_contents.append(pattern))), // don't append to 'Root'
+        ( (_reference == 0) ? pattern : _model.getDomainSpecifics().normalise (_contents.append(pattern))) // make same as contents vs Chrest 2
         //new ListPattern (_contents.getModality ())
         );
     addTestLink (pattern, child);
@@ -595,7 +595,7 @@ public class Node extends Observable {
    * It is assumed the given pattern is non-empty and is a valid extension.
    */
   private Node extendImage (ListPattern newInformation) {
-    setImage (_image.append (newInformation));
+    setImage (_model.getDomainSpecifics().normalise (_image.append (newInformation)));
     _model.advanceClock (_model.getFamiliarisationTime ());
 
     return this;
@@ -626,8 +626,8 @@ public class Node extends Observable {
           }
         }
         Node child = new Node (_model, 
-            ( (_reference == 0) ? pattern : _contents.append(newInformation)), // don't append to 'Root'
-            ( (_reference == 0) ? pattern : _contents.append(newInformation)) // same image
+            ( (_reference == 0) ? pattern : _model.getDomainSpecifics().normalise (_contents.append(newInformation))), // don't append to 'Root'
+            ( (_reference == 0) ? pattern : _model.getDomainSpecifics().normalise (_contents.append(newInformation))) // same image
             );
         addTestLink (newInformation, child);
         _model.advanceClock (_model.getDiscriminationTime ());

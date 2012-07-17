@@ -7,12 +7,15 @@ package jchrest.lib;
  * Enumerated type to manage the fixation type.
  */
 public enum FixationType {
-       none ("No heuristic"),
-       ltm ("LTM heuristic"),
-       randomItem ("Random item heuristic"),
-       randomPlace ("Random place heuristic"),
-       proposedMove ("Proposed movement heuristic") // TODO: this needs a better name
-         ;
+  none ("No heuristic"),
+  start ("First heuristic"),
+  salient ("Salient location heuristic"),
+  ltm ("LTM heuristic"),
+  randomItem ("Random item heuristic"),
+  randomPlace ("Random place heuristic"),
+  global ("Global strategy"),
+  proposedMove ("Proposed movement heuristic") // TODO: this needs a better name
+  ;
 
   private FixationType (String description) {
     _description = description;

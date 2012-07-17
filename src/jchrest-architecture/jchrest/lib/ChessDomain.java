@@ -6,8 +6,12 @@ package jchrest.lib;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import jchrest.architecture.Chrest;
 
 /**
   * The ChessDomain is used for chess modelling.
@@ -39,7 +43,15 @@ public class ChessDomain implements DomainSpecifics {
    * If the pieces are the same, then order is based on column, and then on row.
    */
   public ListPattern normalise (ListPattern pattern) {
-    return pattern.sort (new Comparator<PrimitivePattern> () {
+    ListPattern result = new ListPattern (pattern.getModality ());
+    // remove any duplicates from 'pattern'
+    for (PrimitivePattern prim : pattern) {
+      if (!result.contains (prim)) {
+        result = result.append (prim);
+      }
+    }
+    // and sort into canonical order before returning
+    return result.sort (new Comparator<PrimitivePattern> () {
       public int compare (PrimitivePattern left, PrimitivePattern right) {
         assert (left instanceof ItemSquarePattern);
         assert (right instanceof ItemSquarePattern);
@@ -61,9 +73,19 @@ public class ChessDomain implements DomainSpecifics {
   }
 
   /**
+   * Use level of expertise to determine saliency.
+   */
+  public Set<Square> proposeSalientSquareFixations (Scene scene, Chrest model) {
+    return (model.isExperienced () ? getOffensivePieces (scene) : getBigPieces (scene));
+  }
+
+  /**
    * Construct a chess board given a string definition.
+   * Order should be in FEN style, with row 8 (black side) first.
+   * Empty square indicated with full stop - counts of empty squares not permitted.
    */
   public static Scene constructBoard (String definition) {
+    assert (definition.length () == 71);
     Scene board = new Scene ("chess-board", 8, 8);
 
     for (int row = 0; row < 8; ++row) {
@@ -77,46 +99,47 @@ public class ChessDomain implements DomainSpecifics {
   }
 
   /**
+   * Returns the set of big pieces in given scene.
    * A 'big piece' is anything other than a pawn.  
    * Used to indicate a salient piece for a novice chess player.
    */
-  public static boolean isBigPiece (ItemSquarePattern ios) {
-    return !(ios.getItem().equals ("P") || ios.getItem().equals ("p"));
+  public Set<Square> getBigPieces (Scene scene) {
+    Set<Square> result = new HashSet<Square> ();
+
+    for (int i = 0; i < scene.getWidth (); ++i) {
+      for (int j = 0; j < scene.getHeight (); ++j) {
+        if (!scene.isEmpty (i, j)) {
+          String item = scene.getItem (i, j);
+          if (!item.equalsIgnoreCase ("P")) {
+            result.add (new Square (i, j));
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   /**
+   * Return the set of offensive pieces in given scene.
    * An 'offensive piece' is a piece on the other player's side.
    * e.g. a black piece on white's side of the board.
    * Used to indicate a salient piece for an inexperienced chess player.
    */
-  public static boolean isOffensivePiece (ItemSquarePattern ios) {
-    if (ios.getItem().isEmpty ()) return false;
-    char piece = ios.getItem().charAt (0);
-    if (Character.isLowerCase (piece) && ios.getRow () <= 4) return true; // black piece on white side
-    if (Character.isUpperCase (piece) && ios.getRow () >= 5) return true; // white piece on black side
-    return false;
-  }
+  public Set<Square> getOffensivePieces (Scene scene) {
+    Set<Square> result = new HashSet<Square> ();
 
-  /**
-   * Retrieve the salient pieces from the given pattern.
-   * The 'isExperienced' flag is used to indicate level of skill of model:
-   * isExperienced = false means use the 'isBigPiece' measure,
-   * isExperienced = true means use the 'isOffensivePiece' measure.
-   */
-  public static ListPattern getSalientPieces (ListPattern pattern, Boolean isExperienced) {
-    ListPattern result = new ListPattern (pattern.getModality ());
-    for (PrimitivePattern item : pattern) {
-      if (item instanceof ItemSquarePattern) {
-        ItemSquarePattern ios = (ItemSquarePattern)item;
-        if (isExperienced && isOffensivePiece (ios)) {
-          result.add (ios);
-        } else if (!isExperienced && isBigPiece (ios)) {
-          result.add (ios);
-        } else {
-          ; // leave out non-salient pieces
+    for (int i = 0; i < scene.getHeight (); ++i) {
+      for (int j = 0; j < scene.getWidth (); ++j) {
+        char piece = scene.getItem(i, j).charAt (0);
+        if (Character.isLowerCase (piece) && i >= 4) { // black piece on white side
+          result.add (new Square (i, j));
+        } else if (Character.isUpperCase (piece) && i <= 3) { // white piece on black side
+          result.add (new Square (i, j));
         }
       }
     }
+
     return result;
   }
 

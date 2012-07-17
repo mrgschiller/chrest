@@ -49,8 +49,10 @@ In some cases you will need to use {\tt start-chrest.bat} (on Windows) or
 {\tt start-chrest.sh} (on Linux or Apple) to ensure the Java run-time is correctly 
 called.
 
-If you have special memory requirements, you will also need to edit the number 
-after the flag {\tt -Mmx} in the {\tt start-chrest} script. 
+If you have special memory requirements, you will also need to edit the number
+after the flag {\tt -Mmx} in the {\tt start-chrest} script.  Alternatively, use
+the standard ways to manage the Java Virtual Machine appropriate to your
+platform.
 
 \subsection{Technical Details}
 
@@ -99,6 +101,25 @@ main types are described below.
 \caption{Dialog box to view or change parameters of a CHREST model.}
 \label{properties}
 \end{figure}
+
+\subsection{Charts and Histograms}
+
+The graphical environment provides a number of charts and histograms to display
+information about the current model or experiment.  All these charts provide
+functionality to zoom in/out of the display, alter the range of values
+displayed, and to save as an image file.  This functionality is available in
+most cases by right-clicking on the chart to bring up a menu.  Some useful
+functions are described below:
+
+\begin{enumerate}
+\item Save image: right click on the display, and select `Save as...' from the menu.
+\item Zoom in/out: right click on the display, and select zoom from the menu.
+\item Change range: by dragging a rectangle over the area to see on the chart.
+\item Precise range change: right click on the display, select `Properties...'.  Use the 
+tab `Plot' and then (at the bottom of the display) `Range' for either `Domain axis' or `Range 
+axis'.  Untick the `Autoadjust range' box, and enter the desired numbers.
+\item Reset plot: right click on the display, and select `Autorange' and `Both axes'.
+\end{enumerate}
 
 \section{Supported Domains}
 

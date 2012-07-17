@@ -33,5 +33,9 @@ public class Square {
   public int getRow () {
     return _row;
   }
+
+  public String toString () {
+    return "(" + _row + ", " + _column + ")";
+  }
 }
 

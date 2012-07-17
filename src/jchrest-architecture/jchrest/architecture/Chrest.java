@@ -328,6 +328,21 @@ public class Chrest extends Observable {
   }
 
   /**
+   * Model is 'experienced' if it has at least 2000 nodes in LTM.
+   * This parameter is taken from de Groot and Gobet (1996) to indicate 
+   * point when master-level eye heuristics are used instead of novice 
+   * ones.
+   */
+  public boolean isExperienced () {
+    if (!_experienced) {
+      if (ltmVisualSize()+ltmVerbalSize()+ltmActionSize() > 2000)
+        _experienced = true;
+    }
+    return _experienced;
+  }
+  private boolean _experienced = false; // for caching experience level
+
+  /**
    * Instruct model to construct templates, if the 'constructTemplates' flag is true.  
    * This method should be called at the end of the learning process.
    * Note, the template construction process only currently works for visual patterns 
@@ -680,7 +695,7 @@ public class Chrest extends Observable {
 
   public void learnScene (Scene scene, int numFixations) {
     _perceiver.setScene (scene);
-    _perceiver.start ();
+    _perceiver.start (numFixations);
     for (int i = 0; i < numFixations; i++) {
       _perceiver.moveEyeAndLearn ();
     }
@@ -812,7 +827,7 @@ public class Chrest extends Observable {
       _visualStm.clear ();
     }
     _perceiver.setScene (scene);
-    _perceiver.start ();
+    _perceiver.start (numFixations);
     for (int i = 0; i < numFixations; i++) {
       _perceiver.moveEye ();
     }
@@ -853,10 +868,6 @@ public class Chrest extends Observable {
     _verbalStm.clear ();
     setChanged ();
     if (!_frozen) notifyObservers ();
-  }
-
-  public String getHeuristicDescription () {
-    return _perceiver.getHeuristicDescription ();
   }
 
   /** 
