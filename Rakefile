@@ -92,6 +92,7 @@ directory 'release/chrest'
 desc 'bundle for release'
 task :bundle => [:guide, :manual, :make_jar, :api_doc, 'release/chrest'] do
   Dir.chdir('release/chrest') do
+    sh 'rm -rf documentation' # remove it if exists already
     sh 'mkdir documentation'
     sh 'cp ../../lib/license.txt documentation'
     sh 'cp ../../doc/user-guide/user-guide.pdf documentation'
@@ -99,6 +100,10 @@ task :bundle => [:guide, :manual, :make_jar, :api_doc, 'release/chrest'] do
 
     sh 'cp ../../chrest.jar .'
     sh 'cp -r ../../examples .'
+    sh 'rm examples/lisp/abcl.jar'
+    sh 'rm -rf examples/lisp/toreview'
+    sh 'rm -rf examples/ruby/toreview'
+
     sh 'cp -r ../../doc/api documentation/javadoc'
     File.open("start-chrest.sh", "w") do |file|
       file.puts <<END
@@ -112,7 +117,7 @@ END
     end
   end
   Dir.chdir('release') do
-    sh "zip -r chrest-#{VERSION}.zip chrest"
+    sh "zip -FS -r chrest-#{VERSION}.zip chrest"
   end
 end
 

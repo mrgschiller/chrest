@@ -50,6 +50,8 @@ public class Chrest extends Observable {
   private final Stm _actionStm; // TODO: Incorporate into displays
   // Perception module
   private final Perceiver _perceiver;
+  // Emotions support
+
 
   public Chrest () {
     _domainSpecifics = new GenericDomain ();

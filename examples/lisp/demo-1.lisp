@@ -11,7 +11,7 @@
 ;;; or use
 ;;; $ sh run-abcl-script.sh demo-1.lisp
 
-(load "chrest-system.lisp")
+(load "chrest.lisp")
 (use-package :chrest)
 
 (let* ((model (make-chrest))
