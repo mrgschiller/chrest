@@ -1,4 +1,5 @@
 // Copyright (c) 2012, Peter C. R. Lane
+// with contributions on the emotions code by Marvin Schiller.
 // Released under Open Works License, http://owl.apotheon.org/
 
 package jchrest.architecture;
@@ -50,8 +51,8 @@ public class Chrest extends Observable {
   private final Stm _actionStm; // TODO: Incorporate into displays
   // Perception module
   private final Perceiver _perceiver;
-  // Emotions support
-
+  // Emotions module
+  private EmotionAssociator _emotionAssociator;
 
   public Chrest () {
     _domainSpecifics = new GenericDomain ();
@@ -70,6 +71,7 @@ public class Chrest extends Observable {
     _visualStm = new Stm (4);
     _verbalStm = new Stm (2);
     _actionStm = new Stm (4);
+    _emotionAssociator = new EmotionAssociator ();
 
     _createTemplates = true;
     _perceiver = new Perceiver (this);
@@ -891,4 +893,59 @@ public class Chrest extends Observable {
     writer.write ("*Tie data\nFROM TO\n");
     _visualLtm.writeSemanticLinksAsVna (writer);
   }
+
+  public void setDefaultAlpha (double alpha) {
+    _emotionAssociator.setDefaultAlpha (alpha);
+  }
+
+  /**
+   * Accessor for Emotion Associator.
+   */
+  public EmotionAssociator getEmotionAssociator () {
+    return _emotionAssociator;
+  }
+
+  /**
+   * Propagate emotion across all the given STMs.
+   */
+  public void emoteAndPropagateAcrossModalities (Object stmsobject) {
+    Stm[] stms = (Stm[]) stmsobject;
+    _emotionAssociator.emoteAndPropagateAcrossModalities (stms, _clock);
+  }
+
+  /**
+   * Attach given emotion to top item in STM, if present.
+   */
+  public void assignEmotionToCurrentItem (Stm stm, Emotion emotion) {
+    if (stm.getCount () == 0) {
+      return;  // STM empty, so nothing to be done
+    }
+    _emotionAssociator.setRWEmotion (stm.getItem(0), emotion);
+  }
+
+  /** 
+   * Accessor for the emotion associated with the topmost item in STM.
+   */
+  public Emotion getCurrentEmotion (Stm stm) {
+    if (stm.getCount () == 0) {
+      return null;
+    } else {
+      return _emotionAssociator.getRWEmotion (stm.getItem (0));
+    }
+  }
+
+  public Emotion getCurrentFollowedByEmotion (Stm stm) {
+    if (stm.getCount () == 0) {
+      return null;
+    } else {
+      Node followed_by = stm.getItem(0).getAssociatedNode ();
+      if (followed_by == null) {
+        return null;
+      } else {
+        return _emotionAssociator.getRWEmotion (followed_by);
+      }
+    }
+  }
+
+
 }

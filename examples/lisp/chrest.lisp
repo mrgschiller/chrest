@@ -476,15 +476,12 @@
 (defun chrest::emotion-project (emotion pureemotion)
   (jcall (jmethod "jchrest.architecture.Emotion" "project" "jchrest.architecture.Emotion")
           emotion
-          pureemotion
-          )
-  )
+          pureemotion))
 
 (defun chrest::set-default-alpha (model alpha)
   (jcall (jmethod "jchrest.architecture.Chrest" "setDefaultAlpha" "double")
          model 
-         alpha
-         ))
+         alpha))
 
 (defun chrest::stm-clear(stm)
   (jcall (jmethod "jchrest.architecture.Stm" "clear")
@@ -495,10 +492,8 @@
   (mapcar (lambda (x y) 
             (format t "~A  ~A ~%" y (emotion-project emotion x))) *plutchik-emotions* 
           (if (equal theory *plutchik*) (list "joy" "trust" "fear" "surprise" "sadness" "disgust" "anger" "anticipation")
-              (list "amusement" "anger" "contempt" "contentment" "disgust" "embarassement" 
-                    "excitement" "fear" "guilt" "prideinachievement" "relief" "sadnessdistress" "satisfaction" "sensorypleasure" "shame"))
-              )
-  )
+            (list "amusement" "anger" "contempt" "contentment" "disgust" "embarassement" 
+                  "excitement" "fear" "guilt" "prideinachievement" "relief" "sadnessdistress" "satisfaction" "sensorypleasure" "shame"))))
 
 ;;; mainpulating emotions
 (defun chrest::clone-emotion (emotion)
@@ -507,14 +502,14 @@
 (defun chrest::add-emotions (emotion1 emotion2)
   (jstatic "add" "jchrest.architecture.Emotion" emotion1 emotion2))
 
-        
 (defun chrest::multiply-emotion (emotion factor)
   (jcall (jmethod "jchrest.architecture.Emotion" "multiply" "float")
          emotion
-         factor
-         ))
+         factor))
 
-;;; use the emotion association mechanism, where the most recent item in the STMs is considered the unconditioned stimulus, and the others as conditioned stimuli.
+;;; use the emotion association mechanism, where the most recent item 
+;;; in the STMs is considered the unconditioned stimulus, and the others 
+;;; as conditioned stimuli.
 (defun chrest::emote-and-propagate-across-modalities (model stms)
   (jcall (jmethod "jchrest.architecture.Chrest" "emoteAndPropagateAcrossModalities" "java.lang.Object")
          model 
@@ -525,12 +520,11 @@
   (jcall (jmethod "jchrest.architecture.Chrest" "assignEmotionToCurrentItem" "jchrest.architecture.Stm" "jchrest.architecture.Emotion")
          model 
          stm
-         emotion
-         ))
+         emotion))
 
 ;;; retrieve the emotion associated with the most recent item in STM
 (defun chrest::get-current-emotion (model stm)
   (jcall (jmethod "jchrest.architecture.Chrest" "getCurrentEmotion" "jchrest.architecture.Stm")
          model 
-         stm
-         ))
+         stm))
+

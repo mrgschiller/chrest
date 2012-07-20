@@ -5,7 +5,7 @@
 (load "chrest")
 (use-package :chrest)
 
-;;;;;;;;; THE FUNDAMTENALS OF THE CLASSICAL IOWA GAMBLING TASK
+;;;;;;;;; THE FUNDAMENTALS OF THE CLASSICAL IOWA GAMBLING TASK
 
 ;;; IOWA GAMBLING TASK (SCHEDULE FROM BECHARA et al, 1994, Fig. 1)
 (defparameter deckApenalties '(0 0 150 0 300 0 200 0 250  350   0 350 0  250  200 0 300 150 0 0    0    300 0 350 0  200 250 150 0   0  350 200  250 0  0   0 150 300 0  0))
@@ -19,9 +19,7 @@
     ('A (nth (nth 0 positions) deckApenalties))
     ('B (nth (nth 1 positions) deckBpenalties))
     ('C (nth (nth 2 positions) deckCpenalties))
-    ('D (nth (nth 3 positions) deckDpenalties))
-    )
-  )
+    ('D (nth (nth 3 positions) deckDpenalties))))
 
 ;;; Computations for the IGT - canonical wins for the four decks
 (defun win (deck)
@@ -58,55 +56,49 @@
       ('B (incf pos2))
       ('C (incf pos3))
       ('D (incf pos4)))
-    (list pos1 pos2 pos3 pos4)
-    )
-  )
+    (list pos1 pos2 pos3 pos4)))
 
-;;;;;;;;;;;; PREPARING THE CHREST MODEL -- Assumption that winning/loosing money is a priory associated with joy/sadness 
+;;;;;;;;;;;; PREPARING THE CHREST MODEL -- Assumption that winning/losing money is a priority 
+;;;                                        associated with joy/sadness 
       
 
 (defun create-financial-outcome-item (model strength1 strength2)
   (let ((some-joy (chrest::clone-emotion  chrest::*pure-joy*))
-        (some-sadness (chrest::clone-emotion  chrest::*pure-sadness*))
-        )
+        (some-sadness (chrest::clone-emotion  chrest::*pure-sadness*)))
     
     (chrest::multiply-emotion some-joy strength1)
     (chrest::multiply-emotion some-sadness strength2)
     (recognise-and-learn model (make-list-pattern (list (format NIL "OUTCOME-~A-~A" strength1 strength2))))
-    (chrest::assign-emotion-to-current-item model (chrest::visual-stm model) (chrest::add-emotions some-joy some-sadness))
-    )
-  )
+    (chrest::assign-emotion-to-current-item model (chrest::visual-stm model) (chrest::add-emotions some-joy some-sadness))))
 
 (defun provide-decks (model)
   (dolist (name (list 'A 'B 'C 'D))
     (recognise-and-learn model (make-list-pattern (list (symbol-name name))))
-    (chrest::assign-emotion-to-current-item model (chrest::visual-stm model) chrest::*pure-anticipation*)
-    )
-  )
+    (chrest::assign-emotion-to-current-item model (chrest::visual-stm model) chrest::*pure-anticipation*)))
 
 (defun provide-financial-outcomes (model)
-;; ;; outcomes for deck A
-(create-financial-outcome-item model 100.0 0.0) ;; non-punishment
-(create-financial-outcome-item model 100.0 150.0)
-(create-financial-outcome-item model 100.0 200.0)
-(create-financial-outcome-item model 100.0 250.0)
-(create-financial-outcome-item model 100.0 300.0)
-(create-financial-outcome-item model 100.0 350.0)
+  ;; ;; outcomes for deck A
+  (create-financial-outcome-item model 100.0 0.0) ;; non-punishment
+  (create-financial-outcome-item model 100.0 150.0)
+  (create-financial-outcome-item model 100.0 200.0)
+  (create-financial-outcome-item model 100.0 250.0)
+  (create-financial-outcome-item model 100.0 300.0)
+  (create-financial-outcome-item model 100.0 350.0)
 
-;; outcomes for deck B
-;; (create-financial-outcome-item model1 100.0 0.0) ;; non-punishment (same as deck A)
-(create-financial-outcome-item model 100.0 1250.0) ;; severe punishment
+  ;; outcomes for deck B
+  ;; (create-financial-outcome-item model1 100.0 0.0) ;; non-punishment (same as deck A)
+  (create-financial-outcome-item model 100.0 1250.0) ;; severe punishment
 
-;; outcomes for deck C
-(create-financial-outcome-item model 50.0 0.0) ;; non-punishment
-(create-financial-outcome-item model 50.0 25.0) 
-(create-financial-outcome-item model 50.0 50.0) 
-(create-financial-outcome-item model 50.0 75.0) 
+  ;; outcomes for deck C
+  (create-financial-outcome-item model 50.0 0.0) ;; non-punishment
+  (create-financial-outcome-item model 50.0 25.0) 
+  (create-financial-outcome-item model 50.0 50.0) 
+  (create-financial-outcome-item model 50.0 75.0) 
 
-;; outcomes for deck D
-;; (create-financial-outcome-item model1 50.0 0.0) ;; non-punishment (same as deck C)
-(create-financial-outcome-item model 50.0 250.0) 
-)
+  ;; outcomes for deck D
+  ;; (create-financial-outcome-item model1 50.0 0.0) ;; non-punishment (same as deck C)
+  (create-financial-outcome-item model 50.0 250.0) 
+  )
 
 ;;;;;;;;; service functions for "learning" and "recognising" decks
 
@@ -114,28 +106,24 @@
   (let* ((win (* 1.0 (win deckname)))
          (penalty (* 1.0 (penalty deckname positions)))
          (outcome-pattern (make-list-pattern (list (format NIL "OUTCOME-~A-~A" win penalty)))))
-    (format t "Experience deck ~A, win: ~A, loose: ~A~%" deckname win penalty)
+    (format t "Experience deck ~A, win: ~A, lose: ~A~%" deckname win penalty)
     (chrest::stm-clear (chrest::visual-stm model)) ;;; this is artificial
     (recognise-and-learn model (make-list-pattern (list (symbol-name deckname))))
     (chrest::recall-pattern model outcome-pattern)
-    (chrest::emote-and-propagate-across-modalities model (list (chrest::visual-stm model))))    
-  )
+    (chrest::emote-and-propagate-across-modalities model (list (chrest::visual-stm model)))))
 
 (defun collect-deck-emotion (model deckname)
   (chrest::stm-clear (chrest::visual-stm model))
   (recognise-and-learn model (make-list-pattern (list (symbol-name deckname))))
   (prog1 
     (chrest::get-current-emotion model (chrest::visual-stm model))
-    (chrest::stm-clear (chrest::visual-stm model))
-    )
-  )
+    (chrest::stm-clear (chrest::visual-stm model))))
 
 ;; helper function
 
 (defun get-maxima (lst)
   (let ((max (reduce (lambda (x y) (if (> x y) x y)) (mapcar #'cadr lst))))
-    (mapcar #'car (remove-if (lambda (x) (< (cadr x) max)) lst))
-    ))
+    (mapcar #'car (remove-if (lambda (x) (< (cadr x) max)) lst))))
 
 
 ;;; iterate card selections within one model
@@ -149,11 +137,9 @@
                (deck (if (<= (+ (random 100) 1) randomness) ;; introduce random round robin skips
                          (progn
                            (setq ranselect (+ ranselect 1))
-                           (get-deck-or-next-deck previousselection (remove-if (lambda (x) (equal x previousselection)) remaining-decks))
-                           )
+                           (get-deck-or-next-deck previousselection (remove-if (lambda (x) (equal x previousselection)) remaining-decks)))
                          deck))
-               (newposition (advance-position deck position))
-               )
+               (newposition (advance-position deck position)))
           (format t "Position: ~A ~%" newposition)
           (experience-deck model deck position)
           (iterate-gambling-task model 
@@ -165,15 +151,11 @@
                                  emotionevalfun 
                                  ranselect 
                                  deck 
-                                 anticipfactor)
-          )
+                                 anticipfactor))
       ;;; done iterating
       (progn 
         (format t "Final balance: ~A~%" balance)
-        selections
-        )
-      )
-  )
+        selections)))
 
 
 ;;; RUN OF THE MODEL (until schedule is exhausted)
@@ -189,8 +171,7 @@
         (runs 100)
         (position (list 0 0 0 0))
         (balance 0)
-        (selections NIL)
-        )
+        (selections NIL))
     (setq model1 model)
     (chrest::set-default-alpha model alpha)
     (provide-decks model)
@@ -199,23 +180,19 @@
     ; (chrest::display-model2 model)
     ; (setq *distributions* (cons selections *distributions*))
     (format t "Distribution of selections: ~A" (mapcar (lambda (y) (length (remove-if (lambda (x) (not (equal x y))) selections))) (list 'A 'B 'C 'D)))
-    (reverse selections)
-  )
-  )
+    (reverse selections)))
 
 
 (defun evaluate-deck (model deck anticipfactor)
   (chrest::stm-clear (chrest::visual-stm model))
   (recognise-and-learn model (make-list-pattern (list (symbol-name deck))))
   (let ((emotion (chrest::get-current-emotion model (chrest::visual-stm model))))
-                (if (null emotion) -1000
-                    (let* ((joy (chrest::emotion-project emotion chrest::*pure-joy*))
-                           (sadness (chrest::emotion-project emotion chrest::*pure-sadness*))
-                           (anticipation (chrest::emotion-project emotion chrest::*pure-anticipation*))
-                           )
-                      (chrest::stm-clear (chrest::visual-stm model))
-                      (+ (* anticipfactor anticipation) (* (- 1 anticipfactor) (- joy sadness)))
-                      ))))
+    (if (null emotion) -1000
+      (let* ((joy (chrest::emotion-project emotion chrest::*pure-joy*))
+             (sadness (chrest::emotion-project emotion chrest::*pure-sadness*))
+             (anticipation (chrest::emotion-project emotion chrest::*pure-anticipation*)))
+        (chrest::stm-clear (chrest::visual-stm model))
+        (+ (* anticipfactor anticipation) (* (- 1 anticipfactor) (- joy sadness)))))))
 
 
 ;;;;; One run of the model with the given parameters
@@ -224,5 +201,6 @@
       (alpha 0.2)        ;;; learning rate (0-1.0)
       (anticipation 0.5) ;;; relative importance of discovering decks (vs. using available knowledge), range 0 (use only learned knowledge) - 1.0 (learned knowledge is ignored)
       )
-  (run-model-once randomness #'evaluate-deck alpha anticipation)
-  )
+  (run-model-once randomness #'evaluate-deck alpha anticipation))
+
+(exit)

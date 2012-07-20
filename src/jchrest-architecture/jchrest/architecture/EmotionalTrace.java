@@ -7,19 +7,17 @@ package jchrest.architecture;
 import java.io.*;
 import java.lang.Math;
 import java.util.*;
-import java.util.HashMap;
-
 
 /**
- * Represents a complex emotional tag (for one memory item), including a history of emotions encountered, and an emotion representing a conditioned emotional response (the Rescorla Wagner emotion)
+ * Represents a complex emotional tag
  *
  * @author Marvin Schiller
  */
- 
 public class EmotionalTrace {
     
-   
-    private HashMap<Integer,Emotion> _emotionHistory = new HashMap<Integer,Emotion>();
+    // private float _strength;
+    // private Node source; not needed, is in the association list
+    private Map<Integer,Emotion> _emotionHistory = new HashMap<Integer,Emotion>();
     private Emotion _RescorlaWagnerEmotion;
     
     public void addToHistory(int time, Emotion emotion){
@@ -34,11 +32,6 @@ public class EmotionalTrace {
         return _RescorlaWagnerEmotion;
     } 
     
-    
-    /**
-     * Pretty-printing for debugging purposes
-     */
-    
     public void printToStdOut(){
         System.out.println("== Emotional Trace ==");
         System.out.println("= RW Emotion =");
@@ -50,7 +43,7 @@ public class EmotionalTrace {
         }
         System.out.println("= Emotion History =");
         Set<Integer> timepoints = _emotionHistory.keySet();
-        TreeSet<Integer> sorted_timepoints = new TreeSet<Integer>(timepoints);
+        Set<Integer> sorted_timepoints = new TreeSet<Integer>(timepoints);
         for (Integer i : sorted_timepoints){
             System.out.print("t=");
             System.out.print(i);

@@ -4,8 +4,8 @@ process_test "number matches" do
   number1 = Pattern.makeNumber 1
   number2 = Pattern.makeNumber 2
 
-  assert_true number1.equalPrimitive(NumberPattern.create(1))
-  assert_false number1.equalPrimitive(number2)
+  assert_true number1.equals(NumberPattern.create(1))
+  assert_false number1.equals(number2)
   assert_true number1.matches(NumberPattern.create(1))
   assert_false number1.matches(number2)
 end
@@ -14,8 +14,8 @@ process_test "string matches" do
   string1 = Pattern.makeString "abc"
   string2 = Pattern.makeString "def"
 
-  assert_true string1.equalPrimitive(StringPattern.create("abc"))
-  assert_false string1.equalPrimitive(string2)
+  assert_true string1.equals(StringPattern.create("abc"))
+  assert_false string1.equals(string2)
   assert_true string1.matches(StringPattern.create("abc"))
   assert_false string1.matches(string2)
 end
@@ -25,8 +25,8 @@ process_test "ios matches" do
   ios1a = ItemSquarePattern.new("P", 2, 3)
   ios2 = ItemSquarePattern.new("Q", 2, 3)
 
-  assert_true ios1.equalPrimitive(ios1a)
-  assert_false ios1.equalPrimitive(ios2)
+  assert_true ios1.equals(ios1a)
+  assert_false ios1.equals(ios2)
   assert_true ios1.matches(ios1a)
   assert_false ios1.matches(ios2)
 end

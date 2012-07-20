@@ -115,6 +115,11 @@ END
 start javaw -Xmx100M -jar chrest.jar
 END
     end
+    File.open("README.txt", "w") do |file|
+      file.puts <<END
+See documentation/user-guide.pdf for information on running and using CHREST.
+END
+    end
   end
   Dir.chdir('release') do
     sh "zip -FS -r chrest-#{VERSION}.zip chrest"

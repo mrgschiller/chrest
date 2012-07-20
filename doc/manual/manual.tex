@@ -14,7 +14,7 @@
 affects our ability to remember, categorise and think about the world.  This
 document contains a technical description of CHREST, including details of its
 operation and links to the implementation.  A separate user guide is available,
-which is a gentler introduction on using the CHREST software.
+which is a gentler introduction to using the CHREST software.
 
 \end{abstract}
 
@@ -67,11 +67,12 @@ experience affects our ability to remember, categorise and think about the
 world around us.
 
 This document describes in more detail each component of CHREST.  We begin with
-the long-term memory structures: the chunking network, the semantic
-memory and templates.  Then we cover the perception module, based on Perceiver,
-and the short-term or working memory.  We bring these  components together by
-explaining how to control and work with a CHREST-based agent.  Finally, we
-introduce some example domains and models.
+the long-term memory structures: the chunking network, the semantic memory and
+templates.  Then we cover the perception module, based on Perceiver, and the
+short-term or working memory, followed by explaining the mechanisms for
+including emotional responses in learning and retrieval.  We bring these
+components together by explaining how to control and work with a CHREST-based
+agent.  Finally, we introduce some example domains and models.
 
 \section{Chunking Network}
 
@@ -177,14 +178,27 @@ of the links coming from the template-node.
 
 \section{Working Memory}
 
+\section{Emotions}
+
 \section{Controlling a Model}
 
 \section{Examples}
 
+The following examples demonstrate the use of CHREST in three domains taken
+from published work.  More examples are provided in the `examples' folder of
+the distributed software.
+
 \subsection{Chess recall}
+
+Based on book~\cite{deGroot96} and article~\cite{Gobet00b}.
 
 \subsection{Language learning}
 
+Based on EPAM-VOC~\cite{Jones08}.
+
+\subsection{Iowa gambling task}
+
+Based on Marvin's project~\cite{Gobet11a}.
 
 \section{Recommended reading}
 
@@ -203,7 +217,7 @@ of CHREST and its precursors.
 
 \subsubsection{CHREST and related models}
 
-{\em Version~1 of CHREST} was developed in 1993 and published as:
+{\em Version~1 of CHREST} was released in 1993 and published as:
 
 \begin{itemize}
 \item F. Gobet (1993). Les memoires d'un joueur d'\'echecs.~\cite{Gobet93a}
@@ -217,7 +231,7 @@ structure, and that the eye movements were simulated much more closely than in
 the earlier version. 
 \vspace{3pt}
 
-\noindent {\em Version~2 of CHREST} was developed in 1995 and included the
+\noindent {\em Version~2 of CHREST} was released in 1995 and included the
 ideas of semantic links between nodes and templates.  Important publications
 for version~2 include:
 
@@ -235,9 +249,9 @@ pattern recognition (no search):
 human memory.~\cite{Gobet94} 
 \end{itemize}
 
-\noindent {\em Version~3 of CHREST} was published in 2009, and was used in
-modelling some further results in chess expertise, particularly short-term
-memory effects.
+\noindent {\em Version~3 of CHREST} was released in 2009, and used in modelling
+some further results in chess expertise, particularly short-term memory
+effects.
 
 \begin{itemize}
 \item R. Ll. Smith, F. Gobet and P.C.R. Lane (2007), An investigation into the
@@ -248,12 +262,12 @@ between visual short-term memory capacity and recall ability.~\cite{Smith08}
 chunks: A model of simple check detection.~\cite{Smith09}
 \end{itemize}
 
-\noindent {\em Version~4 of CHREST} was released in 2012, and is a complete
-reimplementation of CHREST from Lisp into Java.  Version~4 includes the
-components of earlier versions of CHREST, such as the chunking network,
+\noindent {\em Version~4 of CHREST} is due for release in late 2012, and is a
+complete reimplementation of CHREST from Lisp into Java.  Version~4 includes
+the components of earlier versions of CHREST, such as the chunking network,
 semantic links, templates, perceiver and working memory, additionally supports
-CHUMP, and includes the emotion-handling mechanisms, as developed by Marvin
-Schiller.
+CHUMP~\cite{Bossomaier12,Gobet94}, and includes the emotion-handling
+mechanisms, as developed by Marvin Schiller~\cite{Gobet11a}.
 
 \subsubsection{Precursors of CHREST}
 
