@@ -58,7 +58,7 @@ end
 # Train model on given scene
 def learn_scene(model, scene, fixations=20)
   model.perceiver.scene = scene
-  model.perceiver.start
+  model.perceiver.start fixations
 #  start_time = model.clock # book uses 5 seconds presentation time
 #  while model.clock < start_time + 5000 do
   fixations.times do 
@@ -69,7 +69,7 @@ end
 # Scan given scene
 def scan_scene(model, scene, fixations=20)
   model.perceiver.scene = scene
-  model.perceiver.start
+  model.perceiver.start fixations
   fixations.times do
     model.perceiver.move_eye
   end
@@ -98,7 +98,7 @@ def get_unique_stm_items model
     image = model.visual_stm.item(i).image
     image.size.times do |j|
       item = image.get_item j
-      items << item if items.detect {|obj| obj.equalPrimitive(item)}.nil?
+      items << item if items.detect {|obj| obj.equals(item)}.nil?
     end
   end
   items
@@ -203,7 +203,7 @@ TrainingData = read_data "../sample-data/chess-positions.dat"
 TestData = read_data "chess-test-gobet96.dat"
 
 @@novice_model = create_model(TrainingData, 2, 20, 200)
-@@expert_model = create_model(TrainingData, 2) # , 20, 25000)
+@@expert_model = create_model(TrainingData, 2, 20, 25000)
 
 @@novice_results = []
 TestData.get_scene_names.length.times do |i|

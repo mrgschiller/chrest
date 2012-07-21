@@ -46,5 +46,5 @@ for pat in Patterns
 end
 
 # And display the Model in a graphical view
-ChrestView.new(nil, model)
+ChrestView.new(model)
 

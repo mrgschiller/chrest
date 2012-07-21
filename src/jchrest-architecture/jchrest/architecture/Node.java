@@ -199,6 +199,7 @@ public class Node extends Observable {
    * Information is based on the size of the image + the number of slots.
    */
   public int information () {
+    if (_reference == 0) return 0; // root node has 0 information
     int information = _image.size ();
     if (_itemSlots != null) {
       information += _itemSlots.size ();

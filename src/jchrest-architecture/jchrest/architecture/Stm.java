@@ -87,7 +87,7 @@ public class Stm implements Iterable<Node> {
     }
     // if most informative node not in STM, then add it back in to top
     if (!_items.contains (hypothesis)) {
-      _items.remove (_items.size () - 1);
+      _items.remove (_items.size () - 1); // losing bottommost item
       _items.add (0, hypothesis);
     }
   }

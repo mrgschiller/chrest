@@ -310,6 +310,20 @@ public class Perceiver {
     return _fixations;
   }
 
+  public int getNumberFixations () {
+    return _fixations.size ();
+  }
+
+  public int getFixationsX (int index) {
+    assert (index < _fixations.size () && index >= 0);
+    return _fixations.get(index).getX ();
+  }
+
+  public int getFixationsY (int index) {
+    assert (index < _fixations.size () && index >= 0);
+    return _fixations.get(index).getY ();
+  }
+
   private void addFixation (Fixation fixation) {
     _fixations.add (fixation);
   }

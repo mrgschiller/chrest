@@ -8,7 +8,7 @@ include TestFramework
 
 # Import all required classes
 [
-  "Chrest"
+  "Chrest", "Node"
 ].each do |klass|
   import "jchrest.architecture.#{klass}"
 end

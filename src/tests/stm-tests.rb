@@ -18,6 +18,7 @@ process_test "stm tests 2" do
   model = Chrest.new
   patternA = Pattern.makeVisualList(["A", "E", "F"].to_java(:String))
 
+  assert_equal(0, model.getVisualStm.getCount)
   model.recogniseAndLearn patternA
   assert_equal(2, model.getVisualStm.getCount)
   assert_true(model.getLtmByModality(patternA) == model.getVisualStm.getItem(1))
