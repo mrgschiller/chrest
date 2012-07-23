@@ -313,8 +313,12 @@ public class ListPattern extends Pattern implements Iterable<PrimitivePattern> {
     int count = 0;
 
     for (PrimitivePattern item : _list) {
-      if (pattern.contains (item)) { // TODO: Think about duplicate items!
+      if (pattern.contains (item)) {
         count += 1;
+        // remove the matching item from pattern
+        ListPattern itemPattern = new ListPattern (_modality);
+        itemPattern.add (item);
+        pattern = pattern.remove (itemPattern);
       }
       if (count >= k) return true;
     }

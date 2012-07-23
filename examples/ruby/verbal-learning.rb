@@ -59,10 +59,10 @@ def show_responses(model, pairs)
   pairs.each do |stimulus, response|
     print "For #{stimulus.toString}-#{response.toString} model returns "
     print "(#{model.recognise(stimulus).contents})#{model.recognise(stimulus).image.toString}-"
-    if model.follow_pattern(stimulus).nil?
+    if model.assocated_pattern(stimulus).nil?
       puts "nothing"
     else
-      puts "#{model.follow_pattern(stimulus).toString}"
+      puts "#{model.associated_pattern(stimulus).toString}"
     end
   end
 end
@@ -77,8 +77,8 @@ def train_model_pairs(model, pairs, timeout = 100)
     some_unknown = false
     cycle += 1
     pairs.each do |stimulus, response|
-      if model.follow_pattern(stimulus).nil? or 
-        !(model.follow_pattern(stimulus).java_send(:equals, [Java::jchrest.lib.ListPattern], response))
+      if model.associate_pattern(stimulus).nil? or 
+        !(model.associate_pattern(stimulus).java_send(:equals, [Java::jchrest.lib.ListPattern], response))
         some_unknown = true
         errors += 1
         model.associate_and_learn(stimulus, response)
@@ -180,10 +180,10 @@ class Experiment
   def perform_cycle model
     loop do
       node = model.recognise(@items[@current])
-      if node.followed_by.nil?
+      if node.associated_node.nil?
         model.associate_and_learn(@items[@current], @items[@current+1], @clock)
       else
-        if node.followed_by.image.java_send(:equals, [Java::jchrest.lib.ListPattern], @items[@current+1])
+        if node.associated_node.image.java_send(:equals, [Java::jchrest.lib.ListPattern], @items[@current+1])
           if rand < 0.3 # try overlearning
             loops = 0
             while model.clock < @clock and loops < 10
@@ -209,7 +209,7 @@ end
 
 def not_fully_learnt?(model, experiment) 
   0.upto(experiment.num_items-2) do |index|
-    retrieved_pattern = model.follow_pattern(experiment[index])
+    retrieved_pattern = model.associate_pattern(experiment[index])
     return true if retrieved_pattern.nil? 
     return true unless retrieved_pattern.java_send(:equals, [Java::jchrest.lib.ListPattern], (experiment[index+1]))
   end
@@ -367,8 +367,8 @@ def run_expt_3_single(pairs, presentation_time = 19000, timeout = 100)
     cycle += 1
     clock += presentation_time
     pairs.each do |stimulus, response|
-      if model.follow_pattern(stimulus).nil? or 
-        !(model.follow_pattern(stimulus).java_send(:equals, [Java::jchrest.lib.ListPattern], response))
+      if model.associate_pattern(stimulus).nil? or 
+        !(model.associate_pattern(stimulus).java_send(:equals, [Java::jchrest.lib.ListPattern], response))
         some_unknown = true
         errors += 1
         model.associate_and_learn(stimulus, response, clock)

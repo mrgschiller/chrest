@@ -58,36 +58,28 @@ public class Stm implements Iterable<Node> {
    * When adding a new node to STM, the new node is added to the top of STM 
    * with the queue cut at the bottom to keep STM to the fixed size constraints.
    * However, the most informative node is maintained in the list, by re-adding 
-   * it to the end of the list, if lost.
+   * it to STM, if lost.
    */
   public void add (Node node) {
-    // find the most informative node
+    // find the most informative node which also matches this node's contents
     Node hypothesis = node;
     for (Node check : _items) {
-      if (check.information () > hypothesis.information ()) {
+      if (hypothesis.getContents ().matches (check.getContents ()) &&
+          check.information () > hypothesis.information ()) {
         hypothesis = check;
       }
     }
     // put this node at the front of STM, and remove any duplicate
     _items.remove (node);
     _items.add (0, node);
-    // sort STM so most informative node at top
-    for (int i = 0; i < _items.size (); ++i) {
-      for (int j = i+1; j < _items.size (); ++j) {
-        if (_items.get(i).information () < _items.get(j).information ()) {
-          Node tmp = _items.get(i);
-          _items.set(i, _items.get(j));
-          _items.set(j, tmp);
-        }
-      }
-    }
+
     // truncate STM to be of at most _size elements
     while (_items.size () > _size) {
       _items.remove (_items.size () - 1);
     }
     // if most informative node not in STM, then add it back in to top
     if (!_items.contains (hypothesis)) {
-      _items.remove (_items.size () - 1); // losing bottommost item
+      _items.remove (_items.size () - 1); // losing bottom item
       _items.add (0, hypothesis);
     }
   }

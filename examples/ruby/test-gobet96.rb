@@ -10,61 +10,10 @@
 
 # TODO: Average results over several models
 
-require "java"
 require "chrest"
-
-import "jchrest.architecture.Chrest"
-import "jchrest.gui.ChrestView"
-import "jchrest.lib.ChessDomain"
-import "jchrest.lib.Scenes"
 
 # ---------------------------------------------------------------------
 # Supporting methods
-
-# Read in a set of Scene descriptions
-def read_data filename
-  scenes = []
-  begin 
-    fbr = java.io.BufferedReader.new(java.io.FileReader.new(filename))
-    fbr.read_line # reads and ignores the 'visual search' line
-    scenes = Scenes.read(fbr)
-  rescue java.io.IOException 
-    puts "Error !"
-  end
-  scenes
-end
-
-# Display scene
-def display_scene scene
-  scene.height.times do |h|
-    scene.width.times do |w|
-      print scene.get_item(h, w)
-    end
-    puts
-  end
-end
-
-# Count the number of non empty squares in a scene
-def count_items scene
-  count = 0
-  scene.height.times do |h|
-    scene.width.times do |w|
-      count += 1 unless scene.is_empty(h, w)
-    end
-  end
-  count
-end
-
-# Train model on given scene
-def learn_scene(model, scene, fixations=20)
-  model.perceiver.scene = scene
-  model.perceiver.start fixations
-#  start_time = model.clock # book uses 5 seconds presentation time
-#  while model.clock < start_time + 5000 do
-  fixations.times do 
-    model.perceiver.move_eye_and_learn
-  end
-end
 
 # Scan given scene
 def scan_scene(model, scene, fixations=20)
@@ -73,22 +22,6 @@ def scan_scene(model, scene, fixations=20)
   fixations.times do
     model.perceiver.move_eye
   end
-end
-
-# Create a model, training on each scene n times
-def create_model(scenes, cycles, fixations = 20, cap = 1_000_000)
-  model = Chrest.new
-  model.set_domain(ChessDomain.new)
-  puts "Learning: "
-  puts "Cycle  Visual LTM size  Avg depth  Avg image size"
-  cycles.times do |cycle|
-    scenes.get_scene_names.length.times do |i|
-      break if model.ltm_visual_size > cap 
-      learn_scene(model, scenes.get(i), fixations)
-    end
-    puts "#{"%5d" % (cycle+1)}  #{"%15d" % model.ltm_visual_size}  #{"%9.2f" % model.get_visual_ltm_average_depth}  #{"%14.2f" % model.get_visual_ltm_average_image_size}"
-  end
-  model
 end
 
 # Collect unique items from visual stm
@@ -102,30 +35,6 @@ def get_unique_stm_items model
     end
   end
   items
-end
-
-# Count the number of recalled items which are correctly placed on the scene
-def count_overlap(recalled_items, scene)
-  count = 0
-  recalled_items.each do |item|
-    begin
-      count += 1 if item.item == scene.get_item(item.row-1, item.column-1)
-    rescue
-    end
-  end
-  count
-end
-
-def compute_recall(recalled_items, scene)
-  count_overlap(recalled_items, scene).quo(count_items(scene))
-end
-
-def compute_precision(recalled_items, scene)
-  if (recalled_items.length.zero?)
-    0
-  else
-    count_overlap(recalled_items, scene).quo(recalled_items.length)
-  end
 end
 
 # Retrieve the number of unique fixated squares
@@ -165,13 +74,13 @@ def recall_performance(model, scene, fixations = 20)
   scan_scene(model, scene, fixations)
   recall = get_unique_stm_items model
   if Trace
-    display_scene scene
+    scene.display
     puts "Recalled: #{recall.join(",")}"
-    puts "Correct is: #{count_overlap(recall, scene)}, Recall: #{compute_recall(recall, scene)}"
+    puts "Correct is: #{recall.count_overlapping_pieces(scene)}, Recall: #{recall.compute_recall(scene)}"
     puts "---------------------------------------------------"
   end
-  RecallResult.new(count_items(scene), recall.length, count_overlap(recall, scene),
-                  compute_recall(recall, scene), compute_precision(recall, scene),
+  RecallResult.new(scene.count_items, recall.length, recall.count_overlapping_pieces(scene),
+                  recall.compute_recall(scene), recall.compute_precision(scene),
                   count_fixated_squares(model), count_fixated_pieces(model, scene))
 end
 
@@ -199,11 +108,11 @@ end
 # Reproduce the de Groot and Gobet (1996) experiments with CHREST
 
 Trace = false # flag to display more information
-TrainingData = read_data "../sample-data/chess-positions.dat"
-TestData = read_data "chess-test-gobet96.dat"
+TrainingData = Scenes.read_from_file "../sample-data/chess-positions.dat"
+TestData = Scenes.read_from_file "chess-test-gobet96.dat"
 
-@@novice_model = create_model(TrainingData, 2, 20, 200)
-@@expert_model = create_model(TrainingData, 2, 20, 25000)
+@@novice_model = Chrest.create_model(TrainingData, 2, 20, 200)
+@@expert_model = Chrest.create_model(TrainingData, 2, 20, 25000)
 
 @@novice_results = []
 TestData.get_scene_names.length.times do |i|

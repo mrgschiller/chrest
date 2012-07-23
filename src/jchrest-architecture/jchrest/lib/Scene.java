@@ -50,6 +50,7 @@ public class Scene {
   }
 
   public void setItem (int row, int column, String item) {
+    assert (row >= 0 && row < _height && column >= 0 && column < _width);
     _scene[row][column] = item;
   }
 
@@ -119,20 +120,31 @@ public class Scene {
 
   /**
    * Compute precision of given scene against this one.
+   * Precision is the proportion of pieces in given scene which are correct.
    */
   public float computePrecision (Scene scene) {
-    return (float)countOverlappingPieces(scene) / (float)scene.countItems();
+    if (scene.countItems() == 0) {
+      return 0.0f;
+    } else {
+      return (float)countOverlappingPieces(scene) / (float)scene.countItems();
+    }
   }
 
   /**
    * Compute recall of given scene against this one.
+   * Recall is the proportion of pieces in this scene which have been correctly recalled.
    */
   public float computeRecall (Scene scene) {
-    return (float)countOverlappingPieces(scene) / (float)this.countItems();
+    if (this.countItems() == 0) {
+      return 0.0f;
+    } else {
+      return (float)countOverlappingPieces(scene) / (float)this.countItems();
+    }
   }
   
   /**
    * Compute errors of omission of given scene against this one.
+   * Omission is the number of pieces which are in this scene but not in the given one.
    */
   public int computeErrorsOfOmission (Scene scene) {
     int errors = 0;
@@ -152,6 +164,7 @@ public class Scene {
 
   /**
    * Compute errors of commission of given scene against this one.
+   * Commission is the number of pieces which are in the given scene but not in this one.
    */
   public int computeErrorsOfCommission (Scene scene) {
     int errors = 0;

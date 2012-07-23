@@ -30,7 +30,7 @@ public class Emotion {
   }
 
   /**
-   * Simple enumeration class to denote the availabe theories on emotions.
+   * Simple enumeration class to denote the available theories on emotions.
    */
   public enum EmotionTheory {
 

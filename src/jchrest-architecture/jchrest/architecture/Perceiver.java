@@ -7,7 +7,7 @@
 // 3. Make fixation heuristics 'like' table 8.1 in book          DONE
 //    (except forces 'random place' if others fail)
 // 4. Include 'global strategies' for experienced model
-// 5. Make learning of pattern be based on fixation sequence,    DONE - but not used as too slow
+// 5. Make learning of pattern be based on fixation sequence,    DONE
 //    as with CHREST 2
 
 package jchrest.architecture;
@@ -252,15 +252,12 @@ public class Perceiver {
       moveEyeUsingHeuristics ();
     }
     // learn pattern found from fixations
-    // TODO: this is learning as used in CHREST 2
-    // but here it produces learning too slow
-    // Need to reconsider the learning during perception issue.
-//    if (shouldLearnFixations ()) {
-//      learnFixatedPattern ();
-//    }
+    if (shouldLearnFixations ()) {
+      learnFixatedPattern ();
+    }
 
     // simplified version of learning, learns pattern at current point
-    _model.recogniseAndLearn (_model.getDomainSpecifics().normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
+//    _model.recogniseAndLearn (_model.getDomainSpecifics().normalise (_currentScene.getItems (_fixationX, _fixationY, 2)));
 
     // NB: template construction is only assumed to occur after training, so 
     // template completion code is not included here
@@ -373,14 +370,12 @@ public class Perceiver {
       if (!_currentScene.isEmpty (_fixations.get(i).getX (), _fixations.get(i).getY ())) {
         fixatedPattern.add (new ItemSquarePattern (
               _currentScene.getItem (_fixations.get(i).getX (), _fixations.get(i).getY ()),
-              _fixations.get(i).getY (),
-              _fixations.get(i).getX ()
+              _fixations.get(i).getY () + 1,
+              _fixations.get(i).getX () + 1
               ));
       }
     }
-    
-    System.out.println ("Perception Learning: " + _model.getDomainSpecifics().normalise (fixatedPattern));
-    _model.recogniseAndLearn (_model.getDomainSpecifics().normalise (fixatedPattern));
+    _model.recogniseAndLearn (_model.getDomainSpecifics().normalise (fixatedPattern.append(_currentScene.getItems(_fixationX, _fixationY, 2))));
     // begin cycle again, from point where we stopped
     _fixationsLearnFrom = _fixations.size () - 1;
   }

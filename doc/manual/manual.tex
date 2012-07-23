@@ -176,6 +176,32 @@ of the links coming from the template-node.
 
 \section{Perceiver}
 
+The Perceiver is responsible for gathering information from a visual stimulus.
+Input from the simulated eye is in the form of {\em patterns}, containing 
+a sequence of {\em item-on-square}.
+
+Attention is controlled using a set of heuristics.  In line with studies 
+on expertise, the heuristics vary slightly between novice and experts.  An 
+arbitrary dividing line is placed between novice and experts at 2000~nodes in 
+visual LTM.
+
+The heuristics are as follows:
+
+\paragraph {LTM}
+
+\paragraph {Neighbouring piece}
+
+The heuristics are applied, as shown in Table~\ref{heuristics}.
+
+\begin{table}
+\begin{tabular}{cc}
+A & B\\
+\end{tabular}
+\caption{Heuristics}
+\label{heuristics}
+\end{table}
+
+
 \section{Working Memory}
 
 \section{Emotions}

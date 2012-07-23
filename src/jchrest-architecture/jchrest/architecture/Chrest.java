@@ -458,7 +458,8 @@ public class Chrest extends Observable {
 
     if (stm.getCount () > 0) {
       Node check = stm.getItem (0); // TODO: make this the hypothesis node
-      if (check != node && 
+      if (check.getContents().isVisual () && // only add semantic links for visual
+          check != node && 
           node.getImage().isSimilarTo (check.getImage (), _similarityThreshold)) {
         node.addSemanticLink (check); 
         check.addSemanticLink (node); // two-way semantic link
