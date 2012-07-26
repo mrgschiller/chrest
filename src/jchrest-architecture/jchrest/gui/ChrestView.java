@@ -25,7 +25,7 @@ public class ChrestView extends JFrame implements Observer {
   }
 
   public ChrestView (Shell shell, Chrest model) {
-    super ("Chrest Model View");
+    super ("CHREST Model View");
     _shell = shell;
     _model = model;
     _model.addObserver (this);

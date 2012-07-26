@@ -73,14 +73,14 @@ public class Shell extends JFrame {
       JOptionPane.showMessageDialog (
           _parent, 
           "<HTML><P>This program is a graphical interface to the <BR>" +
-          "Chrest cognitive architecture.  You can load <BR>" +
+          "CHREST cognitive architecture.  You can load <BR>" +
           "data, train models, and visualise results in a <BR>" +
-          "range of typical modelling problems for Chrest.</P>" +
+          "range of typical modelling problems for CHREST.</P>" +
           "<P><P>Copyright (c) 2010-12, Peter C. R. Lane.</P></P>" +
           "<P>Released under Open Works License</a>, version 0.9.2.</P>" + 
           
           "<p>See <a href=\"http://chrest.info\">http://chrest.info</a> for more information.</P></HTML>",
-          "About Chrest Shell v. 4.0.0-ALPHA-1", 
+          "About CHREST Shell v. 4.0.0-ALPHA-1", 
           JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -320,7 +320,7 @@ public class Shell extends JFrame {
     public void actionPerformed (ActionEvent e) {
       if (JOptionPane.OK_OPTION == JOptionPane.showOptionDialog (_parent, 
             properties(), 
-            "Chrest: Model properties", 
+            "CHREST: Model properties", 
             JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.PLAIN_MESSAGE,
             null, null, 0)) {
@@ -331,6 +331,7 @@ public class Shell extends JFrame {
         _model.setVisualStmSize (((SpinnerNumberModel)_visualStmSize.getModel()).getNumber().intValue ());
         _model.setVerbalStmSize (((SpinnerNumberModel)_verbalStmSize.getModel()).getNumber().intValue ());
         _model.getPerceiver().setFieldOfView (((SpinnerNumberModel)_fieldOfView.getModel()).getNumber().intValue ());
+        _model.setCreateSemanticLinks (_createSemanticLinks.isSelected ());
         _model.setCreateTemplates(_createTemplates.isSelected ());
         _model.setSimilarityThreshold(((SpinnerNumberModel)_similarityThreshold.getModel()).getNumber().intValue ());
       }
@@ -343,8 +344,9 @@ public class Shell extends JFrame {
     private JSpinner _visualStmSize;
     private JSpinner _verbalStmSize;
     private JSpinner _fieldOfView;
-    private JCheckBox _createTemplates;
     private JSpinner _similarityThreshold;
+    private JCheckBox _createSemanticLinks;
+    private JCheckBox _createTemplates;
 
     private JPanel properties () {
       // -- create entry widgets
@@ -356,28 +358,24 @@ public class Shell extends JFrame {
       _verbalStmSize = new JSpinner (new SpinnerNumberModel (_model.getVerbalStmSize (), 1, 10, 1));
       _fieldOfView = new JSpinner (new SpinnerNumberModel (_model.getPerceiver().getFieldOfView (), 1, 100, 1));
       _similarityThreshold = new JSpinner (new SpinnerNumberModel (_model.getSimilarityThreshold (), 1, 100, 1));
+      _createSemanticLinks = new JCheckBox ("Use semantic links", _model.getCreateSemanticLinks ());
       _createTemplates = new JCheckBox ("Use templates", _model.getCreateTemplates ());
 
       JPanel panel = new JPanel ();
-      panel.setLayout (new GridLayout (9, 2));
-      panel.add (new JLabel ("Add link time (ms)", SwingConstants.RIGHT));
-      panel.add (_addLinkTime);
-      panel.add (new JLabel ("Discrimination time (ms)", SwingConstants.RIGHT));
-      panel.add (_discriminationTime);
-      panel.add (new JLabel ("Familiarisation time (ms)", SwingConstants.RIGHT));
-      panel.add (_familiarisationTime);
-      panel.add (new JLabel ("Rho", SwingConstants.RIGHT));
-      panel.add (_rhoEntry);
-      panel.add (new JLabel ("Visual STM size", SwingConstants.RIGHT));
-      panel.add (_visualStmSize);
-      panel.add (new JLabel ("Verbal STM size", SwingConstants.RIGHT));
-      panel.add (_verbalStmSize);
-      panel.add (new JLabel ("Field of view", SwingConstants.RIGHT));
-      panel.add (_fieldOfView);
-      panel.add (new JLabel ("Similarity threshold", SwingConstants.RIGHT));
-      panel.add (_similarityThreshold);
-      panel.add (new JLabel (""));
-      panel.add (_createTemplates);
+      panel.setLayout (new SpringLayout ());
+      Utilities.addLabel (panel, "Add link time (ms)", _addLinkTime);
+      Utilities.addLabel (panel, "Discrimination time (ms)", _discriminationTime);
+      Utilities.addLabel (panel, "Familiarisation time (ms)", _familiarisationTime);
+      Utilities.addLabel (panel, "Rho", _rhoEntry);
+      Utilities.addLabel (panel, "Visual STM size", _visualStmSize);
+      Utilities.addLabel (panel, "Verbal STM size", _verbalStmSize);
+      Utilities.addLabel (panel, "Field of view", _fieldOfView);
+      Utilities.addLabel (panel, "Similarity threshold", _similarityThreshold);
+      Utilities.addLabel (panel, "", _createSemanticLinks);
+      Utilities.addLabel (panel, "", _createTemplates);
+
+      Utilities.makeCompactGrid (panel, 10, 2, 3, 3, 10, 5);
+      panel.setMaximumSize (panel.getPreferredSize ());
 
       return panel;
     }
@@ -465,7 +463,7 @@ public class Shell extends JFrame {
       base.add (jtb);
 
       JOptionPane pane = new JOptionPane (base, JOptionPane.INFORMATION_MESSAGE);
-      JDialog dialog = pane.createDialog (_parent, "Chrest: Model information");
+      JDialog dialog = pane.createDialog (_parent, "CHREST: Model information");
       dialog.setResizable (true);
       dialog.setVisible (true);
     }

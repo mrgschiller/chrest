@@ -600,10 +600,15 @@ public class Node extends Observable {
    * non-empty and constitutes a valid, new test for the current Node.
    */
   private Node addTest (ListPattern pattern) {
+    // ignore if already a test
+    for (Link child : _children) {
+      if (child.getTest().equals (pattern)) {
+        return this;
+      }
+    }
     Node child = new Node (_model, 
         ( (_reference == 0) ? pattern : _model.getDomainSpecifics().normalise (_contents.append(pattern))), // don't append to 'Root'
         ( (_reference == 0) ? pattern : _model.getDomainSpecifics().normalise (_contents.append(pattern))) // make same as contents vs Chrest 2
-        //new ListPattern (_contents.getModality ())
         );
     addTestLink (pattern, child);
     _model.advanceClock (_model.getDiscriminationTime ());
@@ -639,52 +644,22 @@ public class Node extends Observable {
       // 1. is < $ > known?
       if (_model.recognise (newInformation).getContents ().equals (newInformation) ) {
         // 2. if so, use as test
-        // ignore if already a test
-        for (Link child : _children) {
-          if (child.getTest().equals (newInformation)) {
-            return this;
-          }
-        }
-        Node child = new Node (_model, 
-            ( (_reference == 0) ? pattern : _model.getDomainSpecifics().normalise (_contents.append(newInformation))), // don't append to 'Root'
-            ( (_reference == 0) ? pattern : _model.getDomainSpecifics().normalise (_contents.append(newInformation))) // same image
-            );
-        addTestLink (newInformation, child);
-        _model.advanceClock (_model.getDiscriminationTime ());
-        return child;
-        //        return addTest (newInformation.clone ());
+        return addTest (newInformation);
       } else {
         // 3. if not, then learn it
         Node child = new Node (_model, newInformation, newInformation);
         _model.getVisualLtm().addTestLink (newInformation, child);
         return child;
       }
-
-      // OLD VERSION - only use < $ > if given in input
-      //      if (newInformation.isFinished ()) { // 1. add test for < $ >
-      //        return addTest (newInformation);
-      //      } else { // 2. no information to make a new test with
-      //        return this;
-      //      }
     }
 
     Node retrievedChunk = _model.recognise (newInformation);
     if (retrievedChunk == _model.getLtmByModality (pattern)) {
-      // 3. if root node is retrieved, use primitive as test
-      // REMOVE PRIMITIVE LEARNING
-//      ListPattern testPattern = newInformation.getFirstItem ();
-//      testPattern.setNotFinished (); // ensure test link is not finished
-//      return addTest (testPattern);
       // 3. if root node is retrieved, then the primitive must be learnt
        return _model.getLtmByModality(newInformation).learnPrimitive (newInformation.getFirstItem ());
-//    } else if (retrievedChunk.getImage().isEmpty ()) {
-      // 4. if the retrieved chunk has an empty image, then familiarisation must occur
-      // to extend that image.
-//      return retrievedChunk.familiarise (newInformation);
     } else if (retrievedChunk.getContents().matches (newInformation)) {
       // 5. retrieved chunk can be used as a test
       ListPattern testPattern = retrievedChunk.getContents().clone ();
-//      testPattern.setNotFinished (); // ensure test link is not finished
       return addTest (testPattern);
     } else { 
       // 6. mismatch, so use only the first item for test

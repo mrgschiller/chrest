@@ -32,6 +32,7 @@ public class Chrest extends Observable {
   // rho is the probability that a given learning operation will occur
   private float _rho;
   // parameter for construction of semantic link
+  private boolean _createSemanticLinks;
   // - determines number of overlapping items in node images
   private int _similarityThreshold;
   // - determines maximum distance to search semantic links
@@ -74,6 +75,7 @@ public class Chrest extends Observable {
     _emotionAssociator = new EmotionAssociator ();
 
     _createTemplates = true;
+    _createSemanticLinks = true;
     _perceiver = new Perceiver (this);
   }
 
@@ -160,6 +162,20 @@ public class Chrest extends Observable {
    */
   public void setSimilarityThreshold (int threshold) {
     _similarityThreshold = threshold;
+  }
+
+  /**
+   * Modify option to create semantic links.
+   */
+  public void setCreateSemanticLinks (boolean value) {
+    _createSemanticLinks = value;
+  }
+
+  /**
+   * Accessor to option of whether to create semantic links.
+   */
+  public boolean getCreateSemanticLinks () {
+    return _createSemanticLinks;
   }
 
   /**

@@ -27,6 +27,10 @@ class RecogniseAndLearnDemo extends JPanel {
 
   public RecogniseAndLearnDemo (Chrest model, List<ListPattern> patterns) {
     _model = model;
+    // for simplicity, turn off the more confusing aspects of learning
+    _model.setRho (1.0f);
+    _model.setCreateSemanticLinks (false);
+    _model.setCreateTemplates (false);
     _patterns = patterns;
 
     setLayout (new BorderLayout ());
