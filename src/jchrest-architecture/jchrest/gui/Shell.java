@@ -65,7 +65,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     AboutAction (Shell parent) {
-      super ("About");
+      super ("About", new ImageIcon (Shell.class.getResource("icons/About16.gif")));
       _parent = parent;
     }
 
@@ -123,7 +123,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     LoadDataAction (Shell parent) {
-      super ("Open"); 
+      super ("Open", new ImageIcon (Shell.class.getResource("icons/Open16.gif"))); 
 
       _parent = parent;
     }
@@ -288,7 +288,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     ClearModelAction (Shell parent) {
-      super ("Clear");
+      super ("Clear", new ImageIcon (Shell.class.getResource ("icons/Delete16.gif")));
 
       _parent = parent;
     }
@@ -312,7 +312,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     ModelPropertiesAction (Shell parent) {
-      super ("Properties"); 
+      super ("Properties", new ImageIcon (Shell.class.getResource("icons/Properties16.gif"))); 
 
       _parent = parent;
     }
@@ -446,7 +446,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     ModelInformationAction (Shell parent) {
-      super ("Information");
+      super ("Information", new ImageIcon (Shell.class.getResource("icons/Information16.gif")));
 
       _parent = parent;
     }
@@ -555,7 +555,7 @@ public class Shell extends JFrame {
     private Shell _parent;
 
     ViewModelAction (Shell parent) {
-      super ("View");
+      super ("View", new ImageIcon (Shell.class.getResource("icons/Find16.gif")));
 
       _parent = parent;
     }
@@ -566,7 +566,7 @@ public class Shell extends JFrame {
   }
 
   private JMenu createShellMenu () {
-    JMenuItem exit = new JMenuItem ("Exit");
+    JMenuItem exit = new JMenuItem ("Exit", new ImageIcon (Shell.class.getResource ("icons/Stop16.gif")));
     exit.addActionListener (new ActionListener () {
       public void actionPerformed (ActionEvent e) {
         System.exit (0);
@@ -574,34 +574,50 @@ public class Shell extends JFrame {
     });
 
     JMenu menu = new JMenu ("Shell");
+    menu.setMnemonic (KeyEvent.VK_S);
     menu.add (new AboutAction (this));
+    menu.getItem(0).setMnemonic (KeyEvent.VK_A);
     menu.add (new LookFeelAction (this));
+    menu.getItem(1).setMnemonic (KeyEvent.VK_T);
     menu.add (new JSeparator ());
     menu.add (exit);
+    menu.getItem(3).setMnemonic (KeyEvent.VK_X);
 
+    menu.getItem(0).setAccelerator (KeyStroke.getKeyStroke('A', java.awt.Event.CTRL_MASK, false));
+    menu.getItem(3).setAccelerator (KeyStroke.getKeyStroke('X', java.awt.Event.CTRL_MASK, false));
     return menu;
   }
 
   private JMenu createDataMenu () {
     JMenu menu = new JMenu ("Data");
+    menu.setMnemonic (KeyEvent.VK_D);
     menu.add (new LoadDataAction (this));
 
+    menu.getItem(0).setAccelerator (KeyStroke.getKeyStroke('O', java.awt.Event.CTRL_MASK, false));
     return menu;
   }
 
   private JMenu createModelMenu () {
     JMenu menu = new JMenu ("Model");
+    menu.setMnemonic (KeyEvent.VK_M);
     menu.add (new ClearModelAction (this));
+    menu.getItem(0).setMnemonic (KeyEvent.VK_C);
 
     JMenu submenu = new JMenu ("Save");
+    submenu.setMnemonic (KeyEvent.VK_S);
     submenu.add (new SaveModelAsVnaAction (this));
+    submenu.getItem(0).setMnemonic (KeyEvent.VK_N);
     submenu.add (new SaveModelSemanticLinksAsVnaAction (this));
+    submenu.getItem(1).setMnemonic (KeyEvent.VK_L);
     menu.add (submenu);
 
     menu.add (new ModelPropertiesAction (this));
+    menu.getItem(2).setMnemonic (KeyEvent.VK_P);
     menu.add (new JSeparator ());
     menu.add (new ModelInformationAction (this));
+    menu.getItem(4).setMnemonic (KeyEvent.VK_I);
     menu.add (new ViewModelAction (this));
+    menu.getItem(5).setMnemonic (KeyEvent.VK_V);
 
     return menu;
   }

@@ -88,13 +88,11 @@ public class VisualSearchPane extends JPanel {
   private JSpinner _maxTrainingCycles;
   private JSpinner _numFixations;
   private JSpinner _maxNetworkSize;
-  private JCheckBox _useTestSet;
 
   private JPanel constructTrainingOptions () {
     _maxTrainingCycles = new JSpinner (new SpinnerNumberModel (5, 1, 1000, 1));
-    _numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 100, 1));
+    _numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 1000, 1));
     _maxNetworkSize = new JSpinner (new SpinnerNumberModel (100000, 1, 10000000, 1));
-    _useTestSet = new JCheckBox ();
 
     JPanel panel = new JPanel ();
     panel.setLayout (new SpringLayout ());
@@ -103,9 +101,8 @@ public class VisualSearchPane extends JPanel {
     Utilities.addLabel (panel, "Maximum training cycles:", _maxTrainingCycles);
     Utilities.addLabel (panel, "Number of fixations per scene:", _numFixations);
     Utilities.addLabel (panel, "Maximum network size:", _maxNetworkSize);
-    Utilities.addLabel (panel, "Use 10% for test:", _useTestSet);
 
-    Utilities.makeCompactGrid (panel, 6, 2, 3, 3, 10, 5);
+    Utilities.makeCompactGrid (panel, 5, 2, 3, 3, 10, 5);
     panel.setMaximumSize (panel.getPreferredSize ());
 
     JPanel ePanel = new JPanel ();
@@ -202,16 +199,13 @@ public class VisualSearchPane extends JPanel {
     private Chrest _model;
     private Scenes _scenes;
     private int _maxCycles, _maxSize, _numFixations;
-    private boolean _useTestSet;
 
-    TrainingThread (Chrest model, Scenes scenes, int maxCycles, int maxSize, int numFixations, 
-        boolean useTestSet) {
+    TrainingThread (Chrest model, Scenes scenes, int maxCycles, int maxSize, int numFixations) {
       _model = model;
       _scenes = scenes;
       _maxCycles = maxCycles;
       _maxSize = maxSize;
       _numFixations = numFixations;
-      _useTestSet = useTestSet;
     }
 
     @Override
@@ -231,7 +225,7 @@ public class VisualSearchPane extends JPanel {
             (cycle < _maxCycles) && 
             (_model.getTotalLtmNodes () < _maxSize) &&
             !isCancelled ()) {
-          for (int i = 0, lastSceneIndex = (_useTestSet ? (int)Math.floor(_scenes.size () * 0.9) : _scenes.size ()); 
+          for (int i = 0, lastSceneIndex = _scenes.size (); 
               i < lastSceneIndex && (_model.getTotalLtmNodes () < _maxSize) && !isCancelled (); 
               i++) {
             _model.learnScene (_scenes.get (i), _numFixations);
@@ -288,7 +282,7 @@ public class VisualSearchPane extends JPanel {
     }
 
     public void actionPerformed (ActionEvent e) {
-      _task = new TrainingThread (_model, _scenes, getMaxCycles (), getMaxNetworkSize (), getNumFixations (), _useTestSet.isSelected ());
+      _task = new TrainingThread (_model, _scenes, getMaxCycles (), getMaxNetworkSize (), getNumFixations ());
       _task.addPropertyChangeListener(
           new java.beans.PropertyChangeListener() {
             public  void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -368,6 +362,8 @@ public class VisualSearchPane extends JPanel {
     panel.setLayout (new BorderLayout ());
 
     JPanel statistics = new JPanel ();
+    // Note: GridLayout used because it keeps a fixed size for the 
+    // right-hand side, whereas SpringLayout dynamically changes.
     statistics.setLayout (new GridLayout (4, 2));
     statistics.add (new JLabel ("Precision: ", SwingConstants.RIGHT));
     statistics.add (_precision);
@@ -531,7 +527,7 @@ public class VisualSearchPane extends JPanel {
   private JPanel constructButtons () {
 
     Box buttons = Box.createVerticalBox ();
-    JSpinner numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 100, 1));
+    JSpinner numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 1000, 1));
     
     JPanel labelledSpinner = new JPanel ();
     labelledSpinner.setLayout (new GridLayout (1, 2));
@@ -549,25 +545,12 @@ public class VisualSearchPane extends JPanel {
       }
     });
 
-    // TODO: Include action listeners for these selections
-    JRadioButton allScenes = new JRadioButton ("Show all scenes", true);
-    JRadioButton trainScenes = new JRadioButton ("Show training scenes", false);
-    JRadioButton testScenes = new JRadioButton ("Show test scenes", false);
-    final ButtonGroup group = new ButtonGroup ();
-    group.add (allScenes);
-    group.add (trainScenes);
-    group.add (testScenes);
-
     buttons.add (Box.createRigidArea (new Dimension (0, 20)));
     buttons.add (labelledSpinner);
     buttons.add (recallButton);
     buttons.add (Box.createRigidArea (new Dimension (0, 20)));
     buttons.add (showFixations);
     buttons.add (Box.createRigidArea (new Dimension (0, 20)));
-    buttons.add (new JLabel ("Scenes to show in list:"));
-    buttons.add (allScenes);
-    buttons.add (trainScenes);
-    buttons.add (testScenes);
 
     // TODO: There must be a better solution to this problem!
     JPanel panel = new JPanel ();
@@ -635,17 +618,15 @@ public class VisualSearchPane extends JPanel {
   private JPanel analysePanel () {
     _analysisScreen = new JTextArea ();
 
-     Box buttons = Box.createVerticalBox ();
+    Box buttons = Box.createVerticalBox ();
+    buttons.add (new JLabel ("Find frequency of nodes used by model when scanning scenes"));
 
-    JSpinner numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 100, 1));
-    
+    JSpinner numFixations = new JSpinner (new SpinnerNumberModel (20, 1, 1000, 1));
+
     JPanel labelledSpinner = new JPanel ();
     labelledSpinner.setLayout (new GridLayout (1, 2));
     labelledSpinner.add (new JLabel ("Number of fixations: ", SwingConstants.RIGHT));
     labelledSpinner.add (numFixations);
-
-//    JButton runAnalysis = new JButton (new AnalyseAction (numFixations));
-//    runAnalysis.setToolTipText ("Scan all scenes, and record the frequencies of retrieved nodes");
 
     buttons.add (labelledSpinner);
     buttons.add (runAnalysisButtons (numFixations));

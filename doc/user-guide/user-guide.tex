@@ -14,9 +14,9 @@
 
 CHREST is a cognitive architecture covering processes of visual attention,
 memory, categorisation and simple problem solving.  The CHREST software
-provides a graphical interface for some common types of models, and also acts
-as a library of functions for developing more sophisticated experiments or
-CHREST-based agents.
+provides a graphical interface for some common types of models, and can 
+also be used as a library to develop more sophisticated experiments or
+CHREST-based agents in a programming language of your choice.
 
 This document introduces the CHREST software, its capabilities and typical 
 uses. 
@@ -33,14 +33,14 @@ CHREST can be downloaded from one of:
 \noindent After downloading {\tt chrest-NNN.zip} (where NNN refers to the
 latest version number), unpack the file to obtain the {\tt chrest} folder.
 
-The folder contains a copy of this user guide, the {\tt chrest.jar} software, 
-and a folder of examples, including models written in different programming 
-languages and some sample datasets.
+The folder contains some documentation, including a copy of this user guide and
+a manual, the {\tt chrest.jar} software, and a folder of examples, including
+models written in different programming languages and some sample datasets.
 
 \subsection{Run}
 
 CHREST runs on the Java Virtual Machine, and requires version 6 or later of the 
-Java Runtime Environment to run.
+Java Runtime Environment to be installed.
 
 In most cases, CHREST can be run by double-clicking on the file {\tt chrest.jar}, 
 which will launch the graphical shell described in the next section.
@@ -204,6 +204,7 @@ The paired-associate experiment uses a list of pairs of patterns.  Each pair is
 provided on its own line in the definition file, and the individual patterns of
 each pair are separated by a colon.
 
+\begin{minipage}{0.5\textwidth}
 \begin{verbatim}
 serial-anticipation 
 D A G 
@@ -214,7 +215,8 @@ M I Q
 P E L 
 S U J
 \end{verbatim} 
-
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
 \begin{verbatim}
 paired-associate 
 G X J : W A P 
@@ -227,6 +229,7 @@ Z H J : S A J
 M B W : B I P 
 G Q K : W E K
 \end{verbatim}
+\end{minipage}
 
 \subsection{Categorisation}
 
@@ -340,44 +343,44 @@ R....R.K
 \newpage
 \section{Scripting}
 
-More complex models require more control over the experimental setup, the
-number of models to train, etc than can be provided in a graphical environment.
-For more complex models, control is needed from a program.  As the CHREST shell
-is implemented in Java, you can use any language which the Java virtual machine
-supports to develop models with CHREST.  The folder of examples includes
-scripts for a variety of languages including Lisp, Ruby, Groovy (which is based
-on Java) and Clojure (which looks rather like Lisp).  You can also use Java
-itself.\footnote{If you wish to learn a language to begin writing models with
-CHREST, then Ruby is recommended, as more examples are currently available and
-under active development.}
+Although the graphical environment is useful for learning about CHREST, serious
+modelling typically requires more control over the models and experimental
+setup.  As CHREST runs on the Java virtual machine, any language which the Java
+virtual machine supports can be used to develop CHREST-based models.  The
+folder of examples includes scripts for a variety of languages including Lisp,
+Ruby, Groovy (which is based on Java) and Clojure (which looks rather like
+Lisp).  You can also use Java itself.\footnote{If you wish to learn a language
+to begin writing models with CHREST, then Ruby is recommended, as more examples
+are currently available and under active development.}
 
-%The javadoc documentation is provided for all classes within the chrest library.  
+The javadoc documentation is provided for all classes within the chrest library; 
+open the file `documentation/javadoc/index.html' in your browser.  
 
 For most small projects, it is easy to create scripts using a reasonable editor
 and running from the command line.  However, it is also possible to use a
 development environment such as NetBeans or, for Lisp users, an appropriate
-editor such as Emacs+SLIME.  For illustration, below are described some
+editor such as J or Emacs+SLIME.  For illustration, below are described some
 environments for working with CHREST using Lisp, Ruby and Groovy.
 
 \subsection{Development environment for Lisp}
 
 The Lisp environment we recommend uses the java-based editor J and its related
-lisp implementation ABCL.  The website provides a downloadable file containing
-all the required files and further instructions on developing and running
-Chrest models.
+lisp implementation ABCL.  The CHREST website provides a downloadable file
+containing all the required files and further instructions on developing and
+running CHREST models.
 
 \subsection{Development environment for Ruby}
 
 The following steps will let you develop models with jruby:
 
 \begin{enumerate}
-\item Download and install NetBeans, including support for ruby, from
-http://netbeans.org/  (INSTALL PLUGIN)
+\item Download and install NetBeans, from {\tt http://netbeans.org/}
+\item Install the ruby plugin
 \item Create a new Ruby Project, using `File/New/Project'.  You will get a
 dialog box similar to the one below.
 \item After clicking `next' we need to tell NetBeans which ruby platform to
 use.  You need to select a jruby platform, which should already be installed.
-\item The final step in setting up the environment is to include the Chrest
+\item The final step in setting up the environment is to include the CHREST
 library within the project. To do this , go to the `Java' option in the
 Properties dialog box shown below. Select `Add JAR/Folder' and add the
 {\tt chrest.jar} file to the classpath for this project. 
@@ -391,7 +394,7 @@ project.
 The Groovy console provides an easy-to-use scripting environment for those
 familiar with Groovy or the Java language.  Start the Groovy console, 
 add the jar {\tt chrest.jar} to the classpath using the option under the `Scripts' 
-menu, and then write code or run the provided examples.
+menu, and then write code or load and run the examples.
 
 \end{document}
 

@@ -73,7 +73,7 @@ public class ChrestView extends JFrame implements Observer {
     private ChrestView _parent;
 
     public SaveLtmAction (ChrestView parent) {
-      super ("Save LTM");
+      super ("Save LTM", new ImageIcon (Shell.class.getResource ("icons/SaveAs16.gif")));
 
       _parent = parent;
     }
@@ -101,8 +101,11 @@ public class ChrestView extends JFrame implements Observer {
 
   private JMenu createViewMenu () {
     JMenu menu = new JMenu ("View");
+    menu.setMnemonic (KeyEvent.VK_V);
     menu.add (new SaveLtmAction (this));
+    menu.getItem(0).setMnemonic (KeyEvent.VK_S);
     menu.add (new CloseAction (this));
+    menu.getItem(1).setMnemonic (KeyEvent.VK_C);
 
     return menu;
   }
