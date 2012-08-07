@@ -13,8 +13,8 @@
 \noindent CHREST is a symbolic cognitive architecture explaining how experience
 affects our ability to remember, categorise and think about the world.  This
 document contains a technical description of CHREST, including details of its
-operation and links to the implementation.  A separate user guide is available,
-which is a gentler introduction to using the CHREST software.
+main processes and links to how these are implemented.  A separate user guide
+is available, which is a gentler introduction to using the CHREST software.
 
 \end{abstract}
 
@@ -27,7 +27,7 @@ The CHREST architecture may be broadly divided into four components.
 Interactions with the world pass through an input/output component, which is
 responsible for interpreting inputs as patterns and for converting action
 patterns into operations on the world.  Patterns are passed through the
-chunking network, which acts as an index into long-term memory.  Chunks
+discrimination network, which acts as an index into long-term memory.  Chunks
 retrieved from long-term memory are placed into the short-term (or working)
 memory, which is a limited capacity store.  Figure~\ref{chrest-architecture}
 provides an overview of these components and their connections.
@@ -43,7 +43,7 @@ memory structures given a perceived stimulus, such as an image or spoken
 sentence.  The architecture explains how memories are accessed given some
 input, and how certain kinds of associations can be constructed across elements
 of declarative or procedural memory when primed by perception.  The {\em
-chunking network} provides the index into long-term memory, and is constructed
+discrimination network} provides the index into long-term memory, and is constructed
 in close association with the perceptual mechanisms, which control eye
 movements or how verbal information is stored for rehearsal.
 
@@ -67,14 +67,15 @@ experience affects our ability to remember, categorise and think about the
 world around us.
 
 This document describes in more detail each component of CHREST.  We begin with
-the long-term memory structures: the chunking network, the semantic memory and
-templates.  Then we cover the perception module, based on Perceiver, and the
-short-term or working memory, followed by explaining the mechanisms for
-including emotional responses in learning and retrieval.  We bring these
-components together by explaining how to control and work with a CHREST-based
-agent.  Finally, we introduce some example domains and models.
+the long-term memory structures: the discrimination network, the semantic
+memory and templates.  Then we cover the perception module, based on Perceiver,
+and the short-term or working memory, followed by explaining the mechanisms for
+including emotional responses in learning and retrieval.  Problem-solving is
+introduced through a look at the CHUMP mechanisms and the SEARCH simulation.
+We bring these components together by explaining how to control and work with a
+CHREST-based agent.  Finally, we introduce some example domains and models.  
 
-\section{Chunking Network}
+\section{Discrimination Network}
 
 
 \section{Semantic Memory and Templates}
@@ -206,6 +207,26 @@ A & B\\
 
 \section{Emotions}
 
+\section{Problem solving}
+
+CHUMP~\cite{Gobet94} and SEARCH~\cite{Gobet97a} provide two complementary 
+aspects of problem-solving behaviour.  Currently, CHUMP is implemented 
+within CHREST, and SEARCH is currently being integrated.  A process-based 
+model of SEARCH is available, simulating its behaviour.
+
+Problem-solving behaviour in CHREST follows the proposal of Chase and
+Simon~\cite{Chase73} that ``skill in playing chess depends on:
+
+\begin{enumerate}
+\item recognising familiar chunks in chess positions when playing games, and
+\item exploring possible moves and evaluating their consequences.
+\end{enumerate}
+
+Hence, expertise depends {\em both} on the availability in memory of
+information about a large number of frequently recurring patterns of pieces,
+and upon the availability of strategies for highly selective search in the move
+tree.''~\cite{Gobet97a}
+
 \section{Controlling a Model}
 
 \section{Examples}
@@ -290,14 +311,14 @@ chunks: A model of simple check detection.~\cite{Smith09}
 
 \noindent {\em Version~4 of CHREST} is due for release in late 2012, and is a
 complete reimplementation of CHREST from Lisp into Java.  Version~4 includes
-the components of earlier versions of CHREST, such as the chunking network,
+the components of earlier versions of CHREST, such as the discrimination network,
 semantic links, templates, perceiver and working memory, additionally supports
 CHUMP~\cite{Bossomaier12,Gobet94}, and includes the emotion-handling
 mechanisms, as developed by Marvin Schiller~\cite{Gobet11a}.
 
 \subsubsection{Precursors of CHREST}
 
-CHREST's chunking network is at heart a discrimination net similar (but not
+CHREST's discrimination network is at heart similar (but not
 identical) to that proposed by the EPAM theory.
 
 \begin{itemize}
